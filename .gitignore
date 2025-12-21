@@ -22,3 +22,22 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables and secrets
+.env
+.env.*
+*.env
+*.pem
+*.p8
+*.p12
+*.key
+*.jks
+*.keystore
+*.mobileprovision
+asc-key.json
+asc-api-key.json
+GoogleService-Info.plist
+google-services.json
+
+# Exclude the React Native app when deploying the web app
+trigger-tracker-mobile/

@@ -1,14 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 @layer base {
   :root {
     /* AcidTrack - Calming Health Palette */
     --background: 150 20% 98%;
     --foreground: 200 25% 15%;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
 
     --card: 0 0% 100%;
     --card-foreground: 200 25% 15%;
@@ -140,10 +144,19 @@
   body {
     @apply bg-background text-foreground font-body antialiased;
     background: var(--gradient-surface);
-    min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-display font-semibold tracking-tight;
   }
 }
@@ -183,12 +196,29 @@
     @apply inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold;
   }
 
-  .severity-0 { @apply bg-success-light text-success; }
-  .severity-1 { @apply bg-success-light text-success; }
-  .severity-2 { @apply bg-warning-light text-warning; }
-  .severity-3 { @apply bg-warning-light text-warning; }
-  .severity-4 { @apply bg-accent-light text-accent; }
-  .severity-5 { @apply bg-destructive/10 text-destructive; }
+  .severity-0 {
+    @apply bg-success-light text-success;
+  }
+
+  .severity-1 {
+    @apply bg-success-light text-success;
+  }
+
+  .severity-2 {
+    @apply bg-warning-light text-warning;
+  }
+
+  .severity-3 {
+    @apply bg-warning-light text-warning;
+  }
+
+  .severity-4 {
+    @apply bg-accent-light text-accent;
+  }
+
+  .severity-5 {
+    @apply bg-destructive/10 text-destructive;
+  }
 
   .trigger-badge {
     @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium;
@@ -198,6 +228,25 @@
   .safe-badge {
     @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium;
     @apply bg-success-light text-success border border-success/20;
+  }
+
+  /* Safe area helpers for iOS/Capacitor shells */
+  .mobile-shell {
+    padding-top: calc(var(--safe-top) + 1.25rem);
+    padding-bottom: 1.5rem;
+  }
+
+  .mobile-shell.with-bottom-nav {
+    padding-bottom: calc(var(--safe-bottom) + 6.5rem);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: calc(var(--safe-bottom) + 0.75rem);
+  }
+
+  .safe-area-page {
+    padding-top: calc(var(--safe-top) + 1rem);
+    padding-bottom: calc(var(--safe-bottom) + 1rem);
   }
 }
 
@@ -214,41 +263,66 @@
     animation: scaleIn 0.3s ease-out forwards;
   }
 
-  .stagger-1 { animation-delay: 0.1s; }
-  .stagger-2 { animation-delay: 0.2s; }
-  .stagger-3 { animation-delay: 0.3s; }
-  .stagger-4 { animation-delay: 0.4s; }
+  .stagger-1 {
+    animation-delay: 0.1s;
+  }
+
+  .stagger-2 {
+    animation-delay: 0.2s;
+  }
+
+  .stagger-3 {
+    animation-delay: 0.3s;
+  }
+
+  .stagger-4 {
+    animation-delay: 0.4s;
+  }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes slideUp {
-    from { 
+    from {
       opacity: 0;
       transform: translateY(20px);
     }
-    to { 
+
+    to {
       opacity: 1;
       transform: translateY(0);
     }
   }
 
   @keyframes scaleIn {
-    from { 
+    from {
       opacity: 0;
       transform: scale(0.95);
     }
-    to { 
+
+    to {
       opacity: 1;
       transform: scale(1);
     }
   }
 
   @keyframes pulse-soft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.7;
+    }
   }
 
   .animate-pulse-soft {
