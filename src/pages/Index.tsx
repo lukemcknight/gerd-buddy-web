@@ -48,6 +48,11 @@ const Index = () => {
                 Privacy Policy
               </Button>
             </Link>
+            <Link to="/terms" className="inline-flex">
+              <Button variant="outline" size="lg" className="px-6">
+                Terms of Service
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -112,14 +117,19 @@ const Index = () => {
         </section>
 
         <section className="card-elevated p-6 space-y-3">
-          <h2 className="text-2xl font-display font-semibold">Privacy Policy</h2>
+          <h2 className="text-2xl font-display font-semibold">Legal</h2>
           <p className="text-muted-foreground">
-            We respect your privacy and keep things transparent. Read how data is handled, stored, and protected in the full
-            policy below.
+            Read the details on how your data is handled and the terms that govern use of GERDBuddy.
           </p>
-          <Link to="/privacy" className="text-primary font-semibold hover:underline">
-            View Privacy Policy
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link to="/privacy" className="text-primary font-semibold hover:underline">
+              Privacy Policy
+            </Link>
+            <span className="text-muted-foreground">•</span>
+            <Link to="/terms" className="text-primary font-semibold hover:underline">
+              Terms of Service
+            </Link>
+          </div>
         </section>
       </main>
 
