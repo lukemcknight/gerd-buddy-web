@@ -22,13 +22,9 @@
         "image": "latest"
       },
       "env": {
-        "EXPO_PUBLIC_REVENUECAT_API_KEY": "appl_DwQCtluALjQVQgYdsGtlyxAoxEW",
         "EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID": "GERD Buddy Pro",
         "EXPO_PUBLIC_REVENUECAT_OFFERING_ID": "gerd-buddy",
         "EXPO_PUBLIC_REVENUECAT_PAYWALL_ID": "ofrng9be6e0d502",
-        "EXPO_PUBLIC_FOOD_AI_KEY": "AIzaSyBfFPmlZwfiv2lpJeq81epe4kH7I-AM-n8",
-        "EXPO_PUBLIC_POSTHOG_API_KEY": "phc_Qcx4TxzU5XPzWXyE4UZFEzv9Tdv4uQEARZy7j1tyO30",
-        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyD9fqxY5HpFO-0yltGUoOntPbaNp0mqmw4",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "gerd-buddy-fd606.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "gerd-buddy-fd606",
         "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "gerd-buddy-fd606.firebasestorage.app",
