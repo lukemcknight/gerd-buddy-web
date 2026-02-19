@@ -1,0 +1,20 @@
+fastlane_version "2.215.0"
+default_platform(:ios)
+
+lane :upload_testflight do
+  app_identifier = "com.gerdbuddy.app"
+  key_id = "643CZV6N38"
+  issuer_id = "13d738af-5ded-46eb-8fef-bc14f44a1a21"
+  api_key_path = File.expand_path("AuthKey_643CZV6N38.p8", __dir__)
+  ipa_path = File.expand_path("build.ipa", __dir__)
+
+  pilot(
+    api_key: app_store_connect_api_key(
+      key_id: key_id,
+      issuer_id: issuer_id,
+      key_filepath: api_key_path
+    ),
+    app_identifier: app_identifier,
+    ipa: ipa_path
+  )
+end

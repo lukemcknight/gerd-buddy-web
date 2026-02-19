@@ -38,6 +38,3 @@ asc-key.json
 asc-api-key.json
 GoogleService-Info.plist
 google-services.json
-
-# Exclude the React Native app when deploying the web app
-trigger-tracker-mobile/
