@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Text, View, Pressable } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useNavigation } from "@react-navigation/native";
 import { Utensils, Clock, ArrowLeft, Sparkles } from "lucide-react-native";
+import { usePostHog } from "posthog-react-native";
 import Screen from "../components/Screen";
 import Button from "../components/Button";
 import { TextArea } from "../components/TextField";
-import { saveMeal } from "../services/storage";
+import {
+  saveMeal, getMeals, getUser,
+  getStreakInfo, updateBestStreak, STREAK_MILESTONES,
+} from "../services/storage";
 import { showToast } from "../utils/feedback";
 
 const quickMeals = [
@@ -20,15 +23,20 @@ const quickMeals = [
   "🍟 Fried food",
 ];
 
-export default function LogMealScreen() {
-  const navigation = useNavigation();
+export default function LogMealScreen({ navigation }) {
   const [mealText, setMealText] = useState("");
   const [mealTime, setMealTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog?.screen("LogMeal");
+  }, []);
 
   const handleQuickAdd = (meal) => {
     const cleanMeal = meal.replace(/^\S+\s/, "");
     setMealText((prev) => (prev ? `${prev}, ${cleanMeal}` : cleanMeal));
+    posthog?.capture("quick_add_used", { meal: cleanMeal });
   };
 
   const handleSubmit = async () => {
@@ -37,7 +45,37 @@ export default function LogMealScreen() {
       return;
     }
     await saveMeal({ text: mealText.trim(), timestamp: mealTime.getTime() });
-    showToast("Meal logged!", "Keep tracking to discover your triggers.");
+
+    const [meals, user] = await Promise.all([getMeals(), getUser()]);
+    const streakInfo = getStreakInfo(meals, user);
+
+    if (streakInfo.shouldUpdateBest) {
+      updateBestStreak(streakInfo.bestStreak);
+    }
+
+    if (STREAK_MILESTONES.includes(streakInfo.currentStreak)) {
+      posthog?.capture("streak_milestone", {
+        streak_length: streakInfo.currentStreak,
+      });
+    }
+
+    posthog?.capture("meal_logged", {
+      has_quick_add: mealText.includes(","),
+      text_length: mealText.trim().length,
+      streak_length: streakInfo.currentStreak,
+    });
+
+    const streakText =
+      streakInfo.currentStreak > 1
+        ? `${streakInfo.currentStreak}-day streak! `
+        : streakInfo.currentStreak === 1
+          ? "Streak started! "
+          : "";
+
+    showToast(
+      "Meal logged!",
+      `${streakText}Keep tracking to discover your triggers.`
+    );
     navigation.goBack();
   };
 

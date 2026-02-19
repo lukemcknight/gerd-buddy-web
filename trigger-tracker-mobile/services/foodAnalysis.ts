@@ -7,12 +7,19 @@ type FoodImageAsset = {
   height?: number;
 };
 
+export type PersonalTrigger = {
+  ingredient: string;
+  occurrences: number;
+  avgSeverity: number;
+};
+
 export type FoodAnalysisResult = {
   score: number; // 1–5
   label: "Low" | "Moderate" | "High";
   confidence: number; // 0–1
   reasons: string[];
   suggestions: string[];
+  personalTriggerMatch?: string[]; // ingredients that matched user's personal triggers
 };
 
 const MODEL = "gemini-2.5-flash";
@@ -22,6 +29,7 @@ const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL
 const AI_API_KEY =
   process.env.EXPO_PUBLIC_FOOD_AI_KEY || "YOUR_GEMINI_API_KEY_HERE";
 const placeholderKeys = ["YOUR_GEMINI_API_KEY_HERE", "YOUR_VISION_MODEL_API_KEY_HERE"];
+const DEBUG_FOOD_AI = process.env.EXPO_PUBLIC_FOOD_AI_DEBUG === "true";
 
 const fallbackResult: FoodAnalysisResult = {
   score: 3,
@@ -96,6 +104,9 @@ const normalizeResult = (raw: any): FoodAnalysisResult => {
     raw.suggestions,
     ["Eat smaller portions and avoid lying down soon after eating."]
   );
+  const personalTriggerMatch = Array.isArray(raw.personalTriggerMatch)
+    ? raw.personalTriggerMatch.map((item: unknown) => String(item).trim()).filter(Boolean)
+    : undefined;
 
   return {
     score,
@@ -103,12 +114,52 @@ const normalizeResult = (raw: any): FoodAnalysisResult => {
     confidence,
     reasons,
     suggestions,
+    ...(personalTriggerMatch?.length ? { personalTriggerMatch } : {}),
   };
 };
 
+const logDebug = (message: string, details?: Record<string, unknown>) => {
+  if (!DEBUG_FOOD_AI) return;
+  if (details) {
+    console.log(`[FoodAnalysis] ${message}`, details);
+  } else {
+    console.log(`[FoodAnalysis] ${message}`);
+  }
+};
+
+const summarizeAsset = (asset: FoodImageAsset) => ({
+  uri: asset?.uri,
+  fileName: asset?.fileName,
+  mimeType: asset?.mimeType,
+  width: asset?.width,
+  height: asset?.height,
+  base64Length: asset?.base64 ? asset.base64.length : 0,
+});
+
+const buildPersonalTriggerContext = (triggers: PersonalTrigger[]): string => {
+  if (!triggers || triggers.length === 0) return "";
+
+  const triggerList = triggers
+    .slice(0, 10) // Limit to top 10 triggers
+    .map((t) => `${t.ingredient} (${t.occurrences}x, avg severity ${t.avgSeverity}/5)`)
+    .join(", ");
+
+  return (
+    `\n\nIMPORTANT - This user has identified personal triggers based on their symptom history: ${triggerList}. ` +
+    "If you detect any of these ingredients in the food, increase the risk score accordingly and note them in reasons. " +
+    'Also include a "personalTriggerMatch" array in your response listing any matched personal triggers.'
+  );
+};
+
 export const analyzeFoodImage = async (
-  asset: FoodImageAsset
+  asset: FoodImageAsset,
+  personalTriggers?: PersonalTrigger[]
 ): Promise<FoodAnalysisResult> => {
+  logDebug("Starting analysis", {
+    asset: summarizeAsset(asset),
+    personalTriggerCount: personalTriggers?.length || 0,
+  });
+
   if (!AI_API_KEY || placeholderKeys.includes(AI_API_KEY)) {
     throw new Error(
       "Missing AI API key. Add EXPO_PUBLIC_FOOD_AI_KEY or update the placeholder key."
@@ -121,15 +172,27 @@ export const analyzeFoodImage = async (
     );
   }
 
+  const personalContext = buildPersonalTriggerContext(personalTriggers || []);
+
   const systemPrompt =
     "You are a concise assistant that estimates GERD trigger risk from food photos. " +
-    "Stay cautious, avoid medical claims, and keep outputs brief.";
+    "Stay cautious, avoid medical claims, and keep outputs brief." +
+    (personalTriggers?.length
+      ? " You personalize risk scores based on the user's tracked symptom history."
+      : "");
 
   const userPrompt =
     "Analyze this food image for GERD trigger risk. " +
-    'Return ONLY JSON: {"score":1-5,"label":"Low"|"Moderate"|"High","confidence":0-1,"reasons":string[],"suggestions":string[]}. ' +
+    'Return ONLY JSON: {"score":1-5,"label":"Low"|"Moderate"|"High","confidence":0-1,"reasons":string[],"suggestions":string[],"personalTriggerMatch":string[]}. ' +
     "Keep reasons short, call out trigger categories when relevant (fat, spice, acid, carbonation, caffeine, chocolate, mint, alcohol). " +
-    "No markdown, no code fences, no extra text.";
+    "No markdown, no code fences, no extra text." +
+    personalContext;
+
+  logDebug("Prepared prompts", {
+    systemPromptLength: systemPrompt.length,
+    userPromptLength: userPrompt.length,
+    hasPersonalContext: Boolean(personalContext),
+  });
 
   const response = await fetch(`${API_URL}?key=${AI_API_KEY}`, {
     method: "POST",
@@ -156,7 +219,7 @@ export const analyzeFoodImage = async (
         },
       ],
       generationConfig: {
-        maxOutputTokens: 512,
+        maxOutputTokens: 1024,
         temperature: 0.2,
         responseMimeType: "application/json",
       },
@@ -172,6 +235,11 @@ export const analyzeFoodImage = async (
 
   if (!response.ok) {
     const errorText = await response.text();
+    logDebug("AI response error", {
+      status: response.status,
+      statusText: response.statusText,
+      errorText: errorText || "No response body",
+    });
     throw new Error(
       `Analysis failed (${response.status}): ${errorText || "Unknown error from AI service"
       }`
@@ -179,6 +247,11 @@ export const analyzeFoodImage = async (
   }
 
   const data = await response.json();
+  logDebug("AI response received", {
+    status: response.status,
+    candidateCount: Array.isArray(data?.candidates) ? data.candidates.length : 0,
+    finishReason: data?.candidates?.[0]?.finishReason,
+  });
 
   // Try to extract all text parts to improve parsing reliability.
   const parts = data?.candidates?.[0]?.content?.parts || [];
@@ -189,6 +262,13 @@ export const analyzeFoodImage = async (
 
   const finishReason = data?.candidates?.[0]?.finishReason;
   const parsed = parseModelJson(content);
+
+  logDebug("Parsed response content", {
+    partCount: parts.length,
+    contentLength: content.length,
+    parsedOk: Boolean(parsed),
+    finishReason,
+  });
 
   if (!parsed && finishReason === "MAX_TOKENS") {
     throw new Error(

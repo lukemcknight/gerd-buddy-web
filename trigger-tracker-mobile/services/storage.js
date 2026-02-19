@@ -1,5 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { configureRevenueCat, getSubscriptionStatus } from "./revenuecat";
+import { maybePromptForReview } from "./reviewPrompt";
+import { identifyUser } from "./analytics";
+import { calculateTriggers } from "../utils/triggerEngine";
 
 const STORAGE_KEYS = {
   MEALS: "acidtrack_meals",
@@ -8,6 +11,8 @@ const STORAGE_KEYS = {
 };
 
 const TRIAL_LENGTH_MS = 3 * 24 * 60 * 60 * 1000;
+
+export const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
 const readJson = async (key, fallback) => {
   try {
@@ -41,6 +46,11 @@ export const saveMeal = async (meal) => {
   };
   const updated = [...meals, newMeal];
   await writeJson(STORAGE_KEYS.MEALS, updated);
+  getDaysSinceStart()
+    .then((daysSinceStart) =>
+      maybePromptForReview({ daysSinceStart, mealCount: updated.length })
+    )
+    .catch(() => {});
   return newMeal;
 };
 
@@ -156,6 +166,12 @@ export const getTrialInfo = async () => {
     console.warn("RevenueCat status lookup failed", error);
   }
 
+  // Identify user for analytics on app load
+  identifyUser(user.id, {
+    subscription_active: subscriptionActive,
+    symptom_frequency: user.symptomFrequency,
+  }).catch(() => {});
+
   const trialEndsAt = subscriptionExpiresAt || user.trialEndsAt;
   const now = Date.now();
   const msLeft = trialEndsAt ? trialEndsAt - now : 0;
@@ -212,4 +228,77 @@ export const clearAllData = async () => {
     STORAGE_KEYS.SYMPTOMS,
     STORAGE_KEYS.USER,
   ]);
+};
+
+export const getPersonalTriggers = async (limit = 10) => {
+  const [meals, symptoms] = await Promise.all([getMeals(), getSymptoms()]);
+  const triggers = calculateTriggers(meals, symptoms);
+  return triggers.slice(0, limit);
+};
+
+const dateKey = (date) =>
+  `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+
+export const getStreakInfo = (meals, user) => {
+  const previousBest = user?.bestStreak || 0;
+
+  if (!meals || meals.length === 0) {
+    return {
+      currentStreak: 0,
+      bestStreak: previousBest,
+      loggedToday: false,
+      shouldUpdateBest: false,
+    };
+  }
+
+  const loggedDays = new Set();
+  for (const meal of meals) {
+    loggedDays.add(dateKey(new Date(meal.timestamp)));
+  }
+
+  const now = new Date();
+  const today = dateKey(now);
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = dateKey(yesterday);
+
+  const loggedToday = loggedDays.has(today);
+
+  let startDate;
+  if (loggedToday) {
+    startDate = new Date(now);
+  } else if (loggedDays.has(yesterdayKey)) {
+    startDate = new Date(yesterday);
+  } else {
+    return {
+      currentStreak: 0,
+      bestStreak: previousBest,
+      loggedToday: false,
+      shouldUpdateBest: false,
+    };
+  }
+
+  let streak = 0;
+  const cursor = new Date(startDate);
+  cursor.setHours(0, 0, 0, 0);
+
+  while (loggedDays.has(dateKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  const bestStreak = Math.max(previousBest, streak);
+
+  return {
+    currentStreak: streak,
+    bestStreak,
+    loggedToday,
+    shouldUpdateBest: bestStreak > previousBest,
+  };
+};
+
+export const updateBestStreak = async (bestStreak) => {
+  const user = await getUser();
+  if (!user) return;
+  await saveUser({ ...user, bestStreak });
 };

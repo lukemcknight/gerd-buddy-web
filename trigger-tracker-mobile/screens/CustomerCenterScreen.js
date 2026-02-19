@@ -21,9 +21,9 @@ export default function CustomerCenterScreen({ navigation }) {
     let mounted = true;
     const init = async () => {
       try {
-        const { CustomerCenter } = await import("react-native-purchases-ui");
+        const RevenueCatUI = (await import("react-native-purchases-ui")).default;
         if (!mounted) return;
-        setCustomerCenterComponent(() => CustomerCenter);
+        setCustomerCenterComponent(() => RevenueCatUI.CustomerCenterView);
 
         const user = await getUser();
         await configureRevenueCat(user?.id);
@@ -71,7 +71,7 @@ export default function CustomerCenterScreen({ navigation }) {
           </Text>
         </View>
       )}
-      {!ready && !error && (
+      {!ready && !error && !isExpoGo && (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator size="small" color="#3aa27f" />
           <Text className="mt-3 text-muted-foreground">Loading Customer Center...</Text>
@@ -99,7 +99,7 @@ export default function CustomerCenterScreen({ navigation }) {
       )}
       {ready && !isExpoGo && CustomerCenterComponent && (
         <CustomerCenterComponent
-          onEvent={handleEvent}
+          style={{ flex: 1 }}
           onDismiss={() => navigation.goBack()}
         />
       )}

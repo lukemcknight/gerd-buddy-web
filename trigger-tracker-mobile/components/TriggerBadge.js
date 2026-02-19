@@ -2,8 +2,8 @@ import { Text, View } from "react-native";
 import { cn } from "../utils/style";
 
 export const TriggerBadge = ({ trigger, rank, className, style }) => {
-  const severityLevel =
-    trigger.avgSeverity >= 3 ? "high" : trigger.avgSeverity >= 2 ? "medium" : "low";
+  // Use confidence to determine severity level display
+  const confidenceLevel = trigger.confidence >= 0.7 ? "high" : trigger.confidence >= 0.5 ? "medium" : "low";
 
   const bgColors = {
     high: "bg-accent/10 border-accent/30",
@@ -17,52 +17,72 @@ export const TriggerBadge = ({ trigger, rank, className, style }) => {
     low: "text-muted-foreground",
   };
 
+  // Format confidence as percentage
+  const confidencePercent = Math.round((trigger.confidence || 0) * 100);
+  const symptomRate = trigger.symptomRate || 0;
+
   return (
     <View
       style={style}
       className={cn(
-        "flex-row items-center justify-between p-4 rounded-xl border",
-        bgColors[severityLevel],
+        "p-4 rounded-xl border",
+        bgColors[confidenceLevel],
         className
       )}
     >
-      <View className="flex-row items-center gap-3">
-        <View
-          className={cn(
-            "w-9 h-9 rounded-full items-center justify-center text-sm font-bold",
-            severityLevel === "high"
-              ? "bg-accent"
-              : severityLevel === "medium"
-                ? "bg-warning"
-                : "bg-muted-foreground/20"
-          )}
-        >
-          <Text
+      <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center gap-3">
+          <View
             className={cn(
-              "font-bold",
-              severityLevel === "high" || severityLevel === "medium"
-                ? "text-white"
-                : "text-muted-foreground"
+              "w-9 h-9 rounded-full items-center justify-center text-sm font-bold",
+              confidenceLevel === "high"
+                ? "bg-accent"
+                : confidenceLevel === "medium"
+                  ? "bg-warning"
+                  : "bg-muted-foreground/20"
             )}
           >
-            {rank}
-          </Text>
+            <Text
+              className={cn(
+                "font-bold",
+                confidenceLevel === "high" || confidenceLevel === "medium"
+                  ? "text-white"
+                  : "text-muted-foreground"
+              )}
+            >
+              {rank}
+            </Text>
+          </View>
+          <View>
+            <Text className="font-semibold text-foreground capitalize">
+              {trigger.ingredient}
+            </Text>
+            <Text className="text-xs text-muted-foreground">
+              {symptomRate}% symptom rate ({trigger.occurrences}/{trigger.totalOccurrences || trigger.occurrences} meals)
+            </Text>
+          </View>
         </View>
-        <View>
-          <Text className="font-semibold text-foreground capitalize">
-            {trigger.ingredient}
+        <View className="items-end">
+          <Text className={cn("text-lg font-bold", textColors[confidenceLevel])}>
+            {trigger.avgSeverity}/5
           </Text>
-          <Text className="text-xs text-muted-foreground">
-            {trigger.occurrences} occurrences
-          </Text>
+          <Text className="text-xs text-muted-foreground">avg severity</Text>
         </View>
       </View>
-      <View className="items-end">
-        <Text className={cn("text-lg font-bold", textColors[severityLevel])}>
-          {trigger.avgSeverity}/5
-        </Text>
-        <Text className="text-xs text-muted-foreground">avg severity</Text>
-      </View>
+      {trigger.confidence !== undefined && (
+        <View className="mt-2 pt-2 border-t border-border/50">
+          <View className="flex-row justify-between">
+            <Text className="text-xs text-muted-foreground">
+              Confidence: {confidencePercent}%
+            </Text>
+            {trigger.relativeRisk !== undefined && (
+              <Text className="text-xs text-muted-foreground">
+                {trigger.relativeRisk}x more likely
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
     </View>
   );
 };

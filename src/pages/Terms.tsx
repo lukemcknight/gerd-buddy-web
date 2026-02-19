@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 
 const Terms = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground">
       <div className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">
-        <header className="space-y-2">
+        <header className="space-y-2 opacity-0 animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">GERDBuddy</p>
           <h1 className="text-3xl font-display font-bold">Terms of Service</h1>
           <p className="text-muted-foreground">
@@ -13,7 +13,7 @@ const Terms = () => {
           </p>
         </header>
 
-        <section className="card-elevated p-6 space-y-4">
+        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-1">
           <h2 className="text-xl font-display font-semibold">Not medical advice</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li>GERDBuddy is for informational and tracking purposes only and is not a medical device.</li>
@@ -23,7 +23,7 @@ const Terms = () => {
           </ul>
         </section>
 
-        <section className="card-elevated p-6 space-y-4">
+        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-2">
           <h2 className="text-xl font-display font-semibold">Using GERDBuddy</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li>You must be at least 18 years old or have permission from a parent/guardian to use the app.</li>
@@ -33,7 +33,7 @@ const Terms = () => {
           </ul>
         </section>
 
-        <section className="card-elevated p-6 space-y-4">
+        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-3">
           <h2 className="text-xl font-display font-semibold">Subscriptions and payments</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li>Payments and subscription management are handled by Apple App Store or Google Play.</li>
@@ -42,7 +42,7 @@ const Terms = () => {
           </ul>
         </section>
 
-        <section className="card-elevated p-6 space-y-4">
+        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-4">
           <h2 className="text-xl font-display font-semibold">Privacy</h2>
           <p className="text-muted-foreground">
             Your use of GERDBuddy is also governed by our Privacy Policy, which explains how data is handled. The policy is
@@ -53,7 +53,7 @@ const Terms = () => {
           </Link>
         </section>
 
-        <section className="card-elevated p-6 space-y-4">
+        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up">
           <h2 className="text-xl font-display font-semibold">Changes and termination</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li>We may update these terms to reflect product changes or legal requirements.</li>
@@ -62,7 +62,7 @@ const Terms = () => {
           </ul>
         </section>
 
-        <section className="card-elevated p-6 space-y-3">
+        <section className="card-elevated p-6 space-y-3 opacity-0 animate-slide-up">
           <h2 className="text-xl font-display font-semibold">Contact</h2>
           <p className="text-muted-foreground">
             Questions about these terms? Email us at{" "}
@@ -71,15 +71,7 @@ const Terms = () => {
             </a>
             .
           </p>
-          <Link to="/" className="text-primary font-semibold hover:underline">
-            Return to Support
-          </Link>
         </section>
-
-        <footer className="pt-2 text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">© 2025 Luke McKnight</p>
-          <p>GERDBuddy is not a substitute for professional medical advice.</p>
-        </footer>
       </div>
     </div>
   );

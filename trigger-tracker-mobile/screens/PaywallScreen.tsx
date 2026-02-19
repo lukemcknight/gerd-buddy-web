@@ -18,6 +18,7 @@ import type {
 } from "react-native-purchases";
 import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
+import { usePostHog } from "posthog-react-native";
 import Screen from "../components/Screen";
 import Button from "../components/Button";
 import { configureRevenueCat, helpers } from "../services/revenuecat";
@@ -139,6 +140,12 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog?.screen("Paywall");
+    posthog?.capture("paywall_viewed");
+  }, []);
 
   const bestValueId = useMemo(
     () => packages.find(isBestValue)?.identifier ?? null,
@@ -232,17 +239,29 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
     }
     if (!selectedPackage || isPurchasing) return;
     setIsPurchasing(true);
+    posthog?.capture("subscription_attempt", {
+      package_type: selectedPackage.packageType,
+      price: selectedPackage.product?.priceString,
+    });
     try {
       setStatusMessage(null);
       const { customerInfo } = await Purchases.purchasePackage(selectedPackage);
 
       if (entitlementActive(customerInfo)) {
+        posthog?.capture("subscription_started", {
+          package_type: selectedPackage.packageType,
+          price: selectedPackage.product?.priceString,
+        });
         unlockApp();
         return;
       }
 
       const refreshed = await Purchases.getCustomerInfo();
       if (entitlementActive(refreshed)) {
+        posthog?.capture("subscription_started", {
+          package_type: selectedPackage.packageType,
+          price: selectedPackage.product?.priceString,
+        });
         unlockApp();
         return;
       }
@@ -260,9 +279,11 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
         err?.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR ||
         (err as any)?.userCancelled;
       if (cancelled) {
+        posthog?.capture("subscription_cancelled");
         return;
       }
       const message = err?.message || "Purchase failed. Please try again.";
+      posthog?.capture("subscription_failed", { error: message });
       setStatusMessage(message);
       Alert.alert("Purchase issue", message);
     } finally {
@@ -316,47 +337,47 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
         key={pkg.identifier}
         onPress={() => setSelectedPackage(pkg)}
         disabled={disabled}
-        className="rounded-3xl border border-border/80 bg-white"
+        className="rounded-2xl border border-border/80 bg-white"
         style={{
           shadowColor: "#1f3d33",
-          shadowOpacity: best ? 0.12 : 0.06,
-          shadowRadius: best ? 12 : 8,
-          shadowOffset: { width: 0, height: 6 },
-          elevation: best ? 6 : 2,
+          shadowOpacity: best ? 0.10 : 0.04,
+          shadowRadius: best ? 8 : 4,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: best ? 4 : 2,
         }}
       >
         <LinearGradient
           colors={best ? ["#e1f3ec", "#f5fbf8"] : ["#ffffff", "#ffffff"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{ borderRadius: 24, padding: 1 }}
+          style={{ borderRadius: 16, padding: 1 }}
         >
           <View
-            className={`rounded-3xl px-4 py-4 ${
+            className={`rounded-2xl px-3 py-2.5 ${
               isSelected ? "border border-primary/50 bg-primary/5" : "bg-white"
             }`}
           >
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
-                <View className="flex-row items-center gap-2">
-                  <Text className="text-lg font-semibold text-foreground">
+                <View className="flex-row items-center gap-1.5">
+                  <Text className="text-base font-semibold text-foreground">
                     {pkg.product?.title || "Premium"}
                   </Text>
                   {best ? (
-                    <View className="rounded-full bg-primary/15 px-3 py-1">
-                      <Text className="text-xs font-semibold text-primary">Best value</Text>
+                    <View className="rounded-full bg-primary/15 px-2 py-0.5">
+                      <Text className="text-[10px] font-semibold text-primary">Best value</Text>
                     </View>
                   ) : null}
                 </View>
-                <Text className="text-sm text-muted-foreground mt-1">
+                <Text className="text-xs text-muted-foreground">
                   {valueLabel(pkg)}
                 </Text>
               </View>
               <View className="items-end">
-                <Text className="text-xl font-bold text-foreground">
+                <Text className="text-lg font-bold text-foreground">
                   {pkg.product?.priceString}
                 </Text>
-                <Text className="text-xs text-muted-foreground mt-1">
+                <Text className="text-[10px] text-muted-foreground">
                   {cadenceLabel(pkg)}
                 </Text>
               </View>
@@ -368,16 +389,16 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
   };
 
   const renderFallback = () => (
-    <View className="rounded-3xl border border-border bg-white p-5">
-      <Text className="text-lg font-semibold text-foreground">Plans unavailable</Text>
-      <Text className="text-sm text-muted-foreground mt-2">
+    <View className="rounded-2xl border border-border bg-white p-3">
+      <Text className="text-base font-semibold text-foreground">Plans unavailable</Text>
+      <Text className="text-xs text-muted-foreground mt-1">
         We couldn't load subscription options right now. Please try again in a moment.
       </Text>
       <Button
         onPress={handleRestore}
         variant="outline"
-        className="mt-4"
-        textClassName="text-foreground font-semibold"
+        className="mt-2"
+        textClassName="text-foreground font-semibold text-sm"
       >
         Restore purchases
       </Button>
@@ -385,47 +406,46 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
   );
 
   return (
-    <Screen contentClassName="gap-6 pb-10 pt-6">
-      <View className="items-center gap-4">
+    <Screen contentClassName="gap-3 pb-4 pt-4">
+      <View className="items-center gap-2">
         <Image
           source={turtle}
-          style={{ width: 140, height: 140 }}
+          style={{ width: 80, height: 80 }}
           resizeMode="contain"
-          className="rounded-3xl"
+          className="rounded-2xl"
         />
-        <Text className="text-center text-3xl font-extrabold text-foreground">
+        <Text className="text-center text-2xl font-extrabold text-foreground">
           Breathe easier with GERD Buddy
         </Text>
-        <Text className="text-center text-base text-muted-foreground px-4">
-          Friendly guidance to calm reflux triggers, track meals without stress, and feel in control
-          every day.
+        <Text className="text-center text-sm text-muted-foreground px-4">
+          Friendly guidance to calm reflux triggers and feel in control every day.
         </Text>
       </View>
 
-      <View className="rounded-3xl border border-border bg-white p-5">
-        <Text className="text-lg font-semibold text-foreground">Premium gives you</Text>
-        <View className="mt-3 gap-3">
+      <View className="rounded-2xl border border-border bg-white p-3">
+        <Text className="text-base font-semibold text-foreground">Premium gives you</Text>
+        <View className="mt-2 gap-1.5">
           {benefits.map((benefit) => (
-            <View key={benefit} className="flex-row items-start gap-3">
-              <View className="mt-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
-              <Text className="flex-1 text-base text-foreground">{benefit}</Text>
+            <View key={benefit} className="flex-row items-start gap-2">
+              <View className="mt-1.5 h-2 w-2 rounded-full bg-primary" />
+              <Text className="flex-1 text-sm text-foreground">{benefit}</Text>
             </View>
           ))}
         </View>
       </View>
 
       {isLoading ? (
-        <View className="flex-1 items-center justify-center gap-3 py-8">
+        <View className="flex-1 items-center justify-center gap-2 py-4">
           <ActivityIndicator size="small" color="#3aa27f" />
-          <Text className="text-muted-foreground">Loading your plans…</Text>
+          <Text className="text-muted-foreground text-sm">Loading your plans…</Text>
         </View>
       ) : packages.length ? (
-        <View className="gap-3">{packages.map(renderPackage)}</View>
+        <View className="gap-2">{packages.map(renderPackage)}</View>
       ) : (
         renderFallback()
       )}
 
-      <View className="gap-3">
+      <View className="gap-2">
         <Button
           onPress={handlePurchase}
           disabled={!selectedPackage || isPurchasing || isRestoring || isLoading}
@@ -433,46 +453,41 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
         >
           <View className="flex-row items-center justify-center gap-2">
             {isPurchasing && <ActivityIndicator size="small" color="#ffffff" />}
-            <Text className="text-lg font-semibold text-primary-foreground">
+            <Text className="text-base font-semibold text-primary-foreground">
               {selectedPackage ? primaryCtaText : "Plans unavailable"}
             </Text>
           </View>
         </Button>
 
-        <View className="gap-1">
-          <Text className="text-center text-sm font-semibold text-foreground">
-            GERDBuddy Pro subscription required
-          </Text>
-          <Text className="text-center text-sm text-muted-foreground">
-            Cancel anytime during the free trial
-          </Text>
-        </View>
+        <Text className="text-center text-xs text-muted-foreground">
+          Cancel anytime during the free trial
+        </Text>
 
         <Button
           variant="ghost"
           onPress={handleRestore}
           disabled={isPurchasing || isRestoring}
-          className="w-full"
-          textClassName="text-foreground font-semibold"
+          className="w-full py-1"
+          textClassName="text-foreground font-semibold text-sm"
         >
           {isRestoring ? "Restoring…" : "Restore purchases"}
         </Button>
 
         {statusMessage ? (
-          <Text className="text-center text-xs text-muted-foreground">{statusMessage}</Text>
+          <Text className="text-center text-[10px] text-muted-foreground">{statusMessage}</Text>
         ) : null}
 
-        <Text className="text-center text-[11px] text-muted-foreground">
+        <Text className="text-center text-[10px] text-muted-foreground leading-tight">
           After the 3-day free trial, the subscription automatically renews unless canceled at least
           24 hours before the end of the trial.
         </Text>
 
-        <View className="flex-row justify-center gap-4 pt-2">
-          <Pressable onPress={() => Linking.openURL("https://gerdbuddy.app/privacy")}>
-            <Text className="text-[11px] text-primary underline">Privacy Policy</Text>
+        <View className="flex-row justify-center gap-4">
+          <Pressable onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/privacy")}>
+            <Text className="text-[10px] text-primary underline">Privacy Policy</Text>
           </Pressable>
-          <Pressable onPress={() => Linking.openURL("https://gerdbuddy.app/terms")}>
-            <Text className="text-[11px] text-primary underline">Terms of Service</Text>
+          <Pressable onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/terms")}>
+            <Text className="text-[10px] text-primary underline">Terms of Service</Text>
           </Pressable>
         </View>
       </View>

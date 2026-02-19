@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Linking, Pressable, Text, View, Switch } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { Bell, Trash2, Info, ChevronRight, LogOut, Moon, CreditCard, FileText, Shield } from "lucide-react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { Alert, Linking, Platform, Pressable, Text, View, Switch } from "react-native";
+import { Bell, Trash2, Info, ChevronRight, LogOut, Moon, CreditCard, FileText, Shield, User, Mail } from "lucide-react-native";
+import { useAuth } from "../contexts/AuthContext";
 import Screen from "../components/Screen";
 import Card from "../components/Card";
 import Button from "../components/Button";
@@ -11,10 +12,16 @@ import {
   getPermissionStatus,
   openNotificationSettings,
   registerForPushNotifications,
+  syncReminderNotifications,
 } from "../services/notifications";
 
-export default function SettingsScreen() {
-  const navigation = useNavigation();
+export default function SettingsScreen({ navigation }) {
+  const {
+    user: authUser,
+    isAuthenticated,
+    isFirebaseConfigured,
+    signOut,
+  } = useAuth();
   const [user, setUser] = useState(null);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
@@ -43,6 +50,12 @@ export default function SettingsScreen() {
     refreshNotificationStatus();
   }, [refreshNotificationStatus]);
 
+  useFocusEffect(
+    useCallback(() => {
+      refreshNotificationStatus();
+    }, [refreshNotificationStatus])
+  );
+
   const ensureNotificationsAllowed = useCallback(async () => {
     if (notificationPermission.granted || notificationPermission.provisional) {
       return true;
@@ -64,6 +77,10 @@ export default function SettingsScreen() {
       const allowed = await ensureNotificationsAllowed();
       if (!allowed) {
         setRemindersEnabled(false);
+        await syncReminderNotifications({
+          remindersEnabled: false,
+          eveningReminderEnabled,
+        });
         return;
       }
     }
@@ -73,6 +90,10 @@ export default function SettingsScreen() {
       const updatedUser = { ...user, remindersEnabled: enabled };
       await saveUser(updatedUser);
       setUser(updatedUser);
+      await syncReminderNotifications({
+        remindersEnabled: enabled,
+        eveningReminderEnabled,
+      });
       showToast(enabled ? "Reminders enabled" : "Reminders disabled");
     }
   };
@@ -82,6 +103,10 @@ export default function SettingsScreen() {
       const allowed = await ensureNotificationsAllowed();
       if (!allowed) {
         setEveningReminderEnabled(false);
+        await syncReminderNotifications({
+          remindersEnabled,
+          eveningReminderEnabled: false,
+        });
         return;
       }
     }
@@ -91,6 +116,10 @@ export default function SettingsScreen() {
       const updatedUser = { ...user, eveningReminderEnabled: enabled };
       await saveUser(updatedUser);
       setUser(updatedUser);
+      await syncReminderNotifications({
+        remindersEnabled,
+        eveningReminderEnabled: enabled,
+      });
       showToast(enabled ? "Evening reminder enabled" : "Evening reminder disabled");
     }
   };
@@ -111,6 +140,15 @@ export default function SettingsScreen() {
       { text: "Cancel", style: "cancel" },
       { text: "Confirm", style: "destructive", onPress: action },
     ]);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      showToast("Signed out successfully");
+    } catch (err) {
+      showToast("Failed to sign out");
+    }
   };
 
   return (
@@ -151,19 +189,89 @@ export default function SettingsScreen() {
               <Text className="font-semibold text-amber-900">Notifications are off</Text>
             </View>
             <Text className="text-sm text-amber-900">
-              Turn on notifications in system settings to receive logging reminders. We never send
-              marketing pushes—only gentle nudges you opt into.
+              {Platform.OS === "ios"
+                ? "Tap below, then tap Notifications and turn on Allow Notifications."
+                : "Tap below to enable notifications in system settings."}
             </Text>
             <Button
               variant="outline"
               className="w-full border-amber-300"
               onPress={openNotificationSettings}
             >
-              <Text className="text-foreground font-semibold">Open notification settings</Text>
+              <Text className="text-foreground font-semibold">Open Settings</Text>
             </Button>
           </Card>
         )}
       </View>
+
+      {isFirebaseConfigured && (
+        <View className="gap-3">
+          <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+            Account
+          </Text>
+          <Card className="divide-y divide-border">
+            {isAuthenticated ? (
+              <>
+                <View className="flex-row items-center justify-between p-4">
+                  <View className="flex-row items-center gap-3">
+                    <Mail size={20} color="#3aa27f" />
+                    <View>
+                      <Text className="font-medium text-foreground">Email</Text>
+                      <Text className="text-sm text-muted-foreground">
+                        {authUser?.email}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <Pressable
+                  onPress={() =>
+                    confirmAction(
+                      "Sign out?",
+                      "You can sign back in anytime.",
+                      handleSignOut
+                    )
+                  }
+                  className="flex-row items-center justify-between p-4"
+                >
+                  <View className="flex-row items-center gap-3">
+                    <LogOut size={20} color="#5f6f74" />
+                    <Text className="font-medium text-foreground">Sign Out</Text>
+                  </View>
+                  <ChevronRight size={20} color="#5f6f74" />
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <Pressable
+                  onPress={() => navigation.navigate("SignUp")}
+                  className="flex-row items-center justify-between p-4"
+                >
+                  <View className="flex-row items-center gap-3">
+                    <User size={20} color="#3aa27f" />
+                    <View>
+                      <Text className="font-medium text-foreground">Create Account</Text>
+                      <Text className="text-sm text-muted-foreground">
+                        Sync your data across devices
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight size={20} color="#5f6f74" />
+                </Pressable>
+                <Pressable
+                  onPress={() => navigation.navigate("Login")}
+                  className="flex-row items-center justify-between p-4"
+                >
+                  <View className="flex-row items-center gap-3">
+                    <Mail size={20} color="#5f6f74" />
+                    <Text className="font-medium text-foreground">Sign In</Text>
+                  </View>
+                  <ChevronRight size={20} color="#5f6f74" />
+                </Pressable>
+              </>
+            )}
+          </Card>
+        </View>
+      )}
 
       <View className="gap-3">
         <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
@@ -218,7 +326,7 @@ export default function SettingsScreen() {
         </Text>
         <Card className="divide-y divide-border">
           <Pressable
-            onPress={() => Linking.openURL("https://gerdbuddy.app/privacy")}
+            onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/privacy")}
             className="flex-row items-center justify-between p-4"
           >
             <View className="flex-row items-center gap-3">
@@ -228,7 +336,7 @@ export default function SettingsScreen() {
             <ChevronRight size={20} color="#5f6f74" />
           </Pressable>
           <Pressable
-            onPress={() => Linking.openURL("https://gerdbuddy.app/terms")}
+            onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/terms")}
             className="flex-row items-center justify-between p-4"
           >
             <View className="flex-row items-center gap-3">

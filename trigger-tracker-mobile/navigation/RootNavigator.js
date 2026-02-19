@@ -13,7 +13,11 @@ import LogSymptomScreen from "../screens/LogSymptomScreen";
 import FoodScanScreen from "../screens/FoodScanScreen";
 import PaywallScreen from "../screens/PaywallScreen.tsx";
 import CustomerCenterScreen from "../screens/CustomerCenterScreen";
+import SignUpScreen from "../screens/SignUpScreen";
+import LoginScreen from "../screens/LoginScreen";
 import { getTrialInfo } from "../services/storage";
+import { isFirebaseConfigured } from "../services/firebase";
+import { syncReminderNotifications } from "../services/notifications";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -75,7 +79,7 @@ const TabNavigator = () => (
 
 export default function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
-  const [flow, setFlow] = useState("onboarding"); // onboarding | paywall | main
+  const [flow, setFlow] = useState("onboarding"); // onboarding | signup | paywall | main
 
   useEffect(() => {
     const determineFlow = async () => {
@@ -84,6 +88,14 @@ export default function RootNavigator() {
         const user = info.user;
 
         const needsPaywall = !info.subscriptionActive;
+
+        if (user?.onboardingComplete) {
+          // Sync reminders in background - don't let failures affect navigation
+          syncReminderNotifications({
+            remindersEnabled: user.remindersEnabled ?? true,
+            eveningReminderEnabled: user.eveningReminderEnabled ?? false,
+          }).catch((err) => console.warn("Failed to sync reminders:", err));
+        }
 
         if (!user?.onboardingComplete) {
           setFlow("onboarding");
@@ -103,6 +115,15 @@ export default function RootNavigator() {
   }, []);
 
   const handleOnboardingComplete = () => {
+    // Return the next screen name - SignUp if Firebase is configured, otherwise Paywall
+    if (isFirebaseConfigured) {
+      return "SignUp";
+    } else {
+      return "Paywall";
+    }
+  };
+
+  const handleSignUpComplete = () => {
     setFlow("paywall");
   };
 
@@ -119,13 +140,22 @@ export default function RootNavigator() {
     );
   }
 
-  const initialRoute =
-    flow === "main" ? "Main" : flow === "paywall" ? "Paywall" : "Onboarding";
+  const getInitialRoute = () => {
+    switch (flow) {
+      case "main":
+        return "Main";
+      case "paywall":
+        return "Paywall";
+      case "signup":
+        return "SignUp";
+      default:
+        return "Onboarding";
+    }
+  };
 
   return (
     <Stack.Navigator
-      key={flow}
-      initialRouteName={initialRoute}
+      initialRouteName={getInitialRoute()}
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen
@@ -133,6 +163,16 @@ export default function RootNavigator() {
         component={OnboardingScreen}
         initialParams={{ onComplete: handleOnboardingComplete }}
       />
+      <Stack.Screen name="SignUp">
+        {(props) => (
+          <SignUpScreen {...props} onSkip={handleSignUpComplete} />
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="Login">
+        {(props) => (
+          <LoginScreen {...props} onSuccess={handleSignUpComplete} />
+        )}
+      </Stack.Screen>
       <Stack.Screen name="Paywall">
         {(props) => <PaywallScreen {...props} onUnlock={handleUnlock} />}
       </Stack.Screen>

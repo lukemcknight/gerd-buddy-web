@@ -17,11 +17,15 @@ export default function ReportScreen() {
   const [days, setDays] = useState(0);
 
   const loadData = useCallback(async () => {
-    const meals = await getMeals();
-    const symptoms = await getSymptoms();
-    const dayCount = (await getDaysSinceStart()) + 1;
-    setDays(dayCount);
-    setPatternReport(generateTriggerReport(meals, symptoms));
+    try {
+      const meals = await getMeals();
+      const symptoms = await getSymptoms();
+      const dayCount = (await getDaysSinceStart()) + 1;
+      setDays(dayCount);
+      setPatternReport(generateTriggerReport(meals, symptoms));
+    } catch (error) {
+      console.warn("Failed to load report data", error);
+    }
   }, []);
 
   useFocusEffect(

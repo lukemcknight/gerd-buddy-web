@@ -1,12 +1,16 @@
 import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Mail, LifeBuoy } from "lucide-react";
+import { ShieldCheck, Mail, LifeBuoy, BookOpen } from "lucide-react";
+import { format } from "date-fns";
+import { posts } from "@/content/blog";
+
+const latestPost = posts[0];
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/10 via-background to-background text-foreground">
-      <header className="mx-auto w-full max-w-3xl px-4 pt-10 pb-6 space-y-6">
+    <div className="bg-gradient-to-b from-primary/10 via-background to-background text-foreground">
+      <header className="mx-auto w-full max-w-3xl px-4 pt-10 pb-6 space-y-6 opacity-0 animate-fade-in">
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 flex items-center justify-center">
             <img src="/turtle.png" alt="GERDBuddy turtle mascot" className="w-16 h-16 rounded-2xl object-cover" />
@@ -22,6 +26,18 @@ const Index = () => {
           </div>
         </div>
 
+        {/* App Store CTA */}
+        <div className="flex flex-wrap gap-3">
+          <a
+            href="https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary-gradient inline-flex items-center gap-2 text-base"
+          >
+            Download on the App Store
+          </a>
+        </div>
+
         <div className="card-elevated p-5 sm:p-6 flex flex-col gap-4">
           <div className="flex items-start gap-3">
             <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
@@ -33,7 +49,7 @@ const Index = () => {
                 gerdbuddy2@gmail.com
               </a>
               <p className="text-muted-foreground text-sm">
-                If you’re experiencing issues or have questions, reach out and we’ll get back to you.
+                If you're experiencing issues or have questions, reach out and we'll get back to you.
               </p>
             </div>
           </div>
@@ -57,8 +73,8 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-4 pb-16 space-y-10">
-        <section className="card-elevated p-6 space-y-4">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-16 space-y-10">
+        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-1">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-secondary text-secondary-foreground flex items-center justify-center">
               <LifeBuoy className="w-5 h-5" />
@@ -87,7 +103,7 @@ const Index = () => {
           </ul>
         </section>
 
-        <section className="card-elevated p-6 space-y-4">
+        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-2">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
               <ShieldCheck className="w-5 h-5" />
@@ -116,7 +132,7 @@ const Index = () => {
           </Accordion>
         </section>
 
-        <section className="card-elevated p-6 space-y-3">
+        <section className="card-elevated p-6 space-y-3 opacity-0 animate-slide-up stagger-3">
           <h2 className="text-2xl font-display font-semibold">Legal</h2>
           <p className="text-muted-foreground">
             Read the details on how your data is handled and the terms that govern use of GERDBuddy.
@@ -125,20 +141,42 @@ const Index = () => {
             <Link to="/privacy" className="text-primary font-semibold hover:underline">
               Privacy Policy
             </Link>
-            <span className="text-muted-foreground">•</span>
+            <span className="text-muted-foreground">&bull;</span>
             <Link to="/terms" className="text-primary font-semibold hover:underline">
               Terms of Service
             </Link>
           </div>
         </section>
-      </main>
 
-      <footer className="border-t border-border/70 bg-white/70 backdrop-blur-sm">
-        <div className="mx-auto w-full max-w-3xl px-4 py-8 space-y-2 text-center text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">© 2025 Luke McKnight</p>
-          <p>GERDBuddy is not a substitute for professional medical advice.</p>
-        </div>
-      </footer>
+        {/* Latest from the Blog */}
+        {latestPost && (
+          <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <h2 className="text-2xl font-display font-semibold">Latest from the Blog</h2>
+            </div>
+            <Link to={`/blog/${latestPost.slug}`} className="block group">
+              <div className="p-4 rounded-xl bg-primary/5 border border-border/70 space-y-2 transition-all duration-200 group-hover:border-primary/30 group-hover:shadow-sm">
+                <p className="text-sm text-muted-foreground">
+                  {format(new Date(latestPost.date), "MMMM d, yyyy")}
+                </p>
+                <h3 className="text-lg font-display font-semibold group-hover:text-primary transition-colors">
+                  {latestPost.title}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{latestPost.description}</p>
+                <span className="inline-block text-primary text-sm font-semibold group-hover:underline">
+                  Read more &rarr;
+                </span>
+              </div>
+            </Link>
+            <Link to="/blog" className="text-primary text-sm font-semibold hover:underline">
+              View all articles &rarr;
+            </Link>
+          </section>
+        )}
+      </div>
     </div>
   );
 };

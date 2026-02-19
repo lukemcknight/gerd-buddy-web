@@ -38,3 +38,6 @@ asc-key.json
 asc-api-key.json
 GoogleService-Info.plist
 google-services.json
+
+# Build artifacts
+*.ipa

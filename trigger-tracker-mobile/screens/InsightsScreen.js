@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
 import { Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { AlertTriangle, TrendingUp } from "lucide-react-native";
+import { AlertTriangle, TrendingUp, ShieldCheck } from "lucide-react-native";
 import Screen from "../components/Screen";
 import InsightCard from "../components/InsightCard";
 import TriggerBadge from "../components/TriggerBadge";
-import { calculateTriggers, generateDailyInsights } from "../utils/triggerEngine";
+import { calculateTriggers, calculateSafeFoods, generateDailyInsights } from "../utils/triggerEngine";
 import { getMeals, getSymptoms } from "../services/storage";
 import Card from "../components/Card";
 import Mascot from "../components/Mascot";
@@ -13,15 +13,22 @@ import Mascot from "../components/Mascot";
 export default function InsightsScreen() {
   const [insights, setInsights] = useState([]);
   const [triggers, setTriggers] = useState([]);
+  const [safeFoods, setSafeFoods] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
-    setLoading(true);
-    const meals = await getMeals();
-    const symptoms = await getSymptoms();
-    setInsights(generateDailyInsights(meals, symptoms));
-    setTriggers(calculateTriggers(meals, symptoms));
-    setLoading(false);
+    try {
+      setLoading(true);
+      const meals = await getMeals();
+      const symptoms = await getSymptoms();
+      setInsights(generateDailyInsights(meals, symptoms));
+      setTriggers(calculateTriggers(meals, symptoms));
+      setSafeFoods(calculateSafeFoods(meals, symptoms));
+    } catch (error) {
+      console.warn("Failed to load insights data", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useFocusEffect(
@@ -65,6 +72,37 @@ export default function InsightsScreen() {
           </Card>
         )}
       </View>
+
+      {safeFoods.length > 0 && (
+        <View className="gap-2">
+          <View className="flex-row items-center gap-2">
+            <ShieldCheck size={20} color="#3aa27f" />
+            <Text className="text-lg font-semibold text-foreground">Safe Foods</Text>
+          </View>
+          <View className="gap-3">
+            {safeFoods.slice(0, 5).map((food) => (
+              <Card key={food.ingredient} className="p-4 bg-primary/5 border-primary/20">
+                <View className="flex-row items-center justify-between">
+                  <View>
+                    <Text className="font-semibold text-foreground capitalize">
+                      {food.ingredient}
+                    </Text>
+                    <Text className="text-xs text-muted-foreground">
+                      {food.symptomFreeOccurrences}/{food.totalOccurrences} times without symptoms
+                    </Text>
+                  </View>
+                  <View className="items-end">
+                    <Text className="text-lg font-bold text-primary">
+                      {food.safetyScore}%
+                    </Text>
+                    <Text className="text-xs text-muted-foreground">safe</Text>
+                  </View>
+                </View>
+              </Card>
+            ))}
+          </View>
+        </View>
+      )}
 
       <View className="gap-2">
         <View className="flex-row items-center gap-2">

@@ -1,7 +1,7 @@
 import { Image, Text, View } from "react-native";
 import { memo } from "react";
 
-type MascotSize = "small" | "medium" | "large";
+type MascotSize = "small" | "medium" | "large" | "xlarge";
 
 type MascotProps = {
   size?: MascotSize;
@@ -12,7 +12,8 @@ type MascotProps = {
 const sizeMap: Record<MascotSize, number> = {
   small: 72,
   medium: 108,
-  large: 140,
+  large: 160,
+  xlarge: 200,
 };
 
 function MascotComponent({ size = "medium", message, className }: MascotProps) {

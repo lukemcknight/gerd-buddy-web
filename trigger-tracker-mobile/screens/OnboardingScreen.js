@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Text, View, Pressable } from "react-native";
-import { Flame, ArrowRight, Bell, Heart } from "lucide-react-native";
+import { ArrowRight, Clock, CalendarDays, Activity, Utensils, Moon, Bell } from "lucide-react-native";
+import { usePostHog } from "posthog-react-native";
 import Screen from "../components/Screen";
 import Button from "../components/Button";
 import Mascot from "../components/Mascot";
 import { createUser } from "../services/storage";
 import { configureRevenueCat } from "../services/revenuecat";
-import { registerForPushNotifications } from "../services/notifications";
+import { registerForPushNotifications, syncReminderNotifications } from "../services/notifications";
 import { showToast } from "../utils/feedback";
+import * as StoreReview from "expo-store-review";
 
 const symptomTimingOptions = [
   { id: "morning", label: "Morning" },
@@ -54,8 +56,25 @@ export default function OnboardingScreen({ navigation, route }) {
   const [worseLyingDown, setWorseLyingDown] = useState(null);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [reviewAvailable, setReviewAvailable] = useState(false);
   const onComplete = route?.params?.onComplete;
-  const totalSteps = 6;
+  const totalSteps = 7;
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    posthog?.screen("Onboarding");
+    posthog?.capture("onboarding_started");
+
+    // Check if store review is available on this device
+    StoreReview.isAvailableAsync().then(setReviewAvailable).catch(() => setReviewAvailable(false));
+  }, []);
+
+  useEffect(() => {
+    if (step > 0) {
+      posthog?.capture("onboarding_step_completed", { step: step - 1 });
+    }
+  }, [step]);
 
   const handleSymptomToggle = (id) => {
     setTopSymptoms((prev) =>
@@ -76,13 +95,20 @@ export default function OnboardingScreen({ navigation, route }) {
 
     try {
       const result = await registerForPushNotifications();
-      if (!result.permission.granted && !result.permission.provisional) {
+      if (!result.permission.granted) {
         setRemindersEnabled(false);
         setEveningReminderEnabled(false);
-        showToast(
-          "Notifications blocked",
-          "Turn on notifications in Settings later to receive gentle reminders."
-        );
+        if (!result.permission.canAskAgain) {
+          showToast(
+            "Notifications disabled",
+            "Go to Settings > GERD Buddy > Notifications to enable reminders."
+          );
+        } else {
+          showToast(
+            "Notifications not enabled",
+            "You can enable reminders later in the app settings."
+          );
+        }
         return { remindersEnabled: false, eveningReminderEnabled: false };
       }
 
@@ -100,63 +126,88 @@ export default function OnboardingScreen({ navigation, route }) {
   };
 
   const handleComplete = async () => {
-    const reminderSettings = await normalizeReminderSettings();
-    const user = await createUser({
-      topSymptoms,
-      symptomTiming,
-      symptomFrequency,
-      symptomAfterEating,
-      worseLyingDown,
-      remindersEnabled: reminderSettings.remindersEnabled,
-      eveningReminderEnabled: reminderSettings.eveningReminderEnabled,
-    });
+    if (isCompleting) return;
+    setIsCompleting(true);
+
     try {
-      await configureRevenueCat(user.id);
+      const reminderSettings = await normalizeReminderSettings();
+      const user = await createUser({
+        topSymptoms,
+        symptomTiming,
+        symptomFrequency,
+        symptomAfterEating,
+        worseLyingDown,
+        remindersEnabled: reminderSettings.remindersEnabled,
+        eveningReminderEnabled: reminderSettings.eveningReminderEnabled,
+      });
+
+      await syncReminderNotifications({
+        remindersEnabled: reminderSettings.remindersEnabled,
+        eveningReminderEnabled: reminderSettings.eveningReminderEnabled,
+      }).catch((err) => console.warn("Sync reminders failed:", err));
+
+      await configureRevenueCat(user.id).catch((err) =>
+        console.warn("RevenueCat setup failed:", err)
+      );
+
+      posthog?.capture("onboarding_completed", {
+        symptom_frequency: symptomFrequency,
+        top_symptoms_count: topSymptoms.length,
+        reminders_enabled: reminderSettings.remindersEnabled,
+      });
+      posthog?.identify(user.id, {
+        symptom_frequency: symptomFrequency,
+        top_symptoms: topSymptoms,
+      });
+
+      // Check if we should show signup screen (passed via onComplete return value or params)
+      const nextScreen = onComplete?.() || "Paywall";
+      navigation.replace(nextScreen);
     } catch (error) {
-      console.warn("RevenueCat setup failed", error);
+      console.warn("Onboarding completion failed:", error);
+      showToast("Something went wrong", "Please try again.");
+      setIsCompleting(false);
     }
-    onComplete?.();
-    navigation.replace("Paywall");
   };
 
   return (
     <Screen contentClassName="gap-8">
       {step === 0 && (
-        <View className="flex-1 items-center justify-center gap-6 mt-10">
-          <View className="w-20 h-20 rounded-3xl bg-primary/10 items-center justify-center">
-            <Flame size={40} color="#3aa27f" />
-          </View>
-          <View className="items-center gap-2">
-            <Text className="text-3xl font-bold text-foreground">GERDBuddy</Text>
-            <Text className="text-lg text-muted-foreground text-center max-w-xs">
-              A calm companion to help you notice GERD patterns over time.
+        <View className="flex-1 items-center justify-center gap-8 px-2">
+          <Mascot size="large" />
+          <View className="items-center gap-3">
+            <Text className="text-4xl font-extrabold text-foreground tracking-tight">
+              GERDBuddy
+            </Text>
+            <Text className="text-lg text-muted-foreground text-center leading-relaxed">
+              Your calm companion for understanding GERD patterns
             </Text>
           </View>
-          <Mascot
-            size="medium"
-            message="I will stay by your side while we learn what bothers your system."
-          />
-          <Text className="text-sm text-muted-foreground text-center max-w-xs">
-            Start tracking to discover your personal triggers. This information is educational and
-            not medical advice.
-          </Text>
-          <Button
-            className="w-full"
-            onPress={() => setStep(1)}
-          >
-            <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-semibold">Get Started</Text>
-              <ArrowRight size={16} color="#ffffff" />
-            </View>
-          </Button>
+          <View className="w-full gap-4 mt-4">
+            <Text className="text-sm text-muted-foreground/80 text-center leading-relaxed">
+              Track meals, spot triggers, and take control of your digestive health.
+            </Text>
+            <Button
+              className="w-full py-5 rounded-2xl shadow-sm"
+              onPress={() => setStep(1)}
+            >
+              <View className="flex-row items-center justify-center gap-3">
+                <Text className="text-primary-foreground font-bold text-lg">Get Started</Text>
+                <ArrowRight size={20} color="#ffffff" />
+              </View>
+            </Button>
+            <Text className="text-xs text-muted-foreground/60 text-center">
+              Educational purposes only. Not medical advice.
+            </Text>
+          </View>
         </View>
       )}
 
       {step === 1 && (
         <View className="gap-6">
           <View className="items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
-              <Heart size={26} color="#f07c52" />
+            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
+              <Clock size={26} color="#3aa27f" />
             </View>
             <Text className="text-2xl font-bold text-foreground">
               When do you usually experience symptoms?
@@ -199,11 +250,11 @@ export default function OnboardingScreen({ navigation, route }) {
           <Button
             disabled={symptomTiming.length === 0}
             onPress={() => setStep(2)}
-            className="w-full"
+            className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-semibold">Continue</Text>
-              <ArrowRight size={16} color="#ffffff" />
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
             </View>
           </Button>
         </View>
@@ -212,8 +263,8 @@ export default function OnboardingScreen({ navigation, route }) {
       {step === 2 && (
         <View className="gap-6">
           <View className="items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
-              <Bell size={26} color="#3aa27f" />
+            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
+              <CalendarDays size={26} color="#f07c52" />
             </View>
             <Text className="text-2xl font-bold text-foreground">
               How often do you experience reflux symptoms?
@@ -253,11 +304,11 @@ export default function OnboardingScreen({ navigation, route }) {
           <Button
             disabled={!symptomFrequency}
             onPress={() => setStep(3)}
-            className="w-full"
+            className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-semibold">Continue</Text>
-              <ArrowRight size={16} color="#ffffff" />
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
             </View>
           </Button>
         </View>
@@ -266,8 +317,8 @@ export default function OnboardingScreen({ navigation, route }) {
       {step === 3 && (
         <View className="gap-6">
           <View className="items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
-              <Heart size={26} color="#f07c52" />
+            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
+              <Activity size={26} color="#3aa27f" />
             </View>
             <Text className="text-2xl font-bold text-foreground">Which symptoms do you experience most?</Text>
             <Text className="text-muted-foreground">Select all that apply</Text>
@@ -308,11 +359,11 @@ export default function OnboardingScreen({ navigation, route }) {
           <Button
             disabled={topSymptoms.length === 0}
             onPress={() => setStep(4)}
-            className="w-full"
+            className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-semibold">Continue</Text>
-              <ArrowRight size={16} color="#ffffff" />
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
             </View>
           </Button>
         </View>
@@ -321,8 +372,8 @@ export default function OnboardingScreen({ navigation, route }) {
       {step === 4 && (
         <View className="gap-6">
           <View className="items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
-              <Bell size={26} color="#3aa27f" />
+            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
+              <Utensils size={26} color="#f07c52" />
             </View>
             <Text className="text-2xl font-bold text-foreground">
               Do symptoms usually happen after eating?
@@ -361,11 +412,11 @@ export default function OnboardingScreen({ navigation, route }) {
           <Button
             disabled={!symptomAfterEating}
             onPress={() => setStep(5)}
-            className="w-full"
+            className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-semibold">Continue</Text>
-              <ArrowRight size={16} color="#ffffff" />
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
             </View>
           </Button>
         </View>
@@ -375,7 +426,7 @@ export default function OnboardingScreen({ navigation, route }) {
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
-              <Bell size={26} color="#3aa27f" />
+              <Moon size={26} color="#3aa27f" />
             </View>
             <Text className="text-2xl font-bold text-foreground">Are symptoms worse when lying down?</Text>
           </View>
@@ -412,11 +463,11 @@ export default function OnboardingScreen({ navigation, route }) {
           <Button
             disabled={!worseLyingDown}
             onPress={() => setStep(6)}
-            className="w-full"
+            className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-semibold">Continue</Text>
-              <ArrowRight size={16} color="#ffffff" />
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
             </View>
           </Button>
         </View>
@@ -476,12 +527,68 @@ export default function OnboardingScreen({ navigation, route }) {
             </Pressable>
           </View>
 
-          <Button onPress={handleComplete} className="w-full">
+          <Button onPress={() => setStep(7)} className="w-full py-4 rounded-2xl">
             <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-semibold">Start Tracking</Text>
-              <ArrowRight size={16} color="#ffffff" />
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
             </View>
           </Button>
+        </View>
+      )}
+
+      {step === 7 && (
+        <View className="flex-1 items-center justify-center gap-6">
+          <View className="w-20 h-20 rounded-3xl bg-primary/10 items-center justify-center">
+            <Text className="text-4xl">⭐</Text>
+          </View>
+          <View className="items-center gap-2">
+            <Text className="text-2xl font-bold text-foreground text-center">
+              Enjoying GERDBuddy?
+            </Text>
+            <Text className="text-muted-foreground text-center max-w-xs">
+              Your feedback helps others discover our app and motivates us to keep improving.
+            </Text>
+          </View>
+
+          <Mascot
+            size="small"
+            message="A quick review would mean the world to me!"
+          />
+
+          <View className="w-full gap-3">
+            {reviewAvailable && (
+              <Button
+                onPress={async () => {
+                  try {
+                    await StoreReview.requestReview();
+                    posthog?.capture("onboarding_review_requested");
+                  } catch (error) {
+                    console.warn("Store review failed:", error);
+                  }
+                  handleComplete();
+                }}
+                className="w-full"
+              >
+                <View className="flex-row items-center justify-center gap-2">
+                  <Text className="text-primary-foreground font-semibold">Rate the App</Text>
+                  <Text className="text-primary-foreground">⭐</Text>
+                </View>
+              </Button>
+            )}
+
+            <Pressable
+              onPress={() => {
+                posthog?.capture("onboarding_review_skipped");
+                handleComplete();
+              }}
+              disabled={isCompleting}
+              className="py-3"
+            >
+              <Text className="text-center text-muted-foreground">
+                {isCompleting ? "Setting up..." : "Maybe later"}
+              </Text>
+            </Pressable>
+          </View>
         </View>
       )}
 

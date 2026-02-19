@@ -2,7 +2,7 @@
   "expo": {
     "name": "GERD Buddy",
     "slug": "trigger-tracker",
-    "version": "1.0.0",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,7 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gerdbuddy.app",
-      "buildNumber": "1.0.15",
+      "buildNumber": "1.0.25",
       "infoPlist": {
         "NSCameraUsageDescription": "Allow GERDBuddy to use your camera to take meal photos for analysis.",
         "NSPhotoLibraryUsageDescription": "Allow GERDBuddy to access your photo library so you can choose meal photos for analysis.",

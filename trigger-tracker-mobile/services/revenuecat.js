@@ -8,7 +8,7 @@ const ENTITLEMENT_ID =
   process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID?.trim() || "pro";
 const OFFERING_ID = process.env.EXPO_PUBLIC_REVENUECAT_OFFERING_ID || "default";
 
-let isConfigured = false;
+let configurePromise = null;
 let currentUserId = null;
 
 const ensureConfigured = async (userId) => {
@@ -18,13 +18,16 @@ const ensureConfigured = async (userId) => {
     );
   }
 
-  if (!isConfigured) {
-    // Configure once for the app lifecycle; user ID is optional for anonymous installs.
-    await Purchases.configure({ apiKey: API_KEY, appUserID: userId || null });
-    isConfigured = true;
-    currentUserId = userId || null;
-    return;
+  // Use a promise-based singleton to prevent race conditions when multiple
+  // components call RevenueCat functions simultaneously.
+  if (!configurePromise) {
+    configurePromise = (async () => {
+      await Purchases.configure({ apiKey: API_KEY, appUserID: userId || null });
+      currentUserId = userId || null;
+    })();
   }
+
+  await configurePromise;
 
   if (userId && userId !== currentUserId) {
     await Purchases.logIn(userId);
