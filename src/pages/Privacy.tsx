@@ -1,6 +1,13 @@
+import SEO from "@/components/SEO";
+
 const Privacy = () => {
   return (
     <div className="bg-background text-foreground">
+      <SEO
+        title="Privacy Policy"
+        description="Learn how GERDBuddy handles your data. Your information stays on your device — no analytics, no tracking, and no data is sold or shared."
+        path="/privacy"
+      />
       <div className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">
         <header className="space-y-2 opacity-0 animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">GERDBuddy</p>

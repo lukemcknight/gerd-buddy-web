@@ -2,113 +2,107 @@ import type { BlogPost } from "./types";
 
 const post: BlogPost = {
   slug: "gerd-trigger-foods",
-  title: "How to Find Your Personal GERD Trigger Foods",
+  title: "GERD Trigger Foods: How to Find Your Personal Triggers",
   description:
     "Learn how to identify the specific foods that trigger your acid reflux symptoms. A practical guide to food journaling, elimination diets, and pattern tracking for GERD management.",
   date: "2026-02-19",
   author: "GERDBuddy Team",
   content: `
-GERD affects millions of people worldwide, yet the foods that trigger symptoms vary dramatically from person to person. While there are common culprits like tomatoes, chocolate, and spicy foods, your personal trigger list might look completely different from someone else's.
+Here's something that took me way too long to figure out: the "Top 10 GERD Trigger Foods" lists you find online? They're a starting point at best. At worst, they'll have you cutting out half your diet for no reason.
 
-This guide walks you through a practical, step-by-step approach to identifying the specific foods that cause *your* acid reflux symptoms.
+I spent months avoiding every food on those lists — no tomatoes, no coffee, no chocolate, no citrus. And I was still getting flare-ups. Turns out, my actual triggers were way more specific. Dairy was a big one for me, and raw onions. But coffee? Totally fine in moderation. Go figure.
 
-## Why Generic Trigger Lists Don't Work
+The truth is that GERD triggers are deeply personal. What destroys one person might be completely harmless for another. The only real way to find *your* triggers is to pay attention to what you eat and how you feel afterward.
 
-You've probably seen lists of "foods to avoid with GERD" online. While these can be a helpful starting point, they have a major limitation: **they're based on averages, not on you**.
+## Why Those Generic Lists Fall Short
 
-Some people with GERD can eat spicy food without issues but struggle with dairy. Others tolerate coffee just fine but find that bread triggers their symptoms. The only way to know your personal triggers is to track what you eat and how you feel.
+Those lists aren't wrong exactly — they're based on what triggers reflux for *most* people on average. But you're not an average. You're a specific person with a specific body.
 
-## Step 1: Start a Food and Symptom Journal
+I've talked to people who can eat spicy Thai food without blinking but get destroyed by a glass of milk. Others can drink orange juice all day but can't touch chocolate. Bodies are weird like that.
 
-The foundation of finding your triggers is consistent tracking. For at least **7 to 14 days**, record:
+## Start Keeping a Food and Symptom Journal
 
-- **What you eat** — be specific about ingredients, portions, and preparation methods
-- **When you eat** — note the time of each meal and snack
-- **Your symptoms** — heartburn, regurgitation, chest pain, throat irritation, etc.
-- **Symptom timing** — when symptoms appear relative to eating
-- **Symptom severity** — rate each episode on a scale (e.g., 1-5)
+This is the single most useful thing you can do. For at least a week or two, write down:
 
-The more detail you capture, the easier it becomes to spot patterns.
+- **What you ate** — ingredients, rough portions, how it was cooked
+- **When you ate** — time of day matters more than you'd think
+- **Any symptoms** — heartburn, that burning throat feeling, chest tightness, whatever you experience
+- **When symptoms hit** — right after eating? Two hours later? Middle of the night?
+- **How bad it was** — even a simple 1-5 scale helps
 
-## Step 2: Look for Patterns
+I know it sounds tedious. It kind of is at first. But after about a week, you start seeing patterns that you'd never notice otherwise.
 
-After a week or two of tracking, review your journal and look for connections:
+An app like [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) makes this way easier than a notebook — you can quickly log meals and symptoms on your phone, and it'll help surface patterns and correlations you might miss on your own.
 
-- Do symptoms consistently appear after certain foods?
-- Are there specific food combinations that trigger episodes?
-- Does the time of day matter?
+## Look for the Patterns
+
+After a couple weeks of tracking, sit down and look at your data. Ask yourself:
+
+- Do symptoms keep showing up after the same foods?
+- Is it certain combinations rather than individual ingredients?
+- Does time of day matter? (Late-night pizza hits different than lunchtime pizza, trust me.)
 - Does portion size play a role?
 
-You might notice that it's not just *what* you eat but *how much* and *when* you eat it. A small portion of a borderline food might be fine, while a large portion triggers symptoms.
+That last one is sneaky. You might tolerate a small serving of something just fine, but a large helping of the same thing sets you off. This is super common with fatty foods.
 
-## Step 3: Try an Elimination Approach
+## Try Eliminating One Thing at a Time
 
-Once you've identified suspected triggers:
+Once you've got a few suspects, test them one by one:
 
-1. **Remove one suspected trigger** from your diet for 2-3 weeks
-2. **Continue tracking** your symptoms during this period
-3. **Reintroduce the food** and note any symptom changes
-4. **Repeat** with the next suspected trigger
+1. Cut out one suspected trigger for 2-3 weeks
+2. Keep tracking your symptoms during this time
+3. Bring it back and see what happens
+4. Move on to the next suspect
 
-Only eliminate one food at a time so you can clearly attribute any improvements to that specific change.
+The key here is *one at a time*. If you cut out five things at once and feel better, you won't know which one was the problem. Patience pays off here.
 
-## Step 4: Build Your Personal Safe and Trigger Lists
+## Build Your Personal Lists
 
-Over time, you'll develop two valuable lists:
+Over time, you'll end up with two really useful lists:
 
-- **Your safe foods** — foods you can eat confidently without symptoms
-- **Your trigger foods** — foods that consistently cause problems
+- **Your safe foods** — things you can eat with confidence
+- **Your trigger foods** — things you know to steer clear of
 
-These lists are personal to you and far more useful than any generic advice you'll find online.
+These lists are worth more than any blog post (including this one). They're based on *your body's* actual responses, not someone else's.
 
-## Common Categories to Investigate
+## Categories Worth Investigating
 
-While everyone is different, these categories are worth paying attention to during your tracking:
+Everyone's different, but these categories are the ones most worth paying attention to while you're tracking:
 
-- **Acidic foods** — citrus fruits, tomatoes, vinegar-based dressings
-- **Fatty foods** — fried foods, heavy cream sauces, fatty meats
-- **Spicy foods** — chili peppers, hot sauces, curry
-- **Beverages** — coffee, alcohol, carbonated drinks
-- **Chocolate and mint** — both can relax the lower esophageal sphincter
-- **Dairy** — milk, cheese, ice cream (varies widely by person)
-- **Onions and garlic** — common but often overlooked triggers
+- **Acidic stuff** — citrus fruits, tomatoes, vinegar-based dressings
+- **Fatty and fried foods** — this is the big one for a lot of people
+- **Spicy foods** — chili peppers, hot sauces, heavy curry
+- **Drinks** — coffee, alcohol, anything carbonated
+- **Chocolate and mint** — both can relax that valve at the top of your stomach
+- **Dairy** — milk, cheese, ice cream (hugely variable from person to person)
+- **Onions and garlic** — these sneak into everything and are easy to overlook
 
-## Tips for Better Tracking
+For a full breakdown of what to eat and what to avoid, check out our [GERD diet guide](/blog/gerd-diet-guide). And if you're looking for meal ideas that won't trigger symptoms, we've got a guide to [building GERD-friendly meals](/blog/gerd-friendly-meals) that actually taste good.
 
-- **Be consistent** — track every meal, not just the ones before symptoms
-- **Note your stress level** — stress can amplify GERD symptoms
-- **Record your position** — eating late and lying down is a common trigger pattern
-- **Track medications** — some medications can affect GERD symptoms
-- **Be patient** — patterns may take 2-4 weeks to become clear
+## A Few Tracking Tips
 
-## How Technology Can Help
+- **Track everything, not just the bad days.** You need the "good" data too so you can see what *didn't* cause problems.
+- **Note your stress level.** [Stress absolutely makes GERD worse](/blog/stress-and-gerd) for a lot of people.
+- **Pay attention to position.** Eating late and then crashing on the couch is a recipe for reflux.
+- **Be patient.** This isn't a one-week project. Give it at least 2-4 weeks for clear patterns to emerge.
 
-A dedicated tracking app can make the journaling process much easier than pen and paper. Look for one that lets you:
+## When to Talk to a Doctor
 
-- Quickly log meals and symptoms
-- Rate symptom severity
-- View trends and correlations over time
-- Identify patterns you might miss manually
+Tracking and dietary changes are great tools, but they have limits. See a healthcare provider if:
 
-The key is consistency — the best tracking method is the one you'll actually use every day.
+- Your symptoms are severe or getting worse
+- You have trouble swallowing
+- You're losing weight without trying
+- OTC meds aren't helping
+- Things haven't improved after a few weeks of changes
 
-## When to See a Doctor
+GERD is a real medical condition. Sometimes you need more than dietary tweaks.
 
-While food tracking is a valuable self-management tool, consult a healthcare professional if:
+## Just Get Started
 
-- Your symptoms are severe or worsening
-- You experience difficulty swallowing
-- You have unexplained weight loss
-- Over-the-counter medications aren't providing relief
-- You've been managing symptoms for more than 2 weeks without improvement
+Finding your personal trigger foods is honestly one of the most empowering things you can do for managing GERD. It takes you from blindly following internet lists to actually understanding your own body.
 
-GERD is a medical condition that sometimes requires professional treatment beyond dietary changes.
-
-## Start Today
-
-Finding your personal trigger foods is one of the most empowering steps you can take in managing GERD. It shifts you from following generic advice to understanding your own body.
-
-Start tracking today, be patient with the process, and within a few weeks you'll have insights that are uniquely valuable to your health.
+You don't need to be perfect about it. Just start paying attention. Log your meals, note how you feel, and within a few weeks you'll have insights that no generic article can give you.
   `.trim(),
 };
 

@@ -12,7 +12,8 @@ interface SEOProps {
   type?: "website" | "article";
   publishedTime?: string;
   author?: string;
-  jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const SEO = ({
@@ -23,6 +24,7 @@ const SEO = ({
   type = "website",
   publishedTime,
   author,
+  noindex,
   jsonLd,
 }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
@@ -32,6 +34,7 @@ const SEO = ({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      {noindex && <meta name="robots" content="noindex, nofollow" />}
       <link rel="canonical" href={url} />
 
       <meta property="og:title" content={title} />
@@ -54,7 +57,11 @@ const SEO = ({
       )}
 
       {jsonLd && (
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        Array.isArray(jsonLd)
+          ? jsonLd.map((item, i) => (
+              <script key={i} type="application/ld+json">{JSON.stringify(item)}</script>
+            ))
+          : <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       )}
     </Helmet>
   );

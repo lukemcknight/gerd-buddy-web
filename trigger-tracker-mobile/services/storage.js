@@ -10,7 +10,7 @@ const STORAGE_KEYS = {
   USER: "acidtrack_user",
 };
 
-const TRIAL_LENGTH_MS = 3 * 24 * 60 * 60 * 1000;
+const TRIAL_LENGTH_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
@@ -103,6 +103,12 @@ export const createUser = async (...args) => {
     worseLyingDown = null,
     remindersEnabled = true,
     eveningReminderEnabled = false,
+    // Triage fields
+    severity = "moderate",
+    fearFoods = [],
+    customFearFoods = [],
+    mealTimes = [],
+    medsStatus = "none",
   } = payload;
 
   const user = {
@@ -116,6 +122,15 @@ export const createUser = async (...args) => {
     worseLyingDown,
     remindersEnabled,
     eveningReminderEnabled,
+    // Triage fields
+    severity,
+    fearFoods,
+    customFearFoods,
+    mealTimes,
+    medsStatus,
+    // Tracking counters
+    scanCount: 0,
+    lastScanDate: null,
     createdAt: Date.now(),
     startDate: Date.now(),
     trialEndsAt: Date.now() + TRIAL_LENGTH_MS,
@@ -222,11 +237,30 @@ export const activateSubscription = async () => {
   return updated;
 };
 
+export const incrementScanCount = async () => {
+  const user = await getUser();
+  if (!user) return 0;
+  const count = (user.scanCount || 0) + 1;
+  await saveUser({ ...user, scanCount: count, lastScanDate: Date.now() });
+  return count;
+};
+
+export const getScanCount7d = async () => {
+  const meals = await getMeals();
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return meals.filter(
+    (m) => m.source === "scan" && m.createdAt >= sevenDaysAgo
+  ).length;
+};
+
 export const clearAllData = async () => {
   await AsyncStorage.multiRemove([
     STORAGE_KEYS.MEALS,
     STORAGE_KEYS.SYMPTOMS,
     STORAGE_KEYS.USER,
+    "known_triggers_v1",
+    "smart_notification_ids_v1",
+    "gerdbuddy_onboarding_plan",
   ]);
 };
 

@@ -8,6 +8,8 @@ import InsightsScreen from "../screens/InsightsScreen";
 import ReportScreen from "../screens/ReportScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
+import OnboardingPlanScreen from "../screens/OnboardingPlanScreen";
+import OnboardingDay7SummaryScreen from "../screens/OnboardingDay7SummaryScreen";
 import LogMealScreen from "../screens/LogMealScreen";
 import LogSymptomScreen from "../screens/LogSymptomScreen";
 import FoodScanScreen from "../screens/FoodScanScreen";
@@ -15,9 +17,9 @@ import PaywallScreen from "../screens/PaywallScreen.tsx";
 import CustomerCenterScreen from "../screens/CustomerCenterScreen";
 import SignUpScreen from "../screens/SignUpScreen";
 import LoginScreen from "../screens/LoginScreen";
-import { getTrialInfo } from "../services/storage";
+import { getUser } from "../services/storage";
 import { isFirebaseConfigured } from "../services/firebase";
-import { syncReminderNotifications } from "../services/notifications";
+import { syncReminderNotifications, syncSmartNotifications } from "../services/notifications";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -79,15 +81,12 @@ const TabNavigator = () => (
 
 export default function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
-  const [flow, setFlow] = useState("onboarding"); // onboarding | signup | paywall | main
+  const [flow, setFlow] = useState("onboarding"); // onboarding | signup | main
 
   useEffect(() => {
     const determineFlow = async () => {
       try {
-        const info = await getTrialInfo();
-        const user = info.user;
-
-        const needsPaywall = !info.subscriptionActive;
+        const user = await getUser();
 
         if (user?.onboardingComplete) {
           // Sync reminders in background - don't let failures affect navigation
@@ -95,12 +94,13 @@ export default function RootNavigator() {
             remindersEnabled: user.remindersEnabled ?? true,
             eveningReminderEnabled: user.eveningReminderEnabled ?? false,
           }).catch((err) => console.warn("Failed to sync reminders:", err));
+          syncSmartNotifications().catch((err) =>
+            console.warn("Failed to sync smart notifications:", err)
+          );
         }
 
         if (!user?.onboardingComplete) {
           setFlow("onboarding");
-        } else if (needsPaywall) {
-          setFlow("paywall");
         } else {
           setFlow("main");
         }
@@ -115,19 +115,15 @@ export default function RootNavigator() {
   }, []);
 
   const handleOnboardingComplete = () => {
-    // Return the next screen name - SignUp if Firebase is configured, otherwise Paywall
+    // Return the next screen name - SignUp if Firebase is configured, otherwise straight to Main
     if (isFirebaseConfigured) {
       return "SignUp";
     } else {
-      return "Paywall";
+      return "Main";
     }
   };
 
   const handleSignUpComplete = () => {
-    setFlow("paywall");
-  };
-
-  const handleUnlock = () => {
     setFlow("main");
   };
 
@@ -144,8 +140,6 @@ export default function RootNavigator() {
     switch (flow) {
       case "main":
         return "Main";
-      case "paywall":
-        return "Paywall";
       case "signup":
         return "SignUp";
       default:
@@ -173,14 +167,19 @@ export default function RootNavigator() {
           <LoginScreen {...props} onSuccess={handleSignUpComplete} />
         )}
       </Stack.Screen>
-      <Stack.Screen name="Paywall">
-        {(props) => <PaywallScreen {...props} onUnlock={handleUnlock} />}
+      <Stack.Screen
+        name="Paywall"
+        options={{ presentation: "modal" }}
+      >
+        {(props) => <PaywallScreen {...props} />}
       </Stack.Screen>
       <Stack.Screen name="Main" component={TabNavigator} />
       <Stack.Screen name="LogMeal" component={LogMealScreen} />
       <Stack.Screen name="LogSymptom" component={LogSymptomScreen} />
       <Stack.Screen name="FoodScan" component={FoodScanScreen} />
       <Stack.Screen name="CustomerCenter" component={CustomerCenterScreen} />
+      <Stack.Screen name="OnboardingPlan" component={OnboardingPlanScreen} />
+      <Stack.Screen name="OnboardingDay7Summary" component={OnboardingDay7SummaryScreen} />
     </Stack.Navigator>
   );
 }

@@ -6,21 +6,29 @@ import Screen from "../components/Screen";
 import Card from "../components/Card";
 import ProgressRing from "../components/ProgressRing";
 import TriggerBadge from "../components/TriggerBadge";
+import ProTeaser from "../components/ProTeaser";
 import Button from "../components/Button";
 import Mascot from "../components/Mascot";
-import { getMeals, getSymptoms, getDaysSinceStart } from "../services/storage";
+import { getMeals, getSymptoms, getDaysSinceStart, getUser } from "../services/storage";
 import { generateTriggerReport } from "../utils/triggerEngine";
 import { showToast } from "../utils/feedback";
+import { usePremiumStatus } from "../hooks/usePremiumStatus";
 
 export default function ReportScreen() {
   const [patternReport, setPatternReport] = useState(null);
   const [days, setDays] = useState(0);
+  const [userId, setUserId] = useState(null);
+  const { isPro, refreshStatus } = usePremiumStatus(userId);
 
   const loadData = useCallback(async () => {
     try {
-      const meals = await getMeals();
-      const symptoms = await getSymptoms();
-      const dayCount = (await getDaysSinceStart()) + 1;
+      const [meals, symptoms, dayCount, user] = await Promise.all([
+        getMeals(),
+        getSymptoms(),
+        getDaysSinceStart().then((d) => d + 1),
+        getUser(),
+      ]);
+      if (user?.id) setUserId(user.id);
       setDays(dayCount);
       setPatternReport(generateTriggerReport(meals, symptoms));
     } catch (error) {
@@ -31,18 +39,18 @@ export default function ReportScreen() {
   useFocusEffect(
     useCallback(() => {
       loadData();
-    }, [loadData])
+      refreshStatus();
+    }, [loadData, refreshStatus])
   );
 
   const handleShare = async () => {
     const text = patternReport
       ? `My GERDBuddy pattern summary:\n\nTop repeating items:\n${patternReport.topTriggers
-          .slice(0, 3)
-          .map((t, i) => `${i + 1}. ${t.ingredient}`)
-          .join("\n")}\n\nLate eating pattern: ${patternReport.lateEatingRisk}%\nTime window with more symptoms: ${
-          patternReport.worstTimeOfDay
-        }\n\nObservations are AI-assisted pattern analysis only, not medical advice.`
-      : "Check out GERDBuddy for gentle reflux pattern spotting.";
+        .slice(0, 3)
+        .map((t, i) => `${i + 1}. ${t.ingredient}`)
+        .join("\n")}\n\nLate eating pattern: ${patternReport.lateEatingRisk}%\nTime window with more symptoms: ${patternReport.worstTimeOfDay
+      }\n\nThese are personal tracking patterns, not medical advice.`
+      : "I'm using GERDBuddy to track my GERD patterns.";
     try {
       await Share.share({ title: "My GERDBuddy Pattern Summary", message: text });
     } catch (error) {
@@ -70,6 +78,11 @@ export default function ReportScreen() {
     []
   );
 
+  const freeTriggerLimit = 1;
+  const hiddenTriggerCount = !isPro && patternReport
+    ? Math.max(0, Math.min(patternReport.topTriggers.length, 3) - freeTriggerLimit)
+    : 0;
+
   return (
     <Screen contentClassName="gap-6">
       <Card className="p-6 items-center">
@@ -84,21 +97,19 @@ export default function ReportScreen() {
         </Text>
         <Text className="text-sm text-muted-foreground mt-1 text-center">
           {isComplete
-            ? "Your AI-assisted pattern review is ready"
-            : `${7 - days} more days until your full review`}
+            ? "Here's what your tracking data shows so far"
+            : `Keep logging — ${7 - days} more days for a fuller picture`}
         </Text>
       </Card>
 
       <Card className="p-5 gap-4">
         <View className="gap-1">
-          <Text className="text-xs font-semibold text-muted-foreground uppercase">Section A</Text>
           <View className="flex-row items-center gap-2">
             <FileText size={20} color="#f07c52" />
-            <Text className="text-lg font-semibold text-foreground">AI-Detected Patterns</Text>
+            <Text className="text-lg font-semibold text-foreground">Your Patterns</Text>
           </View>
           <Text className="text-xs text-muted-foreground leading-relaxed">
-            These observations are generated using AI-assisted pattern analysis of your personal logs
-            and are not medical advice.
+            Based on what you've logged — these are correlations, not diagnoses. Share them with your doctor for context.
           </Text>
         </View>
 
@@ -108,9 +119,15 @@ export default function ReportScreen() {
               <Text className="text-sm font-semibold text-foreground">Items that appeared more often before symptoms</Text>
               {patternReport.topTriggers.length > 0 ? (
                 <View className="gap-3">
-                  {patternReport.topTriggers.slice(0, 3).map((trigger, index) => (
-                    <TriggerBadge key={trigger.ingredient} trigger={trigger} rank={index + 1} />
+                  {patternReport.topTriggers.slice(0, isPro ? 3 : freeTriggerLimit).map((trigger, index) => (
+                    <TriggerBadge key={trigger.ingredient} trigger={trigger} rank={index + 1} showDetails={isPro} />
                   ))}
+                  {hiddenTriggerCount > 0 && (
+                    <ProTeaser
+                      title={`See ${hiddenTriggerCount} more trigger${hiddenTriggerCount === 1 ? "" : "s"}`}
+                      description="Unlock detailed trigger analysis and confidence scores."
+                    />
+                  )}
                 </View>
               ) : (
                 <Card className="p-5 items-center gap-3 bg-muted/50">
@@ -123,44 +140,51 @@ export default function ReportScreen() {
               )}
             </View>
 
-            <View className="flex-row flex-wrap gap-3">
-              <Card className="p-4 basis-[48%]">
-                <View className="flex-row items-center gap-2 mb-2">
-                  <Clock size={16} color="#5f6f74" />
-                  <Text className="text-xs font-medium text-muted-foreground">Late eating pattern</Text>
-                </View>
-                <Text className="text-2xl font-bold text-accent">{patternReport.lateEatingRisk}%</Text>
-                <Text className="text-xs text-muted-foreground mt-1">
-                  Percentage of symptoms that followed meals logged after 8 PM.
-                </Text>
-              </Card>
-              <Card className="p-4 basis-[48%]">
-                <View className="flex-row items-center gap-2 mb-2">
-                  <TrendingDown size={16} color="#5f6f74" />
-                  <Text className="text-xs font-medium text-muted-foreground">Average intensity</Text>
-                </View>
-                <Text className="text-2xl font-bold text-foreground">{patternReport.avgSeverity}/5</Text>
-                <Text className="text-xs text-muted-foreground mt-1">From your symptom logs.</Text>
-              </Card>
-              <Card className="p-4 basis-[48%]">
-                <View className="flex-row items-center gap-2 mb-2">
-                  <Calendar size={16} color="#5f6f74" />
-                  <Text className="text-xs font-medium text-muted-foreground">Symptom-free days</Text>
-                </View>
-                <Text className="text-2xl font-bold text-success">{patternReport.symptomFreeDays}</Text>
-                <Text className="text-xs text-muted-foreground mt-1">Days without symptom entries.</Text>
-              </Card>
-              <Card className="p-4 basis-[48%]">
-                <View className="flex-row items-center gap-2 mb-2">
-                  <Clock size={16} color="#5f6f74" />
-                  <Text className="text-xs font-medium text-muted-foreground">Common time window</Text>
-                </View>
-                <Text className="text-xl font-bold text-foreground">{patternReport.worstTimeOfDay}</Text>
-                <Text className="text-xs text-muted-foreground mt-1">
-                  Time of day when symptoms appeared more frequently.
-                </Text>
-              </Card>
-            </View>
+            {isPro ? (
+              <View className="flex-row flex-wrap gap-3">
+                <Card className="p-4 basis-[48%]">
+                  <View className="flex-row items-center gap-2 mb-2">
+                    <Clock size={16} color="#5f6f74" />
+                    <Text className="text-xs font-medium text-muted-foreground">Late eating pattern</Text>
+                  </View>
+                  <Text className="text-2xl font-bold text-accent">{patternReport.lateEatingRisk}%</Text>
+                  <Text className="text-xs text-muted-foreground mt-1">
+                    Percentage of symptoms that followed meals logged after 8 PM.
+                  </Text>
+                </Card>
+                <Card className="p-4 basis-[48%]">
+                  <View className="flex-row items-center gap-2 mb-2">
+                    <TrendingDown size={16} color="#5f6f74" />
+                    <Text className="text-xs font-medium text-muted-foreground">Average intensity</Text>
+                  </View>
+                  <Text className="text-2xl font-bold text-foreground">{patternReport.avgSeverity}/5</Text>
+                  <Text className="text-xs text-muted-foreground mt-1">From your symptom logs.</Text>
+                </Card>
+                <Card className="p-4 basis-[48%]">
+                  <View className="flex-row items-center gap-2 mb-2">
+                    <Calendar size={16} color="#5f6f74" />
+                    <Text className="text-xs font-medium text-muted-foreground">Symptom-free days</Text>
+                  </View>
+                  <Text className="text-2xl font-bold text-success">{patternReport.symptomFreeDays}</Text>
+                  <Text className="text-xs text-muted-foreground mt-1">Days without symptom entries.</Text>
+                </Card>
+                <Card className="p-4 basis-[48%]">
+                  <View className="flex-row items-center gap-2 mb-2">
+                    <Clock size={16} color="#5f6f74" />
+                    <Text className="text-xs font-medium text-muted-foreground">Common time window</Text>
+                  </View>
+                  <Text className="text-xl font-bold text-foreground">{patternReport.worstTimeOfDay}</Text>
+                  <Text className="text-xs text-muted-foreground mt-1">
+                    Time of day when symptoms appeared more frequently.
+                  </Text>
+                </Card>
+              </View>
+            ) : (
+              <ProTeaser
+                title="Unlock detailed analytics"
+                description="See late eating patterns, average severity, symptom-free days, and your worst time windows."
+              />
+            )}
 
             <Card className="p-5 bg-muted/50">
               <Text className="font-semibold text-foreground mb-3">Pattern snapshot</Text>
@@ -168,7 +192,7 @@ export default function ReportScreen() {
                 <Text className="text-sm text-muted-foreground">• {patternReport.totalMeals} meals logged</Text>
                 <Text className="text-sm text-muted-foreground">• {patternReport.totalSymptoms} symptom events recorded</Text>
                 <Text className="text-sm text-muted-foreground">
-                  • Observations highlight correlations only. They do not explain causes or offer treatment.
+                  • These are patterns in your data, not medical conclusions
                 </Text>
               </View>
             </Card>
@@ -177,7 +201,7 @@ export default function ReportScreen() {
           <Card className="p-5 items-center gap-3 bg-muted/50">
             <Mascot size="small" />
             <Text className="text-muted-foreground text-center">
-              Start logging meals and symptoms. AI-assisted pattern spotting begins once entries are available.
+              Start logging meals and symptoms to see your patterns here. The more consistently you track, the more useful this report becomes.
             </Text>
           </Card>
         )}
@@ -185,31 +209,14 @@ export default function ReportScreen() {
 
       <Card className="p-5 gap-3">
         <View className="gap-1">
-          <Text className="text-xs font-semibold text-muted-foreground uppercase">Section B</Text>
-          <Text className="text-lg font-semibold text-foreground">Educational Information (Medical Sources)</Text>
+          <Text className="text-lg font-semibold text-foreground">Understanding GERD Triggers</Text>
           <Text className="text-sm text-muted-foreground">
-            Learn about common GERD-related factors. This content is static and sourced from reputable medical organizations.
-          </Text>
-        </View>
-
-        <View className="gap-2">
-          <Text className="text-sm text-foreground">Common factors</Text>
-          <Text className="text-sm text-muted-foreground">
-            • Acidic items such as citrus fruits, tomatoes, and vinegar can be irritating for some people.
-          </Text>
-          <Text className="text-sm text-muted-foreground">
-            • Fatty or fried meals may relax the lower esophageal sphincter and allow more reflux.
-          </Text>
-          <Text className="text-sm text-muted-foreground">
-            • Eating late at night or lying down soon after meals can make reflux episodes more noticeable.
-          </Text>
-          <Text className="text-sm text-muted-foreground">
-            • Carbonated drinks, caffeine, chocolate, peppermint, and alcohol sometimes coincide with heartburn.
+            GERD triggers can vary from person to person, which is what makes tracking them so important. Although there is common triggers such as tomatoes and chocolate, there can be less common triggers for certain people that are more unique to them. Understanding these triggers can help you live a better and more free life without constantly struggling with GERD.
           </Text>
         </View>
 
         <View className="gap-2 pt-2">
-          <Text className="text-sm font-semibold text-foreground">Sources</Text>
+          <Text className="text-sm font-semibold text-foreground">Sources & Further Reading</Text>
           {sources.map((source) => (
             <Pressable
               key={source.url}
@@ -219,10 +226,12 @@ export default function ReportScreen() {
               <Text className="text-sm text-primary underline">{source.title}</Text>
             </Pressable>
           ))}
+          <Text className="text-xs text-muted-foreground italic">
+          </Text>
         </View>
       </Card>
 
-      {patternReport && (
+      {isPro && patternReport && (
         <Button onPress={handleShare} variant="outline" className="w-full flex-row gap-2">
           <Share2 size={18} color="#1f2a30" />
           <Text className="text-foreground font-semibold">Share pattern summary</Text>

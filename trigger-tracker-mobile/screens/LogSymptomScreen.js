@@ -9,6 +9,7 @@ import { TextArea } from "../components/TextField";
 import SeveritySlider from "../components/SeveritySlider";
 import { saveSymptom } from "../services/storage";
 import { showToast } from "../utils/feedback";
+import { syncSmartNotifications } from "../services/notifications";
 
 export default function LogSymptomScreen({ navigation }) {
   const [severity, setSeverity] = useState(2);
@@ -49,6 +50,7 @@ export default function LogSymptomScreen({ navigation }) {
     });
     showToast("Symptom logged!", `Severity ${severity}/5 recorded.`);
     navigation.goBack();
+    syncSmartNotifications().catch(() => {});
   };
 
   return (
@@ -73,8 +75,8 @@ export default function LogSymptomScreen({ navigation }) {
         </View>
         <View className="flex-1">
           <Text className="text-lg font-bold text-foreground">How are you feeling?</Text>
-          <Text className="text-xs text-muted-foreground italic">
-            "I'm here to listen and help you track your patterns."
+          <Text className="text-xs text-muted-foreground">
+            Log even mild symptoms — they help build the full picture.
           </Text>
         </View>
       </View>

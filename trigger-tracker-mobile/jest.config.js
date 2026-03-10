@@ -1,9 +1,9 @@
 module.exports = {
   testEnvironment: 'node',
-  testMatch: ['**/__tests__/**/*.test.js', '**/*.test.js'],
-  moduleFileExtensions: ['js', 'json'],
+  testMatch: ['**/__tests__/**/*.test.{js,ts,tsx}', '**/*.test.{js,ts,tsx}'],
+  moduleFileExtensions: ['js', 'ts', 'tsx', 'json'],
   transform: {
-    '^.+\\.js$': 'babel-jest',
+    '^.+\\.[jt]sx?$': 'babel-jest',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(react-native|@react-native|expo|@expo)/)',

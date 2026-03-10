@@ -10,12 +10,49 @@ const readTime = (content: string) => {
 };
 
 const Blog = () => {
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "GERDBuddy Blog",
+    description: "Articles about managing GERD, identifying trigger foods, and living well with acid reflux.",
+    url: "https://gerdbuddy.com/blog",
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: posts.map((post, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `https://gerdbuddy.com/blog/${post.slug}`,
+        name: post.title,
+      })),
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://gerdbuddy.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: "https://gerdbuddy.com/blog",
+      },
+    ],
+  };
+
   return (
     <div className="bg-gradient-to-b from-primary/10 via-background to-background text-foreground">
       <SEO
         title="Blog"
         description="Articles about managing GERD, identifying trigger foods, and living well with acid reflux. Tips, guides, and insights from GERDBuddy."
         path="/blog"
+        jsonLd={[collectionSchema, breadcrumbSchema]}
       />
 
       <div className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">

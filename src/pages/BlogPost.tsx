@@ -59,6 +59,31 @@ const BlogPost = () => {
     image: post.image || `${SITE_URL}/turtle.png`,
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: `${SITE_URL}/blog`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: `${SITE_URL}/blog/${post.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="bg-background text-foreground">
       {/* Reading progress bar */}
@@ -77,7 +102,7 @@ const BlogPost = () => {
         type="article"
         publishedTime={post.date}
         author={post.author}
-        jsonLd={jsonLd}
+        jsonLd={[jsonLd, breadcrumbSchema]}
       />
 
       <article className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">

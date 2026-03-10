@@ -2,120 +2,121 @@ import type { BlogPost } from "./types";
 
 const post: BlogPost = {
   slug: "gerd-friendly-meals",
-  title: "Building GERD-Friendly Meals That Actually Taste Good",
+  title: "GERD-Friendly Meals: Recipes and Tips That Actually Taste Good",
   description:
     "Eating well with GERD doesn't mean eating bland food. Learn meal-building strategies, ingredient swaps, and cooking techniques that keep meals flavorful and reflux-friendly.",
   date: "2026-01-28",
   author: "GERDBuddy Team",
   content: `
-One of the biggest frustrations with GERD is feeling like you can't enjoy food anymore. The long lists of foods to avoid can make it seem like your only options are plain rice and boiled chicken.
+Can we talk about the most depressing part of getting a GERD diagnosis? It's the moment you Google "GERD diet" and see a list of restrictions that makes it seem like your only options are plain oatmeal and sadness.
 
-The truth is much more encouraging. With a few smart strategies, you can build meals that are both satisfying and unlikely to trigger reflux.
+I've been there. And I can tell you — it gets so much better than that. You absolutely can eat food that's flavorful, satisfying, and doesn't set your chest on fire. It just takes a little rethinking.
 
-## The GERD-Friendly Plate
+## The Basic Framework
 
-A good framework for building reflux-friendly meals:
+When I'm putting together a meal, I think about it in four parts:
 
-- **Lean protein** — the foundation of a filling, low-risk meal
-- **Non-acidic vegetables** — add bulk, fiber, and nutrients
-- **Complex carbohydrates** — provide sustained energy without triggering symptoms
-- **Healthy fats in moderation** — flavor without overdoing it
+- **Lean protein** — the anchor that keeps you full
+- **Non-acidic vegetables** — bulk, fiber, and nutrients
+- **Complex carbs** — sustained energy, and they help absorb acid
+- **A touch of healthy fat** — for flavor and satiety, but not too much
 
-The key word is *balance*. It's rarely a single ingredient that causes problems — it's often the combination, portion size, or preparation method.
+It sounds formulaic written out like that, but in practice it's just... a normal, balanced plate. The trick isn't any single ingredient — it's usually the combination, the portion size, or how something's cooked that makes the difference.
 
-## Protein Options That Work
+## Proteins That Work
 
-Most lean proteins are well-tolerated by people with GERD:
+Good news: most lean proteins are totally fine for GERD.
 
-- **Chicken breast** — baked, grilled, or poached
-- **Turkey** — ground turkey is versatile for many dishes
-- **Fish** — especially mild white fish like cod, tilapia, or halibut
-- **Eggs** — scrambled, poached, or baked (fried in lots of oil may be problematic)
-- **Tofu** — a gentle protein that absorbs flavors well
+- **Chicken breast** — baked, grilled, or poached (not fried — sorry)
+- **Ground turkey** — honestly one of the most versatile ingredients out there
+- **Fish** — mild white fish like cod or tilapia are great, and salmon is usually fine too
+- **Eggs** — scrambled, poached, or baked. Fried in a pool of oil can be iffy.
+- **Tofu** — absorbs whatever flavors you throw at it, which is actually a superpower when you're working around triggers
 
-The preparation method matters as much as the protein itself. Grilling, baking, steaming, and sautéing in small amounts of oil are generally safer than deep frying.
+The prep method matters just as much as the protein. Grilling, baking, steaming — all good. Deep frying? That's where the trouble starts.
 
-## Vegetables That Play Nice
+## Vegetables That Won't Fight You
 
-Many vegetables are naturally low-acid and unlikely to cause reflux:
+Honestly, most vegetables are your friends here:
 
-- **Green beans, broccoli, asparagus, and zucchini** — versatile and easy to prepare
-- **Leafy greens** — spinach, kale, and mixed greens (great for salads with non-acidic dressings)
-- **Root vegetables** — sweet potatoes, carrots, parsnips, and beets
-- **Cucumbers and celery** — refreshing and very low-risk
-- **Mushrooms** — add savory depth without acidity
+- **Green beans, broccoli, asparagus, zucchini** — all versatile, all easy to prepare
+- **Leafy greens** — spinach and kale are great bases for salads (just skip the acidic dressing)
+- **Root vegetables** — sweet potatoes, carrots, parsnips, beets. Roasted root vegetables are *incredible*.
+- **Cucumbers and celery** — refreshing and about as low-risk as food gets
+- **Mushrooms** — add so much savory depth without any acidity
 
-Vegetables to approach carefully include raw onions, garlic (in large amounts), tomatoes, and peppers — though tolerance varies from person to person.
+The ones to watch: raw onions, lots of garlic, tomatoes, and peppers. Though honestly, your mileage may vary on all of those. I can handle cooked garlic just fine but raw garlic wrecks me. For a deeper dive into which foods to watch, see our [GERD diet guide](/blog/gerd-diet-guide).
 
-## Smart Carbohydrate Choices
+## Carbs — Your Secret Weapon
 
-Complex carbohydrates are generally well-tolerated and help absorb stomach acid:
+Complex carbs don't get enough credit in the GERD world. They're filling, they're gentle on your stomach, and they help absorb acid:
 
-- **Oatmeal** — one of the best breakfast options for GERD
-- **Brown rice and quinoa** — filling and easy on the stomach
-- **Whole grain bread** — especially when not heavily buttered
-- **Pasta** — plain or with non-tomato sauces
-- **Potatoes** — baked or mashed (skip the heavy cream and butter)
+- **Oatmeal** — maybe the single best GERD breakfast food. I eat it almost every morning.
+- **Brown rice and quinoa** — boring? Sure. Reliable? Absolutely.
+- **Whole grain bread** — just go easy on the butter
+- **Pasta** — totally fine as long as you ditch the marinara (more on that in a sec)
+- **Potatoes** — baked or mashed, without the heavy cream
 
-## Flavor Without the Fire
+## Making It Actually Taste Good
 
-The biggest concern people have is losing flavor. Here are ways to keep meals interesting without common GERD triggers:
+Okay, this is the important part. GERD-friendly doesn't have to mean flavorless.
 
-### Herb-Based Flavor
+### Fresh Herbs Are Your Best Friend
 
-Fresh herbs add tremendous flavor without acid or spice:
+If you're not already cooking with fresh herbs, this is your sign to start:
 
-- **Basil** — great with chicken, pasta, and vegetables
-- **Rosemary** — pairs well with roasted meats and potatoes
-- **Thyme** — versatile and mild
-- **Parsley** — brightens any dish
-- **Dill** — excellent with fish and eggs
-- **Ginger** — may actually help with digestive discomfort (use in moderation)
+- **Basil** — amazing with chicken, pasta, and vegetables
+- **Rosemary** — transforms roasted anything
+- **Thyme** — subtle but it rounds out every dish
+- **Dill** — try it with fish or eggs, seriously
+- **Ginger** — might actually *help* with digestion, and it adds a great kick
 
-### Cooking Techniques
+### Cooking Techniques That Build Flavor
 
-How you cook affects flavor as much as what you add:
+You don't need hot sauce when you've got good technique:
 
-- **Roasting vegetables** at high heat brings out natural sweetness
-- **Searing protein** creates flavorful browning without added spice
-- **Slow cooking** develops deep, complex flavors over time
-- **Using good quality olive oil** (in moderation) adds richness
+- **Roasting veggies at high heat** brings out their natural sweetness in a way that boiling never will
+- **Getting a good sear on protein** creates deep flavor from just salt and heat
+- **Slow cooking** develops rich, complex flavors over time
+- **Good olive oil** (in moderation) adds a richness that ties everything together
 
-### Smart Swaps
+### Swaps That Actually Work
 
-- Instead of **tomato sauce**: try a butternut squash or pesto-based sauce
-- Instead of **citrus juice**: use a small amount of apple cider vinegar or try fennel for brightness
-- Instead of **heavy cream**: try a small amount of coconut milk or pureed cauliflower for creaminess
-- Instead of **hot spices**: try cumin, coriander, turmeric, or smoked paprika for warmth without heat
+- **Tomato sauce** → butternut squash sauce or pesto. Game changer for pasta night.
+- **Citrus juice** → a tiny bit of apple cider vinegar, or fennel for brightness
+- **Heavy cream** → pureed cauliflower for creaminess (sounds weird, tastes great) or a splash of coconut milk
+- **Hot spices** → cumin, coriander, turmeric, or smoked paprika. You get warmth and depth without the burn.
 
-## Meal Ideas to Get You Started
+## Some Meals I Actually Make
 
 ### Breakfast
-- Oatmeal with banana slices and a drizzle of honey
+- Oatmeal with banana slices and honey (my go-to)
 - Scrambled eggs with spinach and whole grain toast
-- Smoothie with banana, almond milk, and a spoonful of almond butter
+- Banana almond butter smoothie with almond milk
 
 ### Lunch
-- Grilled chicken salad with cucumber, carrots, and a ginger-tahini dressing
-- Turkey and avocado wrap with lettuce in a whole grain tortilla
-- Butternut squash soup with crusty bread
+- Grilled chicken salad with cucumber, carrots, and ginger-tahini dressing
+- Turkey avocado wrap in a whole grain tortilla
+- Butternut squash soup with crusty bread (so good on a cold day)
 
 ### Dinner
 - Baked salmon with roasted sweet potatoes and asparagus
-- Chicken stir-fry with broccoli, snap peas, and brown rice (use low-sodium soy sauce sparingly)
-- Pasta with pesto, grilled chicken, and steamed green beans
+- Chicken stir-fry with broccoli and snap peas over brown rice
+- Pesto pasta with grilled chicken and steamed green beans
 
-## Portion Size Matters
+## Don't Forget About Portions
 
-Even GERD-friendly foods can cause problems in large quantities. Large meals distend the stomach and increase pressure on the lower esophageal sphincter.
+Even the gentlest foods can cause problems if you eat too much of them. Big meals stretch your stomach and put pressure on the LES — that valve that's supposed to keep acid from going up.
 
-Try eating **smaller, more frequent meals** rather than three large ones. This keeps you satisfied without overloading your digestive system.
+I've had much better luck eating smaller meals more often throughout the day instead of three big ones. It keeps me satisfied without that overstuffed feeling that almost always leads to reflux. There are also some [natural approaches to managing reflux](/blog/natural-remedies-acid-reflux) beyond just diet that are worth knowing about.
 
-## The Personal Factor
+## The Real Secret: Track and Adjust
 
-Remember: these are general guidelines, not rules. Your personal triggers may differ. The best approach is to **try these ideas, track how you feel, and adjust based on your own data**.
+All of these are general guidelines. Your body might agree with all of them, or it might have its own opinions. The only way to know is to pay attention.
 
-What works for one person with GERD may not work for another. The meal ideas above are starting points — use them as a foundation and customize based on what your tracking tells you.
+Try a new recipe, note how you feel. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) can help you connect the dots between what you eat and how your symptoms respond — and over time, you build a personalized playbook that no generic list can match.
+
+What works for one person with GERD won't always work for another. That's not a limitation — it's actually freeing. It means your diet doesn't have to look like anyone else's. It just has to work for you.
   `.trim(),
 };
 

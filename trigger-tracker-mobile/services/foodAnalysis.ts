@@ -25,7 +25,6 @@ export type FoodAnalysisResult = {
 const MODEL = "gemini-2.5-flash";
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
-// TODO: Move this key to a backend service once available.
 const AI_API_KEY =
   process.env.EXPO_PUBLIC_FOOD_AI_KEY || "YOUR_GEMINI_API_KEY_HERE";
 const placeholderKeys = ["YOUR_GEMINI_API_KEY_HERE", "YOUR_VISION_MODEL_API_KEY_HERE"];

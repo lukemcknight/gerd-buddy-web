@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { cn } from "../utils/style";
 
-export const TriggerBadge = ({ trigger, rank, className, style }) => {
+export const TriggerBadge = ({ trigger, rank, className, style, showDetails = true }) => {
   // Use confidence to determine severity level display
   const confidenceLevel = trigger.confidence >= 0.7 ? "high" : trigger.confidence >= 0.5 ? "medium" : "low";
 
@@ -69,7 +69,7 @@ export const TriggerBadge = ({ trigger, rank, className, style }) => {
           <Text className="text-xs text-muted-foreground">avg severity</Text>
         </View>
       </View>
-      {trigger.confidence !== undefined && (
+      {showDetails && trigger.confidence !== undefined && (
         <View className="mt-2 pt-2 border-t border-border/50">
           <View className="flex-row justify-between">
             <Text className="text-xs text-muted-foreground">

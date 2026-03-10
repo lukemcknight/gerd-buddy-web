@@ -35,6 +35,7 @@ dist-ssr
 *.keystore
 *.mobileprovision
 asc-key.json
+trigger-tracker-mobile/eas.json
 asc-api-key.json
 GoogleService-Info.plist
 google-services.json

@@ -18,15 +18,18 @@ import type {
 } from "react-native-purchases";
 import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
+import { X, Camera, Zap, ShieldCheck, TrendingUp } from "lucide-react-native";
 import { usePostHog } from "posthog-react-native";
 import Screen from "../components/Screen";
 import Button from "../components/Button";
 import { configureRevenueCat, helpers } from "../services/revenuecat";
 import { getTrialInfo } from "../services/storage";
+import { recordPaywallShown, getEntitlementState } from "../services/paywallTrigger";
+import { EVENTS } from "../services/analytics";
 
 type PaywallScreenProps = {
   navigation: any;
-  onUnlock?: () => void;
+  route?: any;
 };
 
 const turtle = require("../assets/mascot/turtle_shell_standing.png");
@@ -35,10 +38,10 @@ const bypassFlag = process.env.EXPO_PUBLIC_BYPASS_PAYWALL;
 const shouldBypassPaywall = isExpoGo || (__DEV__ && bypassFlag !== "false");
 
 const benefits = [
-  "Daily insights to calm reflux triggers fast",
-  "Clear logging to spot patterns without guesswork",
-  "Gentle reminders that keep you consistent",
-  "Actionable reports to discuss with your care team",
+  { icon: Camera, text: "Scan any meal — get instant GERD risk analysis" },
+  { icon: TrendingUp, text: "Full trigger analysis with confidence scores" },
+  { icon: Zap, text: "Detailed analytics: severity, timing & symptom-free days" },
+  { icon: ShieldCheck, text: "Share your pattern reports with your doctor" },
 ];
 
 const valueLabel = (pkg: PurchasesPackage) => {
@@ -133,7 +136,13 @@ const entitlementActive = (info: CustomerInfo | null) => {
   );
 };
 
-export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenProps) {
+const scannerLimitHeadline = "Try Pro free for 7 days";
+const scannerLimitSubtext =
+  "You've used your 3 free scans. Unlock unlimited scanning and premium insights.";
+
+export default function PaywallScreen({ navigation, route }: PaywallScreenProps) {
+  const triggerSource = route?.params?.trigger_source || "manual";
+  const isScannerLimit = triggerSource === "scanner_limit";
   const [isLoading, setIsLoading] = useState(true);
   const [packages, setPackages] = useState<PurchasesPackage[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PurchasesPackage | null>(null);
@@ -144,7 +153,13 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
 
   useEffect(() => {
     posthog?.screen("Paywall");
-    posthog?.capture("paywall_viewed");
+    posthog?.capture(EVENTS.PAYWALL_VIEWED, {
+      trigger_source: triggerSource,
+    });
+    posthog?.capture(EVENTS.PAYWALL_TRIGGERED, {
+      trigger_source: triggerSource,
+    });
+    recordPaywallShown().catch(() => {});
   }, []);
 
   const bestValueId = useMemo(
@@ -228,8 +243,13 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
   }, []);
 
   const unlockApp = () => {
-    onUnlock?.();
-    navigation.replace("Main");
+    // After successful purchase, go back to the previous screen (FoodScan)
+    // which will re-check subscription status via useFocusEffect
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      navigation.replace("Main");
+    }
   };
 
   const handlePurchase = async () => {
@@ -248,9 +268,11 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
       const { customerInfo } = await Purchases.purchasePackage(selectedPackage);
 
       if (entitlementActive(customerInfo)) {
-        posthog?.capture("subscription_started", {
+        const isTrial = hasFreeTrial(selectedPackage);
+        posthog?.capture(isTrial ? EVENTS.TRIAL_STARTED : EVENTS.PURCHASE_COMPLETED, {
           package_type: selectedPackage.packageType,
           price: selectedPackage.product?.priceString,
+          trigger_source: triggerSource,
         });
         unlockApp();
         return;
@@ -258,9 +280,11 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
 
       const refreshed = await Purchases.getCustomerInfo();
       if (entitlementActive(refreshed)) {
-        posthog?.capture("subscription_started", {
+        const isTrial = hasFreeTrial(selectedPackage);
+        posthog?.capture(isTrial ? EVENTS.TRIAL_STARTED : EVENTS.PURCHASE_COMPLETED, {
           package_type: selectedPackage.packageType,
           price: selectedPackage.product?.priceString,
+          trigger_source: triggerSource,
         });
         unlockApp();
         return;
@@ -302,6 +326,9 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
       setStatusMessage(null);
       const restored = await Purchases.restorePurchases();
       if (entitlementActive(restored)) {
+        posthog?.capture(EVENTS.PURCHASE_RESTORED, {
+          trigger_source: triggerSource,
+        });
         unlockApp();
         return;
       }
@@ -323,9 +350,11 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
     }
   };
 
-  const primaryCtaText = hasFreeTrial(selectedPackage)
+  const primaryCtaText = isScannerLimit
+    ? "Start 7-Day Free Trial"
+    : hasFreeTrial(selectedPackage)
     ? trialCtaText(selectedPackage)
-    : "Subscribe to GERDBuddy Pro";
+    : "Unlock Pro";
 
   const renderPackage = (pkg: PurchasesPackage) => {
     const isSelected = selectedPackage?.identifier === pkg.identifier;
@@ -407,30 +436,49 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
 
   return (
     <Screen contentClassName="gap-3 pb-4 pt-4">
+      {/* Dismiss button */}
+      <View className="flex-row justify-end">
+        <Pressable
+          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.replace("Main")}
+          className="p-2 rounded-full bg-muted/60"
+          accessibilityLabel="Close"
+          accessibilityRole="button"
+        >
+          <X size={20} color="#5f6f74" />
+        </Pressable>
+      </View>
+
       <View className="items-center gap-2">
         <Image
           source={turtle}
-          style={{ width: 80, height: 80 }}
+          style={{ width: 72, height: 72 }}
           resizeMode="contain"
           className="rounded-2xl"
         />
         <Text className="text-center text-2xl font-extrabold text-foreground">
-          Breathe easier with GERD Buddy
+          {isScannerLimit ? scannerLimitHeadline : "Find your top reflux triggers in 14 days."}
         </Text>
         <Text className="text-center text-sm text-muted-foreground px-4">
-          Friendly guidance to calm reflux triggers and feel in control every day.
+          {isScannerLimit
+            ? scannerLimitSubtext
+            : "Unlimited scanning, full trigger analysis, detailed reports, and more — everything you need to take control."}
         </Text>
       </View>
 
       <View className="rounded-2xl border border-border bg-white p-3">
-        <Text className="text-base font-semibold text-foreground">Premium gives you</Text>
-        <View className="mt-2 gap-1.5">
-          {benefits.map((benefit) => (
-            <View key={benefit} className="flex-row items-start gap-2">
-              <View className="mt-1.5 h-2 w-2 rounded-full bg-primary" />
-              <Text className="flex-1 text-sm text-foreground">{benefit}</Text>
-            </View>
-          ))}
+        <Text className="text-base font-semibold text-foreground">What you get</Text>
+        <View className="mt-2 gap-2">
+          {benefits.map((benefit) => {
+            const Icon = benefit.icon;
+            return (
+              <View key={benefit.text} className="flex-row items-center gap-3">
+                <View className="w-8 h-8 rounded-lg bg-primary/10 items-center justify-center">
+                  <Icon size={16} color="#3aa27f" />
+                </View>
+                <Text className="flex-1 text-sm text-foreground">{benefit.text}</Text>
+              </View>
+            );
+          })}
         </View>
       </View>
 
@@ -460,7 +508,7 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
         </Button>
 
         <Text className="text-center text-xs text-muted-foreground">
-          Cancel anytime during the free trial
+          Cancel anytime. Meal tracking and symptom logging are always free.
         </Text>
 
         <Button
@@ -478,8 +526,8 @@ export default function PaywallScreen({ navigation, onUnlock }: PaywallScreenPro
         ) : null}
 
         <Text className="text-center text-[10px] text-muted-foreground leading-tight">
-          After the 3-day free trial, the subscription automatically renews unless canceled at least
-          24 hours before the end of the trial.
+          Subscription automatically renews unless canceled at least 24 hours before the end of the
+          current period. Free trial auto-renews to a paid subscription.
         </Text>
 
         <View className="flex-row justify-center gap-4">

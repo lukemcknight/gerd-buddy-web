@@ -1,8 +1,14 @@
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const Terms = () => {
   return (
     <div className="bg-background text-foreground">
+      <SEO
+        title="Terms of Service"
+        description="Terms of Service for GERDBuddy. Understand the terms that govern your use of the app, including subscription details and important limitations."
+        path="/terms"
+      />
       <div className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">
         <header className="space-y-2 opacity-0 animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">GERDBuddy</p>

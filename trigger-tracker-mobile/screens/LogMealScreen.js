@@ -11,6 +11,7 @@ import {
   getStreakInfo, updateBestStreak, STREAK_MILESTONES,
 } from "../services/storage";
 import { showToast } from "../utils/feedback";
+import { syncSmartNotifications } from "../services/notifications";
 
 const quickMeals = [
   "☕ Coffee",
@@ -77,6 +78,7 @@ export default function LogMealScreen({ navigation }) {
       `${streakText}Keep tracking to discover your triggers.`
     );
     navigation.goBack();
+    syncSmartNotifications().catch(() => {});
   };
 
   return (
@@ -106,7 +108,7 @@ export default function LogMealScreen({ navigation }) {
       <View className="gap-3">
         <View className="flex-row items-center gap-2">
           <Sparkles size={16} color="#5f6f74" />
-          <Text className="text-sm text-muted-foreground font-medium">Quick add common triggers</Text>
+          <Text className="text-sm text-muted-foreground font-medium">Quick add</Text>
         </View>
         <View className="flex-row flex-wrap gap-2">
           {quickMeals.map((meal) => (

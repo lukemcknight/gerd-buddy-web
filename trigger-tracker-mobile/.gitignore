@@ -34,6 +34,7 @@ yarn-error.*
 .env
 .env*.local
 asc-key.json
+eas.json
 
 # typescript
 *.tsbuildinfo

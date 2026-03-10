@@ -9,6 +9,14 @@ import nighttimeGerdTips from "./nighttime-gerd-tips";
 import stressAndGerd from "./stress-and-gerd";
 import gerdFriendlyMeals from "./gerd-friendly-meals";
 import understandingLpr from "./understanding-lpr";
+import naturalRemedies from "./natural-remedies-acid-reflux";
+import gerdDietGuide from "./gerd-diet-guide";
+import gerdVsHeartburn from "./gerd-vs-heartburn";
+import acidRefluxPregnancy from "./acid-reflux-pregnancy";
+import gerdMedicationsExplained from "./gerd-medications-explained";
+import exerciseAndGerd from "./exercise-and-gerd";
+import gerdAndAnxiety from "./gerd-and-anxiety";
+import foodsThatHelpAcidReflux from "./foods-that-help-acid-reflux";
 
 const posts: BlogPost[] = [
   gerdTriggerFoods,
@@ -16,6 +24,14 @@ const posts: BlogPost[] = [
   stressAndGerd,
   gerdFriendlyMeals,
   understandingLpr,
+  naturalRemedies,
+  gerdDietGuide,
+  gerdVsHeartburn,
+  acidRefluxPregnancy,
+  gerdMedicationsExplained,
+  exerciseAndGerd,
+  gerdAndAnxiety,
+  foodsThatHelpAcidReflux,
 ];
 
 // Sort by date, newest first

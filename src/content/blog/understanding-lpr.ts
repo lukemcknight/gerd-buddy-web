@@ -2,113 +2,110 @@ import type { BlogPost } from "./types";
 
 const post: BlogPost = {
   slug: "understanding-lpr",
-  title: "Silent Reflux (LPR): When GERD Doesn't Feel Like Heartburn",
+  title: "Silent Reflux (LPR): Symptoms, Causes, and How to Manage It",
   description:
     "Not all acid reflux causes heartburn. Learn about laryngopharyngeal reflux (LPR), its unique symptoms, and how tracking can help you identify and manage silent reflux.",
   date: "2026-01-20",
   author: "GERDBuddy Team",
   content: `
-When most people think of acid reflux, they picture heartburn — that burning sensation in the chest after a heavy meal. But there's another form of reflux that many people don't recognize because it doesn't cause typical heartburn at all.
+For months, I kept clearing my throat. Constantly. In meetings, on phone calls, first thing in the morning. I figured it was allergies, or maybe I was just getting sick a lot. My doctor thought the same thing and sent me home with antihistamines.
 
-It's called **laryngopharyngeal reflux (LPR)**, often referred to as **silent reflux**, and it can go undiagnosed for months or even years.
+They didn't help. What I actually had was **laryngopharyngeal reflux (LPR)** — sometimes called **silent reflux** — and it turns out a lot of people have it without realizing what's going on.
 
-## What Is LPR?
+## So What Is LPR, Exactly?
 
-LPR occurs when stomach acid travels past the esophagus and reaches the **throat (pharynx) and voice box (larynx)**. Unlike typical GERD, where the main symptom is heartburn, LPR primarily affects the upper airway.
+LPR happens when stomach acid makes it all the way past the esophagus and reaches your throat and voice box. Unlike regular GERD, where heartburn is the main event, LPR primarily messes with your upper airway.
 
-The reason it's called "silent" reflux is that many people with LPR don't experience the classic burning chest pain. The acid exposure happens higher up and in smaller amounts, so the symptoms feel different.
+The "silent" part of silent reflux refers to the fact that many people with LPR never get that classic burning chest pain. The acid exposure happens higher up and in smaller amounts, so the symptoms feel totally different. You might not even connect them to your stomach at all.
 
-## Symptoms of Silent Reflux
+## Symptoms That Don't Scream "Acid Reflux"
 
-LPR symptoms are often mistaken for allergies, sinus problems, or other throat conditions:
+This is what makes LPR so tricky. The symptoms look a lot like other things:
 
-- **Chronic throat clearing** — feeling like something is stuck in your throat
-- **Hoarseness** — especially in the morning or after meals
-- **Post-nasal drip sensation** — a feeling of mucus dripping down the back of the throat
-- **Chronic cough** — a dry, persistent cough that doesn't respond to typical treatments
-- **Difficulty swallowing** — a sensation of a lump in the throat (globus sensation)
-- **Sore throat** — recurring throat irritation without infection
-- **Voice fatigue** — your voice tires easily or changes throughout the day
-- **Bitter taste** — especially upon waking
+- **Chronic throat clearing** — that persistent feeling of something stuck in your throat
+- **Hoarseness** — especially in the morning or after eating
+- **Post-nasal drip feeling** — except it's not actually from your sinuses
+- **A cough that won't quit** — dry and persistent, doesn't respond to cough medicine
+- **Difficulty swallowing** — or a sensation of a lump in your throat (called globus sensation)
+- **Recurring sore throat** — without any actual infection
+- **Voice fatigue** — your voice gives out or changes throughout the day
+- **Bitter taste** — especially when you first wake up
 
-Many people visit ENT (ear, nose, and throat) specialists multiple times before LPR is identified as the cause.
+I've heard from so many people who bounced between ENT specialists, allergists, and their primary care doctor for months before anyone suggested LPR. It's frustratingly under-recognized.
 
-## How LPR Differs from GERD
+## How It's Different from Regular GERD
 
-While LPR and GERD are both caused by acid reflux, they behave differently:
+LPR and GERD are both acid reflux, but they [behave pretty differently](/blog/gerd-vs-heartburn):
 
 | | GERD | LPR |
 |---|---|---|
-| **Main symptom** | Heartburn | Throat/voice symptoms |
-| **When it's worse** | Lying down, after meals | Upright, during the day |
-| **Nighttime symptoms** | Common | Less common |
-| **Heartburn** | Usually present | Often absent |
-| **Throat symptoms** | Occasional | Primary complaint |
+| **Main complaint** | Heartburn, chest burning | Throat and voice issues |
+| **Worst timing** | Lying down, after meals | Often during the day, upright |
+| **Nighttime symptoms** | Very common | Less so |
+| **Heartburn present?** | Usually yes | Often no |
+| **Throat symptoms** | Sometimes | The primary issue |
 
-One important difference: LPR often occurs **during the day while upright**, unlike classic GERD which tends to worsen when lying down. This is because LPR involves acid mist or vapor that can travel upward even when you're standing.
+That daytime thing catches people off guard. With regular GERD, lying down is the enemy. With LPR, acid can travel as a fine mist or vapor that makes it upward even when you're standing. Weird, right?
 
-## Why Tracking Matters Even More with LPR
+## Why Tracking Is Extra Important Here
 
-Because LPR symptoms are subtle and easy to attribute to other causes, **tracking is especially valuable**. A symptom journal can help you and your doctor:
-
-- Connect throat symptoms to eating patterns
-- Identify which foods are most likely to trigger throat irritation
-- Distinguish LPR from allergies or infections
-- Monitor whether treatments are working
+Because LPR symptoms are so easy to blame on something else — allergies, dry air, "just a cold" — keeping a record is genuinely crucial for figuring out what's going on.
 
 When tracking LPR, pay attention to:
 
-- **Throat symptoms** — note throat clearing, hoarseness, cough, and voice changes
-- **Timing** — record when symptoms occur relative to meals
-- **Foods eaten** — same as GERD tracking, with extra attention to acidic and fatty foods
-- **Beverages** — coffee, carbonated drinks, and alcohol are common LPR triggers
-- **Body position** — note whether symptoms change with position
+- **Throat symptoms specifically** — clearing, hoarseness, cough, voice changes. Note how often and how bad.
+- **Timing relative to meals** — this is where the connection often reveals itself
+- **What you ate and drank** — same as regular GERD tracking, with extra attention to acidic foods and beverages
+- **Drinks especially** — coffee, carbonated stuff, and alcohol are big LPR triggers
+- **Body position** — do symptoms shift when you're standing vs. sitting vs. lying down?
 
-## Managing LPR
+[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) works well for this — you can log meals and symptoms throughout the day, and the patterns that emerge can be really eye-opening when you bring them to your doctor.
 
-Many of the lifestyle strategies for GERD also help with LPR, but there are some specific considerations:
+## What Helps with LPR
 
-### Dietary Changes
+A lot of the same lifestyle changes that help regular GERD help with LPR, but there are some specific things worth emphasizing:
 
-LPR tends to respond well to reducing:
+### Diet Adjustments
+
+LPR tends to respond especially well to cutting back on:
 
 - **Acidic foods and drinks** — citrus, tomatoes, vinegar, carbonated beverages
-- **Caffeine** — coffee and tea can trigger symptoms
-- **Alcohol** — particularly wine and spirits
-- **Fatty and fried foods** — slow gastric emptying
-- **Chocolate and mint** — relax the lower esophageal sphincter
-- **Late-night eating** — stop eating at least 3 hours before bed
+- **Caffeine** — coffee and tea can both be problems
+- **Alcohol** — wine and spirits seem to be the worst offenders
+- **Fatty and fried foods** — they slow down stomach emptying
+- **Chocolate and mint** — they relax the valve that's supposed to keep acid down
+- **Late-night eating** — giving your stomach 3 hours to empty before bed (see our [nighttime GERD tips](/blog/nighttime-gerd-tips) for more on this)
 
-Some research suggests that a **low-acid diet** (avoiding foods with a pH below 5) may be particularly helpful for LPR.
+Some research points to a **low-acid diet** (avoiding foods with a pH below 5) as particularly helpful for LPR. It's more restrictive than a typical GERD diet, but a lot of people see real improvement.
 
-### Lifestyle Adjustments
+### Day-to-Day Habits
 
-- **Don't lie down after eating** — stay upright for at least 30 minutes after meals
-- **Elevate the head of your bed** — even though LPR often occurs upright, this can still help
-- **Stay hydrated** — water helps clear acid from the throat
-- **Avoid throat clearing** — it's a natural response but can actually irritate the throat further; try sipping water instead
-- **Don't whisper** — whispering puts more strain on irritated vocal cords than speaking normally
+- **Stay upright after meals** — at least 30 minutes
+- **Elevate your bed** — it helps even though LPR often happens during the day
+- **Drink plenty of water** — it helps wash acid away from the throat
+- **Resist the urge to clear your throat** — I know, this is hard. But throat clearing actually irritates the tissue more. Sip water instead.
+- **Don't whisper when your voice is hoarse** — counterintuitively, whispering strains your vocal cords more than just speaking normally
 
 ### Medical Treatment
 
-LPR often requires medical treatment in addition to lifestyle changes. If you suspect you have LPR, see a doctor — ideally an ENT specialist or gastroenterologist. They may recommend:
+LPR usually needs medical treatment on top of lifestyle changes. If you suspect you have it, see a doctor — ideally an ENT or gastroenterologist. They might recommend:
 
-- Proton pump inhibitors (PPIs) — often prescribed for a longer course than typical GERD
+- PPIs (proton pump inhibitors) — often prescribed for a longer course than typical GERD
 - Other acid-reducing medications
-- In some cases, further testing to confirm the diagnosis
+- Sometimes additional testing to confirm the diagnosis
 
-## The Path to Diagnosis
+## Getting to a Diagnosis
 
-If you've been dealing with unexplained throat symptoms, chronic cough, or hoarseness, consider whether silent reflux might be the cause. Here's a practical path forward:
+If you've been dealing with unexplained throat stuff — the clearing, the hoarseness, the cough that won't leave — consider whether silent reflux might be the explanation. Here's a practical path:
 
-1. **Start tracking** — log your meals, beverages, and throat symptoms for 2 weeks
-2. **Look for patterns** — do symptoms correlate with certain foods or times of day?
-3. **See a doctor** — bring your tracking data; it gives your doctor valuable information
-4. **Follow through** — LPR often takes longer to resolve than typical GERD, so patience with treatment is important
+1. **Track for two weeks** — meals, drinks, and throat symptoms
+2. **Look for connections** — do symptoms line up with eating patterns?
+3. **See your doctor** — and bring your tracking data. Concrete data makes a real difference in how seriously symptoms get taken.
+4. **Be patient with treatment** — LPR often takes longer to resolve than regular GERD
 
-## You're Not Imagining It
+## Trust What You're Feeling
 
-One of the most frustrating aspects of LPR is being told nothing is wrong when you know something is. If your symptoms are real and persistent, advocate for yourself. Tracking your symptoms gives you concrete data to share with your healthcare team — and that data can make the difference between a vague complaint and a clear diagnosis.
+One of the most annoying things about LPR is getting told "everything looks fine" when you know it doesn't feel fine. If your symptoms are real and persistent, keep pushing for answers. Having actual data from tracking your symptoms gives you something concrete to show your healthcare team — and that can be the difference between a vague conversation and a real diagnosis.
   `.trim(),
 };
 

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { Text, View, Pressable } from "react-native";
-import { ArrowRight, Clock, CalendarDays, Activity, Utensils, Moon, Bell } from "lucide-react-native";
+import { Text, View, Pressable, TextInput } from "react-native";
+import {
+  ArrowRight, Clock, CalendarDays, Activity, Utensils, Moon, Bell,
+  Pill, AlertTriangle, ChevronRight,
+} from "lucide-react-native";
 import { usePostHog } from "posthog-react-native";
 import Screen from "../components/Screen";
 import Button from "../components/Button";
@@ -9,7 +12,8 @@ import { createUser } from "../services/storage";
 import { configureRevenueCat } from "../services/revenuecat";
 import { registerForPushNotifications, syncReminderNotifications } from "../services/notifications";
 import { showToast } from "../utils/feedback";
-import * as StoreReview from "expo-store-review";
+import { generatePlan, FEAR_FOOD_OPTIONS, MEAL_TIME_OPTIONS, MEDS_OPTIONS } from "../services/onboardingPlan";
+import { EVENTS } from "../services/analytics";
 
 const symptomTimingOptions = [
   { id: "morning", label: "Morning" },
@@ -19,9 +23,9 @@ const symptomTimingOptions = [
 ];
 
 const symptomFrequencyOptions = [
-  { id: "rarely", label: "Rarely (1–2x/month)" },
-  { id: "occasionally", label: "Occasionally (1–2x/week)" },
-  { id: "frequently", label: "Frequently (3–5x/week)" },
+  { id: "rarely", label: "Rarely (1-2x/month)" },
+  { id: "occasionally", label: "Occasionally (1-2x/week)" },
+  { id: "frequently", label: "Frequently (3-5x/week)" },
   { id: "daily", label: "Daily" },
 ];
 
@@ -36,7 +40,7 @@ const topSymptomOptions = [
 
 const afterEatingOptions = [
   { id: "within_30", label: "Yes, within 30 minutes" },
-  { id: "within_2h", label: "Yes, within 1–2 hours" },
+  { id: "within_2h", label: "Yes, within 1-2 hours" },
   { id: "after_3h", label: "Mostly later (3+ hours)" },
   { id: "not_sure", label: "Not sure" },
 ];
@@ -47,8 +51,15 @@ const lyingDownOptions = [
   { id: "sometimes", label: "Sometimes" },
 ];
 
+const severityOptions = [
+  { id: "light", label: "Light", description: "Occasional discomfort, manageable" },
+  { id: "moderate", label: "Moderate", description: "Regular symptoms, affects daily life" },
+  { id: "severe", label: "Severe", description: "Frequent, intense symptoms" },
+];
+
 export default function OnboardingScreen({ navigation, route }) {
   const [step, setStep] = useState(0);
+  // Existing fields
   const [symptomTiming, setSymptomTiming] = useState([]);
   const [symptomFrequency, setSymptomFrequency] = useState(null);
   const [topSymptoms, setTopSymptoms] = useState([]);
@@ -57,20 +68,27 @@ export default function OnboardingScreen({ navigation, route }) {
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
-  const [reviewAvailable, setReviewAvailable] = useState(false);
+  // New triage fields
+  const [severity, setSeverity] = useState(null);
+  const [fearFoods, setFearFoods] = useState([]);
+  const [customFearFood, setCustomFearFood] = useState("");
+  const [customFearFoods, setCustomFearFoods] = useState([]);
+  const [mealTimes, setMealTimes] = useState([]);
+  const [medsStatus, setMedsStatus] = useState(null);
+
   const onComplete = route?.params?.onComplete;
-  const totalSteps = 7;
+  const totalSteps = 10; // 0=welcome, 1=severity, 2=timing, 3=frequency, 4=symptoms, 5=afterEating, 6=lyingDown, 7=fearFoods, 8=mealTimes+meds, 9=reminders
   const posthog = usePostHog();
 
   useEffect(() => {
     posthog?.screen("Onboarding");
     posthog?.capture("onboarding_started");
-
-    // Check if store review is available on this device
-    StoreReview.isAvailableAsync().then(setReviewAvailable).catch(() => setReviewAvailable(false));
   }, []);
 
   useEffect(() => {
+    if (step === 1) {
+      posthog?.capture(EVENTS.ONBOARDING_TRIAGE_STARTED);
+    }
     if (step > 0) {
       posthog?.capture("onboarding_step_completed", { step: step - 1 });
     }
@@ -86,6 +104,30 @@ export default function OnboardingScreen({ navigation, route }) {
     setSymptomTiming((prev) =>
       prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
+  };
+
+  const handleFearFoodToggle = (id) => {
+    setFearFoods((prev) =>
+      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
+    );
+  };
+
+  const handleMealTimeToggle = (id) => {
+    setMealTimes((prev) =>
+      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
+    );
+  };
+
+  const addCustomFearFood = () => {
+    const trimmed = customFearFood.trim();
+    if (trimmed && !customFearFoods.includes(trimmed)) {
+      setCustomFearFoods((prev) => [...prev, trimmed]);
+      setCustomFearFood("");
+    }
+  };
+
+  const removeCustomFearFood = (food) => {
+    setCustomFearFoods((prev) => prev.filter((f) => f !== food));
   };
 
   const normalizeReminderSettings = async () => {
@@ -111,11 +153,7 @@ export default function OnboardingScreen({ navigation, route }) {
         }
         return { remindersEnabled: false, eveningReminderEnabled: false };
       }
-
-      return {
-        remindersEnabled,
-        eveningReminderEnabled,
-      };
+      return { remindersEnabled, eveningReminderEnabled };
     } catch (error) {
       showToast(
         "Notifications unavailable",
@@ -139,6 +177,12 @@ export default function OnboardingScreen({ navigation, route }) {
         worseLyingDown,
         remindersEnabled: reminderSettings.remindersEnabled,
         eveningReminderEnabled: reminderSettings.eveningReminderEnabled,
+        // New triage fields
+        severity: severity || "moderate",
+        fearFoods,
+        customFearFoods,
+        mealTimes,
+        medsStatus: medsStatus || "none",
       });
 
       await syncReminderNotifications({
@@ -150,6 +194,27 @@ export default function OnboardingScreen({ navigation, route }) {
         console.warn("RevenueCat setup failed:", err)
       );
 
+      // Generate 7-day plan
+      const plan = await generatePlan({
+        severity: severity || "moderate",
+        fearFoods,
+        customFearFoods,
+        mealTimes,
+        medsStatus: medsStatus || "none",
+      });
+
+      posthog?.capture(EVENTS.ONBOARDING_TRIAGE_COMPLETED, {
+        severity_level: severity,
+        fear_foods_count: fearFoods.length + customFearFoods.length,
+        meds_status: medsStatus,
+        symptom_frequency: symptomFrequency,
+        top_symptoms_count: topSymptoms.length,
+        reminders_enabled: reminderSettings.remindersEnabled,
+      });
+      posthog?.capture(EVENTS.ONBOARDING_PLAN_GENERATED, {
+        severity_level: severity,
+        plan_id: plan.id,
+      });
       posthog?.capture("onboarding_completed", {
         symptom_frequency: symptomFrequency,
         top_symptoms_count: topSymptoms.length,
@@ -158,10 +223,12 @@ export default function OnboardingScreen({ navigation, route }) {
       posthog?.identify(user.id, {
         symptom_frequency: symptomFrequency,
         top_symptoms: topSymptoms,
+        severity_level: severity,
+        meds_status: medsStatus,
       });
 
-      // Check if we should show signup screen (passed via onComplete return value or params)
-      const nextScreen = onComplete?.() || "Paywall";
+      // Navigate to SignUp if Firebase is configured, otherwise straight to Main
+      const nextScreen = onComplete?.() || "Main";
       navigation.replace(nextScreen);
     } catch (error) {
       console.warn("Onboarding completion failed:", error);
@@ -170,8 +237,62 @@ export default function OnboardingScreen({ navigation, route }) {
     }
   };
 
+  const renderMultiSelectOption = (option, selected, onToggle) => {
+    const active = selected.includes(option.id);
+    return (
+      <Pressable
+        key={option.id}
+        onPress={() => onToggle(option.id)}
+        className={`flex-row items-center gap-4 p-4 rounded-xl border ${
+          active ? "bg-primary-light border-primary/40" : "bg-card border-border"
+        }`}
+      >
+        {option.emoji && <Text className="text-2xl">{option.emoji}</Text>}
+        <View className="flex-1">
+          <Text className="text-left font-medium text-foreground">
+            {option.label}
+          </Text>
+          {option.description && (
+            <Text className="text-xs text-muted-foreground mt-0.5">{option.description}</Text>
+          )}
+        </View>
+        <View
+          className={`w-5 h-5 rounded-md border ${
+            active ? "bg-primary border-primary" : "border-border"
+          }`}
+        />
+      </Pressable>
+    );
+  };
+
+  const renderSingleSelectOption = (option, selected, onSelect) => {
+    const active = selected === option.id;
+    return (
+      <Pressable
+        key={option.id}
+        onPress={() => onSelect(option.id)}
+        className={`flex-row items-center justify-between p-4 rounded-xl border ${
+          active ? "bg-primary-light border-primary/40" : "bg-card border-border"
+        }`}
+      >
+        <View className="flex-1">
+          <Text className="text-foreground font-medium">{option.label}</Text>
+          {option.description && (
+            <Text className="text-xs text-muted-foreground mt-0.5">{option.description}</Text>
+          )}
+        </View>
+        <View
+          className={`w-5 h-5 rounded-full border ${
+            active ? "bg-primary border-primary" : "border-border"
+          }`}
+        />
+      </Pressable>
+    );
+  };
+
   return (
     <Screen contentClassName="gap-8">
+      {/* Step 0: Welcome */}
       {step === 0 && (
         <View className="flex-1 items-center justify-center gap-8 px-2">
           <Mascot size="large" />
@@ -185,7 +306,7 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
           <View className="w-full gap-4 mt-4">
             <Text className="text-sm text-muted-foreground/80 text-center leading-relaxed">
-              Track meals, spot triggers, and take control of your digestive health.
+              Answer a few quick questions (~60 seconds) and we'll build your personalized 7-day plan.
             </Text>
             <Button
               className="w-full py-5 rounded-2xl shadow-sm"
@@ -203,7 +324,40 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
+      {/* Step 1: Symptom Severity (NEW) */}
       {step === 1 && (
+        <View className="gap-6">
+          <View className="items-center gap-3">
+            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
+              <AlertTriangle size={26} color="#f07c52" />
+            </View>
+            <Text className="text-2xl font-bold text-foreground">
+              How severe are your symptoms?
+            </Text>
+            <Text className="text-muted-foreground">This helps us calibrate your plan</Text>
+          </View>
+
+          <View className="gap-3">
+            {severityOptions.map((option) =>
+              renderSingleSelectOption(option, severity, setSeverity)
+            )}
+          </View>
+
+          <Button
+            disabled={!severity}
+            onPress={() => setStep(2)}
+            className="w-full py-4 rounded-2xl"
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
+            </View>
+          </Button>
+        </View>
+      )}
+
+      {/* Step 2: Symptom Timing */}
+      {step === 2 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
@@ -216,40 +370,14 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
 
           <View className="gap-3">
-            {symptomTimingOptions.map((option) => {
-              const active = symptomTiming.includes(option.id);
-              return (
-                <Pressable
-                  key={option.id}
-                  onPress={() => handleTimingToggle(option.id)}
-                  className={`flex-row items-center gap-4 p-4 rounded-xl border ${
-                    active ? "bg-primary-light border-primary/40" : "bg-card border-border"
-                  }`}
-                >
-                  <Text className="flex-1 text-left font-medium text-foreground">
-                    {option.label}
-                  </Text>
-                  <View
-                    className={`w-5 h-5 rounded-md border ${
-                      active ? "bg-primary border-primary" : "border-border"
-                    }`}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <View className="bg-accent-light border border-accent/40 rounded-xl p-4">
-            <Text className="text-sm text-foreground font-semibold mb-1">Why this matters</Text>
-            <Text className="text-sm text-muted-foreground">
-              Nighttime GERD behaves differently. It guides meal timing advice, trigger weighting, and
-              notification timing.
-            </Text>
+            {symptomTimingOptions.map((option) =>
+              renderMultiSelectOption(option, symptomTiming, handleTimingToggle)
+            )}
           </View>
 
           <Button
             disabled={symptomTiming.length === 0}
-            onPress={() => setStep(2)}
+            onPress={() => setStep(3)}
             className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
@@ -260,7 +388,8 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {step === 2 && (
+      {/* Step 3: Frequency */}
+      {step === 3 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
@@ -273,91 +402,13 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
 
           <View className="gap-3">
-            {symptomFrequencyOptions.map((option) => {
-              const active = symptomFrequency === option.id;
-              return (
-                <Pressable
-                  key={option.id}
-                  onPress={() => setSymptomFrequency(option.id)}
-                  className={`flex-row items-center justify-between p-4 rounded-xl border ${
-                    active ? "bg-primary-light border-primary/40" : "bg-card border-border"
-                  }`}
-                >
-                  <Text className="text-foreground font-medium">{option.label}</Text>
-                  <View
-                    className={`w-5 h-5 rounded-full border ${
-                      active ? "bg-primary border-primary" : "border-border"
-                    }`}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <View className="bg-accent-light border border-accent/40 rounded-xl p-4">
-            <Text className="text-sm text-foreground font-semibold mb-1">Why</Text>
-            <Text className="text-sm text-muted-foreground">
-              Sets a baseline so we do not over-alarm users with mild GERD.
-            </Text>
+            {symptomFrequencyOptions.map((option) =>
+              renderSingleSelectOption(option, symptomFrequency, setSymptomFrequency)
+            )}
           </View>
 
           <Button
             disabled={!symptomFrequency}
-            onPress={() => setStep(3)}
-            className="w-full py-4 rounded-2xl"
-          >
-            <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
-              <ArrowRight size={18} color="#ffffff" />
-            </View>
-          </Button>
-        </View>
-      )}
-
-      {step === 3 && (
-        <View className="gap-6">
-          <View className="items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
-              <Activity size={26} color="#3aa27f" />
-            </View>
-            <Text className="text-2xl font-bold text-foreground">Which symptoms do you experience most?</Text>
-            <Text className="text-muted-foreground">Select all that apply</Text>
-          </View>
-
-          <View className="gap-3">
-            {topSymptomOptions.map((symptom) => {
-              const active = topSymptoms.includes(symptom.id);
-              return (
-                <Pressable
-                  key={symptom.id}
-                  onPress={() => handleSymptomToggle(symptom.id)}
-                  className={`flex-row items-center gap-4 p-4 rounded-xl border ${
-                    active ? "bg-primary-light border-primary/40" : "bg-card border-border"
-                  }`}
-                >
-                  <Text className="text-2xl">{symptom.emoji}</Text>
-                  <Text className="flex-1 text-left font-medium text-foreground">
-                    {symptom.label}
-                  </Text>
-                  <View
-                    className={`w-5 h-5 rounded-md border ${
-                      active ? "bg-primary border-primary" : "border-border"
-                    }`}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <View className="bg-accent-light border border-accent/40 rounded-xl p-4">
-            <Text className="text-sm text-foreground font-semibold mb-1">Why</Text>
-            <Text className="text-sm text-muted-foreground">
-              Different symptoms point to different triggers like acid, volume, or gas.
-            </Text>
-          </View>
-
-          <Button
-            disabled={topSymptoms.length === 0}
             onPress={() => setStep(4)}
             className="w-full py-4 rounded-2xl"
           >
@@ -369,48 +420,25 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
+      {/* Step 4: Top Symptoms */}
       {step === 4 && (
         <View className="gap-6">
           <View className="items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
-              <Utensils size={26} color="#f07c52" />
+            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
+              <Activity size={26} color="#3aa27f" />
             </View>
-            <Text className="text-2xl font-bold text-foreground">
-              Do symptoms usually happen after eating?
-            </Text>
+            <Text className="text-2xl font-bold text-foreground">Which symptoms do you experience most?</Text>
+            <Text className="text-muted-foreground">Select all that apply</Text>
           </View>
 
           <View className="gap-3">
-            {afterEatingOptions.map((option) => {
-              const active = symptomAfterEating === option.id;
-              return (
-                <Pressable
-                  key={option.id}
-                  onPress={() => setSymptomAfterEating(option.id)}
-                  className={`flex-row items-center justify-between p-4 rounded-xl border ${
-                    active ? "bg-primary-light border-primary/40" : "bg-card border-border"
-                  }`}
-                >
-                  <Text className="text-foreground font-medium">{option.label}</Text>
-                  <View
-                    className={`w-5 h-5 rounded-full border ${
-                      active ? "bg-primary border-primary" : "border-border"
-                    }`}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <View className="bg-accent-light border border-accent/40 rounded-xl p-4">
-            <Text className="text-sm text-foreground font-semibold mb-1">Why this matters</Text>
-            <Text className="text-sm text-muted-foreground">
-              Helps portion-size guidance, fat digestion assumptions, and AI food photo interpretation.
-            </Text>
+            {topSymptomOptions.map((symptom) =>
+              renderMultiSelectOption(symptom, topSymptoms, handleSymptomToggle)
+            )}
           </View>
 
           <Button
-            disabled={!symptomAfterEating}
+            disabled={topSymptoms.length === 0}
             onPress={() => setStep(5)}
             className="w-full py-4 rounded-2xl"
           >
@@ -422,46 +450,26 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
+      {/* Step 5: After Eating */}
       {step === 5 && (
         <View className="gap-6">
           <View className="items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
-              <Moon size={26} color="#3aa27f" />
+            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
+              <Utensils size={26} color="#f07c52" />
             </View>
-            <Text className="text-2xl font-bold text-foreground">Are symptoms worse when lying down?</Text>
-          </View>
-
-          <View className="gap-3">
-            {lyingDownOptions.map((option) => {
-              const active = worseLyingDown === option.id;
-              return (
-                <Pressable
-                  key={option.id}
-                  onPress={() => setWorseLyingDown(option.id)}
-                  className={`flex-row items-center justify-between p-4 rounded-xl border ${
-                    active ? "bg-primary-light border-primary/40" : "bg-card border-border"
-                  }`}
-                >
-                  <Text className="text-foreground font-medium">{option.label}</Text>
-                  <View
-                    className={`w-5 h-5 rounded-full border ${
-                      active ? "bg-primary border-primary" : "border-border"
-                    }`}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <View className="bg-accent-light border border-accent/40 rounded-xl p-4">
-            <Text className="text-sm text-foreground font-semibold mb-1">Why this matters</Text>
-            <Text className="text-sm text-muted-foreground">
-              Points to lower esophageal sphincter sensitivity and night reflux risk.
+            <Text className="text-2xl font-bold text-foreground">
+              Do symptoms usually happen after eating?
             </Text>
           </View>
 
+          <View className="gap-3">
+            {afterEatingOptions.map((option) =>
+              renderSingleSelectOption(option, symptomAfterEating, setSymptomAfterEating)
+            )}
+          </View>
+
           <Button
-            disabled={!worseLyingDown}
+            disabled={!symptomAfterEating}
             onPress={() => setStep(6)}
             className="w-full py-4 rounded-2xl"
           >
@@ -473,7 +481,154 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
+      {/* Step 6: Lying Down */}
       {step === 6 && (
+        <View className="gap-6">
+          <View className="items-center gap-3">
+            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
+              <Moon size={26} color="#3aa27f" />
+            </View>
+            <Text className="text-2xl font-bold text-foreground">Are symptoms worse when lying down?</Text>
+          </View>
+
+          <View className="gap-3">
+            {lyingDownOptions.map((option) =>
+              renderSingleSelectOption(option, worseLyingDown, setWorseLyingDown)
+            )}
+          </View>
+
+          <Button
+            disabled={!worseLyingDown}
+            onPress={() => setStep(7)}
+            className="w-full py-4 rounded-2xl"
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
+            </View>
+          </Button>
+        </View>
+      )}
+
+      {/* Step 7: Fear Foods (NEW) */}
+      {step === 7 && (
+        <View className="gap-6">
+          <View className="items-center gap-3">
+            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
+              <Utensils size={26} color="#f07c52" />
+            </View>
+            <Text className="text-2xl font-bold text-foreground">
+              Which foods worry you most?
+            </Text>
+            <Text className="text-muted-foreground">Select any you suspect are triggers</Text>
+          </View>
+
+          <View className="gap-2">
+            {FEAR_FOOD_OPTIONS.map((option) =>
+              renderMultiSelectOption(option, fearFoods, handleFearFoodToggle)
+            )}
+          </View>
+
+          {/* Custom fear food input */}
+          <View className="gap-2">
+            <Text className="text-sm font-medium text-foreground">Add your own:</Text>
+            <View className="flex-row gap-2">
+              <TextInput
+                value={customFearFood}
+                onChangeText={setCustomFearFood}
+                placeholder="e.g. avocado"
+                placeholderTextColor="#9ca3af"
+                className="flex-1 border border-border rounded-xl px-4 py-3 text-foreground bg-card"
+                onSubmitEditing={addCustomFearFood}
+                returnKeyType="done"
+              />
+              <Button
+                onPress={addCustomFearFood}
+                disabled={!customFearFood.trim()}
+                className="px-4 rounded-xl"
+              >
+                <Text className="text-primary-foreground font-semibold">Add</Text>
+              </Button>
+            </View>
+            {customFearFoods.length > 0 && (
+              <View className="flex-row flex-wrap gap-2 mt-1">
+                {customFearFoods.map((food) => (
+                  <Pressable
+                    key={food}
+                    onPress={() => removeCustomFearFood(food)}
+                    className="flex-row items-center gap-1 bg-accent-light border border-accent/30 rounded-full px-3 py-1.5"
+                  >
+                    <Text className="text-sm text-foreground">{food}</Text>
+                    <Text className="text-muted-foreground ml-1">x</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <Button
+            onPress={() => setStep(8)}
+            className="w-full py-4 rounded-2xl"
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              <Text className="text-primary-foreground font-bold text-base">
+                {fearFoods.length === 0 && customFearFoods.length === 0 ? "Skip" : "Continue"}
+              </Text>
+              <ArrowRight size={18} color="#ffffff" />
+            </View>
+          </Button>
+        </View>
+      )}
+
+      {/* Step 8: Meal Times + Meds (NEW) */}
+      {step === 8 && (
+        <View className="gap-6">
+          <View className="items-center gap-3">
+            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
+              <Clock size={26} color="#3aa27f" />
+            </View>
+            <Text className="text-2xl font-bold text-foreground">
+              Your usual meal times
+            </Text>
+            <Text className="text-muted-foreground">Select all that apply</Text>
+          </View>
+
+          <View className="gap-2">
+            {MEAL_TIME_OPTIONS.map((option) =>
+              renderMultiSelectOption(option, mealTimes, handleMealTimeToggle)
+            )}
+          </View>
+
+          <View className="items-center gap-3 mt-2">
+            <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
+              <Pill size={26} color="#f07c52" />
+            </View>
+            <Text className="text-2xl font-bold text-foreground">
+              Current medication?
+            </Text>
+          </View>
+
+          <View className="gap-2">
+            {MEDS_OPTIONS.map((option) =>
+              renderSingleSelectOption(option, medsStatus, setMedsStatus)
+            )}
+          </View>
+
+          <Button
+            disabled={mealTimes.length === 0 || !medsStatus}
+            onPress={() => setStep(9)}
+            className="w-full py-4 rounded-2xl"
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
+            </View>
+          </Button>
+        </View>
+      )}
+
+      {/* Step 9: Reminders */}
+      {step === 9 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
@@ -527,68 +682,27 @@ export default function OnboardingScreen({ navigation, route }) {
             </Pressable>
           </View>
 
-          <Button onPress={() => setStep(7)} className="w-full py-4 rounded-2xl">
+          <View className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+            <Text className="text-sm font-semibold text-foreground mb-1">
+              Your 7-day plan is ready
+            </Text>
+            <Text className="text-sm text-muted-foreground">
+              After setup, you'll get a personalized daily checklist to help you identify your triggers in just one week.
+            </Text>
+          </View>
+
+          <Button
+            onPress={handleComplete}
+            disabled={isCompleting}
+            className="w-full py-4 rounded-2xl"
+          >
             <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
-              <ArrowRight size={18} color="#ffffff" />
+              <Text className="text-primary-foreground font-bold text-base">
+                {isCompleting ? "Setting up your plan..." : "Start My 7-Day Plan"}
+              </Text>
+              <ChevronRight size={18} color="#ffffff" />
             </View>
           </Button>
-        </View>
-      )}
-
-      {step === 7 && (
-        <View className="flex-1 items-center justify-center gap-6">
-          <View className="w-20 h-20 rounded-3xl bg-primary/10 items-center justify-center">
-            <Text className="text-4xl">⭐</Text>
-          </View>
-          <View className="items-center gap-2">
-            <Text className="text-2xl font-bold text-foreground text-center">
-              Enjoying GERDBuddy?
-            </Text>
-            <Text className="text-muted-foreground text-center max-w-xs">
-              Your feedback helps others discover our app and motivates us to keep improving.
-            </Text>
-          </View>
-
-          <Mascot
-            size="small"
-            message="A quick review would mean the world to me!"
-          />
-
-          <View className="w-full gap-3">
-            {reviewAvailable && (
-              <Button
-                onPress={async () => {
-                  try {
-                    await StoreReview.requestReview();
-                    posthog?.capture("onboarding_review_requested");
-                  } catch (error) {
-                    console.warn("Store review failed:", error);
-                  }
-                  handleComplete();
-                }}
-                className="w-full"
-              >
-                <View className="flex-row items-center justify-center gap-2">
-                  <Text className="text-primary-foreground font-semibold">Rate the App</Text>
-                  <Text className="text-primary-foreground">⭐</Text>
-                </View>
-              </Button>
-            )}
-
-            <Pressable
-              onPress={() => {
-                posthog?.capture("onboarding_review_skipped");
-                handleComplete();
-              }}
-              disabled={isCompleting}
-              className="py-3"
-            >
-              <Text className="text-center text-muted-foreground">
-                {isCompleting ? "Setting up..." : "Maybe later"}
-              </Text>
-            </Pressable>
-          </View>
         </View>
       )}
 

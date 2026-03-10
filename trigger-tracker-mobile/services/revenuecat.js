@@ -1,4 +1,5 @@
 import Purchases, { PurchasesErrorCode } from "react-native-purchases";
+import { auth } from "./firebase";
 
 const API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY;
 
@@ -66,6 +67,10 @@ const parseStatus = (customerInfo) => {
 
 export const configureRevenueCat = async (userId) => {
   await ensureConfigured(userId);
+  const email = auth?.currentUser?.email;
+  if (email) {
+    await Purchases.setEmail(email);
+  }
 };
 
 export const getSubscriptionStatus = async (userId) => {
