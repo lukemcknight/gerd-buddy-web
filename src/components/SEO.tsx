@@ -1,8 +1,5 @@
 import { Helmet } from "react-helmet-async";
-
-const SITE_URL = "https://gerdbuddy.com";
-const SITE_NAME = "GERDBuddy";
-const DEFAULT_IMAGE = `${SITE_URL}/turtle.png`;
+import { SITE_URL, SITE_NAME, DEFAULT_IMAGE } from "@/config/site";
 
 interface SEOProps {
   title: string;
@@ -11,8 +8,11 @@ interface SEOProps {
   image?: string;
   type?: "website" | "article";
   publishedTime?: string;
+  modifiedTime?: string;
   author?: string;
   noindex?: boolean;
+  section?: string;
+  tags?: string[];
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
@@ -23,8 +23,11 @@ const SEO = ({
   image = DEFAULT_IMAGE,
   type = "website",
   publishedTime,
+  modifiedTime,
   author,
   noindex,
+  section,
+  tags,
   jsonLd,
 }: SEOProps) => {
   const url = `${SITE_URL}${path}`;
@@ -43,6 +46,7 @@ const SEO = ({
       <meta property="og:type" content={type} />
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:locale" content="en_US" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
@@ -52,9 +56,18 @@ const SEO = ({
       {type === "article" && publishedTime && (
         <meta property="article:published_time" content={publishedTime} />
       )}
+      {type === "article" && modifiedTime && (
+        <meta property="article:modified_time" content={modifiedTime} />
+      )}
       {type === "article" && author && (
         <meta property="article:author" content={author} />
       )}
+      {type === "article" && section && (
+        <meta property="article:section" content={section} />
+      )}
+      {type === "article" && tags && tags.map((tag) => (
+        <meta key={tag} property="article:tag" content={tag} />
+      ))}
 
       {jsonLd && (
         Array.isArray(jsonLd)

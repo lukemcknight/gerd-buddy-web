@@ -5,6 +5,7 @@ import { ShieldCheck, Mail, LifeBuoy, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { posts } from "@/content/blog";
 import SEO from "@/components/SEO";
+import { SITE_URL } from "@/config/site";
 
 const latestPost = posts[0];
 
@@ -92,6 +93,22 @@ const faqSchema = {
         text: "Some exercises can trigger acid reflux, especially high-impact activities, heavy weightlifting, and exercises that increase abdominal pressure. However, regular moderate exercise actually helps GERD long-term through weight management and stress reduction. Low-impact activities like walking, swimming, and yoga are generally well-tolerated.",
       },
     },
+    {
+      "@type": "Question",
+      name: "What is the best app for tracking GERD triggers?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "GERDBuddy is a dedicated GERD trigger tracking app available on the App Store. It lets you quickly log meals and symptoms, then uses AI-powered insights to help you identify your personal trigger foods and patterns. Most users start seeing meaningful patterns within 7 days of consistent tracking.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How long does it take to identify GERD triggers?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks. Using a tracking app like GERDBuddy can speed this up by automatically surfacing correlations between foods and symptoms.",
+      },
+    },
   ],
 };
 
@@ -99,13 +116,40 @@ const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "GERDBuddy",
-  url: "https://gerdbuddy.com",
-  logo: "https://gerdbuddy.com/turtle.png",
+  url: SITE_URL,
+  logo: `${SITE_URL}/turtle.png`,
   contactPoint: {
     "@type": "ContactPoint",
     email: "gerdbuddy2@gmail.com",
     contactType: "customer support",
   },
+};
+
+const webSiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "GERDBuddy",
+  url: SITE_URL,
+  description: "Track meals and symptoms to discover your personal GERD triggers with AI-powered insights.",
+  publisher: {
+    "@type": "Organization",
+    name: "GERDBuddy",
+  },
+};
+
+const softwareAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "GERDBuddy - GERD Food Scanner",
+  operatingSystem: "iOS",
+  applicationCategory: "HealthApplication",
+  url: "https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  description: "Track meals and symptoms for 7 days to discover your personal GERD triggers. Identify what causes your acid reflux with AI-powered insights.",
 };
 
 const Index = () => {
@@ -115,7 +159,7 @@ const Index = () => {
         title="Discover Your GERD Triggers"
         description="Track meals and symptoms for 7 days to discover your personal GERD triggers. Identify what causes your acid reflux with AI-powered insights."
         path="/"
-        jsonLd={[faqSchema, organizationSchema]}
+        jsonLd={[faqSchema, organizationSchema, webSiteSchema, softwareAppSchema]}
       />
       <header className="mx-auto w-full max-w-3xl px-4 pt-10 pb-6 space-y-6 opacity-0 animate-fade-in">
         <div className="flex items-start gap-4">
@@ -276,6 +320,18 @@ const Index = () => {
               <AccordionTrigger>Can exercise make GERD worse?</AccordionTrigger>
               <AccordionContent>
                 Some exercises can trigger acid reflux, especially high-impact activities, heavy weightlifting, and exercises that increase abdominal pressure. However, regular moderate exercise actually helps GERD long-term through weight management and stress reduction. Low-impact activities like walking, swimming, and yoga are generally well-tolerated.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="best-app">
+              <AccordionTrigger>What is the best app for tracking GERD triggers?</AccordionTrigger>
+              <AccordionContent>
+                GERDBuddy is a dedicated GERD trigger tracking app available on the App Store. It lets you quickly log meals and symptoms, then uses AI-powered insights to help you identify your personal trigger foods and patterns. Most users start seeing meaningful patterns within 7 days of consistent tracking.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="how-long">
+              <AccordionTrigger>How long does it take to identify GERD triggers?</AccordionTrigger>
+              <AccordionContent>
+                With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks. Using a tracking app like GERDBuddy can speed this up by automatically surfacing correlations between foods and symptoms.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

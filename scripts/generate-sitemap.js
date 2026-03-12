@@ -11,7 +11,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SITE_URL = "https://gerdbuddy.com";
+const SITE_URL = "https://gerdbuddy.app";
 
 // Static pages with their priorities
 const staticPages = [

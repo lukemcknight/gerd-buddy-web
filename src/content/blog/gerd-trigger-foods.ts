@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Learn how to identify the specific foods that trigger your acid reflux symptoms. A practical guide to food journaling, elimination diets, and pattern tracking for GERD management.",
   date: "2026-02-19",
+  dateModified: "2026-02-19",
   author: "GERDBuddy Team",
+  category: "Diet & Nutrition",
+  tags: ["trigger foods", "food journal", "elimination diet", "GERD triggers", "symptom tracking"],
   content: `
 Here's something that took me way too long to figure out: the "Top 10 GERD Trigger Foods" lists you find online? They're a starting point at best. At worst, they'll have you cutting out half your diet for no reason.
 

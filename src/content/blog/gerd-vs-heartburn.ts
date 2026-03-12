@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Heartburn and GERD are often used interchangeably, but they're not the same thing. Learn the key differences, when occasional heartburn becomes GERD, and when to see a doctor.",
   date: "2026-02-13",
+  dateModified: "2026-02-13",
   author: "GERDBuddy Team",
+  category: "Conditions",
+  tags: ["GERD", "heartburn", "diagnosis", "symptoms", "acid reflux"],
   content: `
 I used to say "I have heartburn" the way you'd say "I have a headache" — like it was just a thing that happened sometimes and you dealt with it. Pop a Tums, move on. It took me a while to realize that when heartburn stops being an occasional annoyance and starts being a regular part of your week, it might be something more.
 

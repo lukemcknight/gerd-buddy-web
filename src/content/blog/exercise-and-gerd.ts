@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Exercise can make GERD worse — or better. Learn which workouts trigger acid reflux, which ones help, and how to stay active without the burn.",
   date: "2026-03-01",
+  dateModified: "2026-03-01",
   author: "GERDBuddy Team",
+  category: "Lifestyle",
+  tags: ["exercise", "workout", "fitness", "lifestyle tips", "acid reflux"],
   content: `
 Here's the frustrating paradox of exercise and GERD: staying active is one of the best things you can do for acid reflux long-term (it helps with weight management, stress reduction, and digestion), but the actual act of exercising can trigger some of the worst reflux episodes you'll experience.
 

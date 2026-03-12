@@ -2,15 +2,32 @@ import { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
-import { ArrowLeft, Calendar, User, Clock } from "lucide-react";
+import { ArrowLeft, Calendar, User, Clock, ChevronRight } from "lucide-react";
 import { posts } from "@/content/blog";
 import SEO from "@/components/SEO";
-
-const SITE_URL = "https://gerdbuddy.com";
+import { SITE_URL } from "@/config/site";
 
 const readTime = (content: string) => {
   const words = content.trim().split(/\s+/).length;
   return Math.max(1, Math.ceil(words / 200));
+};
+
+const wordCount = (content: string) => {
+  return content.trim().split(/\s+/).length;
+};
+
+const getRelatedPosts = (currentSlug: string, currentTags?: string[]) => {
+  if (!currentTags || currentTags.length === 0) {
+    return posts.filter((p) => p.slug !== currentSlug).slice(0, 3);
+  }
+  const scored = posts
+    .filter((p) => p.slug !== currentSlug)
+    .map((p) => ({
+      post: p,
+      score: (p.tags || []).filter((t) => currentTags.includes(t)).length,
+    }))
+    .sort((a, b) => b.score - a.score);
+  return scored.slice(0, 3).map((s) => s.post);
 };
 
 const BlogPost = () => {
@@ -32,14 +49,18 @@ const BlogPost = () => {
     return <Navigate to="/blog" replace />;
   }
 
-  const relatedPosts = posts.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const relatedPosts = getRelatedPosts(post.slug, post.tags);
 
-  const jsonLd = {
+  const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
     description: post.description,
     datePublished: post.date,
+    dateModified: post.dateModified || post.date,
+    wordCount: wordCount(post.content),
+    articleSection: post.category || "GERD Management",
+    keywords: post.tags?.join(", "),
     author: {
       "@type": "Organization",
       name: post.author,
@@ -57,6 +78,28 @@ const BlogPost = () => {
       "@id": `${SITE_URL}/blog/${post.slug}`,
     },
     image: post.image || `${SITE_URL}/turtle.png`,
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: [".prose h1", ".prose p:first-of-type"],
+    },
+  };
+
+  const medicalWebPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "MedicalWebPage",
+    name: post.title,
+    description: post.description,
+    url: `${SITE_URL}/blog/${post.slug}`,
+    about: {
+      "@type": "MedicalCondition",
+      name: "Gastroesophageal Reflux Disease (GERD)",
+      alternateName: "GERD",
+    },
+    medicalAudience: {
+      "@type": "MedicalAudience",
+      audienceType: "Patient",
+    },
+    lastReviewed: post.dateModified || post.date,
   };
 
   const breadcrumbSchema = {
@@ -101,11 +144,23 @@ const BlogPost = () => {
         image={post.image}
         type="article"
         publishedTime={post.date}
+        modifiedTime={post.dateModified || post.date}
         author={post.author}
-        jsonLd={[jsonLd, breadcrumbSchema]}
+        section={post.category}
+        tags={post.tags}
+        jsonLd={[articleSchema, medicalWebPageSchema, breadcrumbSchema]}
       />
 
       <article className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">
+        {/* Visible breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground opacity-0 animate-fade-in">
+          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <Link to="/blog" className="hover:text-primary transition-colors">Blog</Link>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className="text-foreground truncate max-w-[200px] sm:max-w-none">{post.title}</span>
+        </nav>
+
         <nav className="opacity-0 animate-fade-in">
           <Link
             to="/blog"

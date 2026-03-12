@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Anxiety and GERD are deeply connected. Learn how they create a vicious cycle, why your brain and gut are linked, and practical ways to break free from both.",
   date: "2026-02-25",
+  dateModified: "2026-02-25",
   author: "GERDBuddy Team",
+  category: "Lifestyle",
+  tags: ["anxiety", "mental health", "gut-brain axis", "stress", "coping strategies"],
   content: `
 If you've ever noticed that your acid reflux gets worse when you're anxious — or that acid reflux makes you feel more anxious — you're not imagining things. GERD and anxiety have a well-documented bidirectional relationship, meaning each one can cause and worsen the other.
 

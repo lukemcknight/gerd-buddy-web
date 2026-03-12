@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Pregnancy heartburn is incredibly common. Learn why acid reflux happens during pregnancy, which remedies are safe, and practical tips for relief in every trimester.",
   date: "2026-03-08",
+  dateModified: "2026-03-08",
   author: "GERDBuddy Team",
+  category: "Conditions",
+  tags: ["pregnancy", "heartburn", "safe remedies", "trimester", "acid reflux"],
   content: `
 If you're pregnant and dealing with acid reflux, first: you're not alone. Up to **80% of pregnant women** experience heartburn at some point during pregnancy, and for many, it's one of the most uncomfortable parts of the whole experience.
 

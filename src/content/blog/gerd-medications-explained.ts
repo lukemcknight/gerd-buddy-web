@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Confused by all the acid reflux medications? Learn how PPIs, H2 blockers, and antacids work, their side effects, and which one might be right for your GERD.",
   date: "2026-03-05",
+  dateModified: "2026-03-05",
   author: "GERDBuddy Team",
+  category: "Treatment",
+  tags: ["medications", "PPIs", "H2 blockers", "antacids", "treatment"],
   content: `
 When you're first dealing with GERD, the medication landscape can feel overwhelming. Your doctor mentions PPIs, your friend swears by H2 blockers, and the pharmacy aisle has about forty different antacid options. What's the difference? Which one should you take? And can you just stay on them forever?
 

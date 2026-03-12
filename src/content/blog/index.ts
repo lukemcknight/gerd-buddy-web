@@ -17,6 +17,11 @@ import gerdMedicationsExplained from "./gerd-medications-explained";
 import exerciseAndGerd from "./exercise-and-gerd";
 import gerdAndAnxiety from "./gerd-and-anxiety";
 import foodsThatHelpAcidReflux from "./foods-that-help-acid-reflux";
+import whenToSeeDoctorAcidReflux from "./when-to-see-doctor-acid-reflux";
+import gerdAndSleepApnea from "./gerd-and-sleep-apnea";
+import gerdAndWeightLoss from "./gerd-and-weight-loss";
+import gerdAndCoffee from "./gerd-and-coffee";
+import gerdAndAlcohol from "./gerd-and-alcohol";
 
 const posts: BlogPost[] = [
   gerdTriggerFoods,
@@ -32,6 +37,11 @@ const posts: BlogPost[] = [
   exerciseAndGerd,
   gerdAndAnxiety,
   foodsThatHelpAcidReflux,
+  whenToSeeDoctorAcidReflux,
+  gerdAndSleepApnea,
+  gerdAndWeightLoss,
+  gerdAndCoffee,
+  gerdAndAlcohol,
 ];
 
 // Sort by date, newest first

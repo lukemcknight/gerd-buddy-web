@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "How stress affects GERD symptoms and what you can do about it. Understanding the gut-brain connection and practical strategies for stress-related reflux.",
   date: "2026-02-05",
+  dateModified: "2026-02-05",
   author: "GERDBuddy Team",
+  category: "Lifestyle",
+  tags: ["stress", "gut-brain axis", "anxiety", "lifestyle tips", "mindfulness"],
   content: `
 You know those weeks where everything at work is chaos, you're sleeping terribly, and suddenly your acid reflux is through the roof? That's not a coincidence.
 

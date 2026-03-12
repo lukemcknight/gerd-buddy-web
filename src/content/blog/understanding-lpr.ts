@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Not all acid reflux causes heartburn. Learn about laryngopharyngeal reflux (LPR), its unique symptoms, and how tracking can help you identify and manage silent reflux.",
   date: "2026-01-20",
+  dateModified: "2026-01-20",
   author: "GERDBuddy Team",
+  category: "Conditions",
+  tags: ["LPR", "silent reflux", "throat symptoms", "diagnosis", "laryngopharyngeal reflux"],
   content: `
 For months, I kept clearing my throat. Constantly. In meetings, on phone calls, first thing in the morning. I figured it was allergies, or maybe I was just getting sick a lot. My doctor thought the same thing and sent me home with antihistamines.
 

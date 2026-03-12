@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Explore evidence-based natural remedies for acid reflux and GERD. From dietary changes and lifestyle adjustments to herbal options, learn what can help manage your symptoms naturally.",
   date: "2026-02-17",
+  dateModified: "2026-02-17",
   author: "GERDBuddy Team",
+  category: "Treatment",
+  tags: ["natural remedies", "lifestyle changes", "supplements", "home remedies", "acid reflux relief"],
   content: `
 Let's be real — when you're dealing with acid reflux regularly, you start Googling some pretty desperate things at 2am. "Natural acid reflux cure." "How to stop heartburn without medication." "Does apple cider vinegar actually work?" (Spoiler: probably not.)
 

@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Not all food is the enemy. These 15 foods can actually soothe acid reflux and reduce GERD symptoms. Learn what to eat more of and the science behind why it helps.",
   date: "2026-02-20",
+  dateModified: "2026-02-20",
   author: "GERDBuddy Team",
+  category: "Diet & Nutrition",
+  tags: ["safe foods", "GERD diet", "anti-inflammatory", "meal planning", "acid reflux relief"],
   content: `
 Most GERD advice focuses on what you *can't* eat. Don't eat this, avoid that, say goodbye to your favorite foods. It gets exhausting — and a little depressing. So let's flip the script and talk about foods that actually **help** with acid reflux.
 

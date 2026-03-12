@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { BookOpen } from "lucide-react";
 import { posts } from "@/content/blog";
 import SEO from "@/components/SEO";
+import { SITE_URL } from "@/config/site";
 
 const readTime = (content: string) => {
   const words = content.trim().split(/\s+/).length;
@@ -15,13 +16,13 @@ const Blog = () => {
     "@type": "CollectionPage",
     name: "GERDBuddy Blog",
     description: "Articles about managing GERD, identifying trigger foods, and living well with acid reflux.",
-    url: "https://gerdbuddy.com/blog",
+    url: `${SITE_URL}/blog`,
     mainEntity: {
       "@type": "ItemList",
       itemListElement: posts.map((post, i) => ({
         "@type": "ListItem",
         position: i + 1,
-        url: `https://gerdbuddy.com/blog/${post.slug}`,
+        url: `${SITE_URL}/blog/${post.slug}`,
         name: post.title,
       })),
     },
@@ -35,13 +36,13 @@ const Blog = () => {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://gerdbuddy.com",
+        item: SITE_URL,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Blog",
-        item: "https://gerdbuddy.com/blog",
+        item: `${SITE_URL}/blog`,
       },
     ],
   };

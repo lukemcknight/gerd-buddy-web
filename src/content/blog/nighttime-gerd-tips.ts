@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Struggling with acid reflux at night? These evidence-based strategies can help you reduce nighttime symptoms and get better sleep.",
   date: "2026-02-12",
+  dateModified: "2026-02-12",
   author: "GERDBuddy Team",
+  category: "Lifestyle",
+  tags: ["nighttime reflux", "sleep", "lifestyle tips", "acid reflux at night", "bed elevation"],
   content: `
 If you've ever been jolted awake by that awful burning feeling creeping up your chest, you know how miserable nighttime GERD can be. It's not just uncomfortable — it wrecks your sleep, and bad sleep makes everything worse, including the GERD itself. It's a frustrating cycle.
 

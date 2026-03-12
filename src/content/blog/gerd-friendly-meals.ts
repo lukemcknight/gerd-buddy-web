@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "Eating well with GERD doesn't mean eating bland food. Learn meal-building strategies, ingredient swaps, and cooking techniques that keep meals flavorful and reflux-friendly.",
   date: "2026-01-28",
+  dateModified: "2026-01-28",
   author: "GERDBuddy Team",
+  category: "Diet & Nutrition",
+  tags: ["recipes", "GERD diet", "meal planning", "cooking tips", "safe foods"],
   content: `
 Can we talk about the most depressing part of getting a GERD diagnosis? It's the moment you Google "GERD diet" and see a list of restrictions that makes it seem like your only options are plain oatmeal and sadness.
 

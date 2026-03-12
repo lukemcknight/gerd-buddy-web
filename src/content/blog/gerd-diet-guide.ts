@@ -6,7 +6,10 @@ const post: BlogPost = {
   description:
     "A comprehensive guide to eating with GERD. Learn which foods are generally safe, which common triggers to watch for, and how to build meals that minimize acid reflux symptoms.",
   date: "2026-02-15",
+  dateModified: "2026-02-15",
   author: "GERDBuddy Team",
+  category: "Diet & Nutrition",
+  tags: ["GERD diet", "trigger foods", "safe foods", "meal planning", "food guide"],
   content: `
 When I first started dealing with GERD, I felt like every meal was a gamble. I'd eat something, wait an hour, and hope for the best. It was exhausting — and honestly, kind of anxiety-inducing.
 
