@@ -193,6 +193,14 @@ const BlogPost = () => {
               <Clock className="w-4 h-4" />
               {readTime(post.content)} min read
             </span>
+            {post.dateModified && post.dateModified !== post.date && (
+              <span className="inline-flex items-center gap-1.5 text-xs">
+                Updated{" "}
+                <time dateTime={post.dateModified}>
+                  {format(new Date(post.dateModified), "MMM d, yyyy")}
+                </time>
+              </span>
+            )}
           </div>
         </header>
 
@@ -213,6 +221,9 @@ const BlogPost = () => {
             <img
               src="/turtle.png"
               alt="GERDBuddy mascot"
+              width={64}
+              height={64}
+              loading="lazy"
               className="w-full h-full rounded-2xl object-cover"
             />
           </div>

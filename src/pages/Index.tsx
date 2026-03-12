@@ -164,7 +164,7 @@ const Index = () => {
       <header className="mx-auto w-full max-w-3xl px-4 pt-10 pb-6 space-y-6 opacity-0 animate-fade-in">
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 flex items-center justify-center">
-            <img src="/turtle.png" alt="GERDBuddy turtle mascot" className="w-16 h-16 rounded-2xl object-cover" />
+            <img src="/turtle.png" alt="GERDBuddy turtle mascot" width={64} height={64} className="w-16 h-16 rounded-2xl object-cover" />
           </div>
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">GERDBuddy</p>
