@@ -22,13 +22,13 @@ describe('PaywallScreen - Pro messaging', () => {
 
   describe('Headline', () => {
     test('shows outcomes-based headline', () => {
-      expect(source).toContain('Find your top reflux triggers in 14 days.');
+      expect(source).toContain('Find your top triggers in 14 days.');
     });
 
     test('headline is in the main heading element', () => {
       const headlineMatch = source.match(/text-2xl font-extrabold[^>]*>[^<]*/);
       expect(headlineMatch).toBeTruthy();
-      expect(headlineMatch[0]).toContain('Find your top reflux triggers in 14 days.');
+      expect(headlineMatch[0]).toContain('Find your top triggers in 14 days.');
     });
   });
 

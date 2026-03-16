@@ -238,9 +238,12 @@ export default function FoodScanScreen({ navigation }) {
 
     posthog?.capture("food_scan_started");
     try {
-      const personalTriggers = await getPersonalTriggers();
+      const [personalTriggers, user] = await Promise.all([
+        getPersonalTriggers(),
+        getUser(),
+      ]);
       setPersonalTriggerCount(personalTriggers?.length || 0);
-      const rawResult = await analyzeFoodImage(asset, personalTriggers);
+      const rawResult = await analyzeFoodImage(asset, personalTriggers, user?.conditions);
       const enhanced = enhanceScanResult(rawResult);
       setAnalysis(enhanced);
 
@@ -302,11 +305,10 @@ export default function FoodScanScreen({ navigation }) {
 
   const buildMealDescription = () => {
     if (!analysis) return "Scanned meal";
-    const primaryReason = analysis.reasons?.[0]?.replace(/^•\s*/, "");
-    const riskLabel = analysis.trafficLight || "Scanned meal";
-    return primaryReason
-      ? `${riskLabel}: ${primaryReason}`
-      : `${riskLabel} from photo`;
+    if (analysis.detectedFoods?.length > 0) {
+      return analysis.detectedFoods.join(", ");
+    }
+    return "Scanned meal";
   };
 
   const handleLogMeal = async () => {
@@ -472,7 +474,7 @@ export default function FoodScanScreen({ navigation }) {
               Know Before You Eat
             </Text>
             <Text className="text-base text-muted-foreground text-center leading-relaxed max-w-xs">
-              Our AI analyzes your meal photo against known GERD triggers and your personal symptom history to give you a risk score before your first bite.
+              Our AI analyzes your meal photo against known digestive triggers and your personal symptom history to give you a risk score before your first bite.
             </Text>
           </View>
 
@@ -659,6 +661,20 @@ export default function FoodScanScreen({ navigation }) {
                 </Text>
               </View>
             </View>
+
+            {/* Detected Foods */}
+            {analysis.detectedFoods?.length > 0 && (
+              <View className="mb-4 bg-white/60 p-4 rounded-xl">
+                <Text className="font-semibold text-slate-800 mb-2">Detected</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {analysis.detectedFoods.map((food, idx) => (
+                    <View key={idx} className="px-3 py-1.5 rounded-full bg-white border border-slate-200">
+                      <Text className="text-sm text-slate-700">{food}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
 
             {/* Reason Tags */}
             {analysis.reasonTags.length > 0 && (

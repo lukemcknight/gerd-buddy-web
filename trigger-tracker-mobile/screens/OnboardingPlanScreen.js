@@ -59,7 +59,7 @@ function QuickTriageSetup({ onComplete }) {
       {step === 0 && (
         <View className="gap-3">
           <Text className="text-base font-semibold text-foreground">
-            How would you describe your reflux?
+            How would you describe your symptoms?
           </Text>
           {SEVERITY_OPTIONS.map((opt) => (
             <Pressable

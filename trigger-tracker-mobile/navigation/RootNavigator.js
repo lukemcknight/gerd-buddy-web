@@ -17,6 +17,7 @@ import PaywallScreen from "../screens/PaywallScreen.tsx";
 import CustomerCenterScreen from "../screens/CustomerCenterScreen";
 import SignUpScreen from "../screens/SignUpScreen";
 import LoginScreen from "../screens/LoginScreen";
+import BuddyAccessoriesScreen from "../screens/BuddyAccessoriesScreen";
 import { getUser } from "../services/storage";
 import { isFirebaseConfigured } from "../services/firebase";
 import { syncReminderNotifications, syncSmartNotifications } from "../services/notifications";
@@ -180,6 +181,7 @@ export default function RootNavigator() {
       <Stack.Screen name="CustomerCenter" component={CustomerCenterScreen} />
       <Stack.Screen name="OnboardingPlan" component={OnboardingPlanScreen} />
       <Stack.Screen name="OnboardingDay7Summary" component={OnboardingDay7SummaryScreen} />
+      <Stack.Screen name="BuddyAccessories" component={BuddyAccessoriesScreen} />
     </Stack.Navigator>
   );
 }

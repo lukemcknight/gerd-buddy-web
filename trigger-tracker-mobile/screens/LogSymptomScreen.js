@@ -11,8 +11,21 @@ import { saveSymptom } from "../services/storage";
 import { showToast } from "../utils/feedback";
 import { syncSmartNotifications } from "../services/notifications";
 
+const symptomTypes = [
+  { id: "heartburn", label: "Heartburn" },
+  { id: "regurgitation", label: "Regurgitation" },
+  { id: "bloating", label: "Bloating" },
+  { id: "nausea", label: "Nausea" },
+  { id: "chest_pain", label: "Chest Pain" },
+  { id: "throat", label: "Sore Throat" },
+  { id: "stomach_pain", label: "Stomach Pain" },
+  { id: "gas", label: "Gas" },
+  { id: "other", label: "Other" },
+];
+
 export default function LogSymptomScreen({ navigation }) {
   const [severity, setSeverity] = useState(2);
+  const [selectedTypes, setSelectedTypes] = useState([]);
   const [notes, setNotes] = useState("");
   const [symptomTime, setSymptomTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -22,6 +35,12 @@ export default function LogSymptomScreen({ navigation }) {
   useEffect(() => {
     posthog?.screen("LogSymptom");
   }, []);
+
+  const toggleType = (id) => {
+    setSelectedTypes((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+    );
+  };
 
   const timePresets = [
     { id: "now", label: "Just now", minutes: 0 },
@@ -38,52 +57,76 @@ export default function LogSymptomScreen({ navigation }) {
   };
 
   const handleSubmit = async () => {
+    const typeLabels = selectedTypes.map(
+      (id) => symptomTypes.find((t) => t.id === id)?.label
+    ).filter(Boolean);
+
     await saveSymptom({
       severity,
+      symptomTypes: selectedTypes,
       timestamp: symptomTime.getTime(),
       notes: notes.trim() || undefined,
     });
     posthog?.capture("symptom_logged", {
       severity,
+      symptom_types: selectedTypes,
       has_notes: Boolean(notes.trim()),
       time_preset: activePreset,
     });
-    showToast("Symptom logged!", `Severity ${severity}/5 recorded.`);
+
+    const typeText = typeLabels.length > 0 ? typeLabels.join(", ") : `Severity ${severity}/5`;
+    showToast("Symptom logged!", typeText);
     navigation.goBack();
     syncSmartNotifications().catch(() => {});
   };
 
   return (
     <Screen contentClassName="gap-6 pb-24">
-      <View className="flex-row items-center justify-between">
+      <View className="flex-row items-center">
         <Pressable onPress={() => navigation.goBack()} className="p-2 rounded-xl bg-muted/60">
           <ArrowLeft size={18} color="#1f2a30" />
         </Pressable>
-        <Text className="text-base font-semibold text-foreground">Log Symptom</Text>
+        <View className="flex-1 items-center">
+          <Text className="text-base font-semibold text-foreground">Log Symptom</Text>
+        </View>
         <View className="w-10 h-10 rounded-full bg-accent-light items-center justify-center">
           <Activity size={18} color="#f07c52" />
         </View>
       </View>
 
-      <View className="flex-row items-center gap-4 bg-card border border-border rounded-3xl p-4">
-        <View className="w-16 h-16 rounded-2xl bg-primary-light items-center justify-center">
-          <Image
-            source={require("../assets/mascot/turtle.png")}
-            className="w-12 h-12"
-            resizeMode="contain"
-          />
-        </View>
-        <View className="flex-1">
-          <Text className="text-lg font-bold text-foreground">How are you feeling?</Text>
-          <Text className="text-xs text-muted-foreground">
-            Log even mild symptoms — they help build the full picture.
-          </Text>
+      {/* Symptom type selection */}
+      <View className="gap-3">
+        <Text className="text-sm font-medium text-foreground">What are you feeling?</Text>
+        <View className="flex-row flex-wrap gap-2">
+          {symptomTypes.map((type) => {
+            const isSelected = selectedTypes.includes(type.id);
+            return (
+              <Pressable
+                key={type.id}
+                onPress={() => toggleType(type.id)}
+                className={[
+                  "px-4 py-2.5 rounded-full",
+                  isSelected ? "bg-accent" : "bg-card border border-border",
+                ].join(" ")}
+              >
+                <Text
+                  className={[
+                    "text-sm font-semibold",
+                    isSelected ? "text-white" : "text-foreground",
+                  ].join(" ")}
+                >
+                  {type.label}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       </View>
 
+      {/* Severity slider */}
       <View className="bg-card border border-border rounded-3xl p-5 space-y-4">
         <View className="flex-row items-center justify-between">
-          <Text className="text-base font-semibold text-foreground">Symptom intensity</Text>
+          <Text className="text-base font-semibold text-foreground">Intensity</Text>
           <View className="px-3 py-1 rounded-full bg-primary-light">
             <Text className="text-primary text-lg font-bold">{severity}</Text>
           </View>
@@ -96,10 +139,11 @@ export default function LogSymptomScreen({ navigation }) {
         </View>
       </View>
 
+      {/* Time presets */}
       <View className="gap-3">
         <View className="flex-row items-center gap-2">
           <Clock size={16} color="#5f6f74" />
-          <Text className="text-sm font-medium text-foreground">Time of onset</Text>
+          <Text className="text-sm font-medium text-foreground">When did it start?</Text>
         </View>
         <View className="flex-row flex-wrap gap-2">
           {timePresets.map((preset) => {
@@ -164,13 +208,14 @@ export default function LogSymptomScreen({ navigation }) {
         )}
       </View>
 
+      {/* Notes */}
       <View className="gap-2">
         <View className="flex-row items-center gap-2">
           <FileText size={16} color="#3aa27f" />
-          <Text className="text-sm font-medium text-foreground">Additional notes</Text>
+          <Text className="text-sm font-medium text-foreground">Notes (optional)</Text>
         </View>
         <TextArea
-          placeholder="Any triggers? (Spicy food, stress, coffee...)"
+          placeholder="Anything else? (what you ate, stress, etc.)"
           value={notes}
           onChangeText={setNotes}
           className="min-h-[90px] rounded-2xl"

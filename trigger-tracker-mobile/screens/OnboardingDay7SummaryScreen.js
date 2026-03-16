@@ -8,6 +8,7 @@ import Button from "../components/Button";
 import Mascot from "../components/Mascot";
 import { getDay7Summary } from "../services/onboardingPlan";
 import { EVENTS } from "../services/analytics";
+import { promptForReviewOnEvent } from "../services/reviewPrompt";
 
 export default function OnboardingDay7SummaryScreen({ navigation }) {
   const [summary, setSummary] = useState(null);
@@ -25,6 +26,8 @@ export default function OnboardingDay7SummaryScreen({ navigation }) {
           plan_adherence: s?.adherencePercent || 0,
           days_completed: s?.daysCompleted || 0,
         });
+        // Positive moment — user finished the 7-day plan
+        promptForReviewOnEvent("plan_completed").catch(() => {});
       } catch (error) {
         console.warn("Failed to load summary", error);
       } finally {

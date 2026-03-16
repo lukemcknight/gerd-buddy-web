@@ -1,7 +1,6 @@
 const {
   mapToTrafficLight,
   extractReasonTags,
-  getSaferSwaps,
   enhanceScanResult,
 } = require("../scannerAdapter");
 
@@ -32,8 +31,10 @@ describe("extractReasonTags", () => {
       score: 4,
       label: "High",
       confidence: 0.8,
+      detectedFoods: [],
       reasons: ["This meal contains high-fat content and spicy ingredients"],
       suggestions: ["Try grilled instead of fried"],
+      saferSwaps: [],
     };
 
     const tags = extractReasonTags(result);
@@ -47,8 +48,10 @@ describe("extractReasonTags", () => {
       score: 3,
       label: "Moderate",
       confidence: 0.7,
+      detectedFoods: [],
       reasons: ["Contains caffeine from coffee"],
       suggestions: [],
+      saferSwaps: [],
     };
 
     const tags = extractReasonTags(result);
@@ -60,8 +63,10 @@ describe("extractReasonTags", () => {
       score: 4,
       label: "High",
       confidence: 0.8,
+      detectedFoods: [],
       reasons: ["Known trigger"],
       suggestions: [],
+      saferSwaps: [],
       personalTriggerMatch: ["chocolate"],
     };
 
@@ -69,50 +74,35 @@ describe("extractReasonTags", () => {
     expect(tags).toContain("personal-trigger");
   });
 
+  it("extracts tags from detectedFoods", () => {
+    const result = {
+      score: 3,
+      label: "Moderate",
+      confidence: 0.7,
+      detectedFoods: ["coffee", "chocolate cake"],
+      reasons: ["Moderate risk"],
+      suggestions: [],
+      saferSwaps: [],
+    };
+
+    const tags = extractReasonTags(result);
+    expect(tags).toContain("caffeine");
+    expect(tags).toContain("chocolate");
+  });
+
   it("returns empty array for neutral results", () => {
     const result = {
       score: 1,
       label: "Low",
       confidence: 0.9,
+      detectedFoods: ["plain rice"],
       reasons: ["This looks safe to eat"],
       suggestions: [],
+      saferSwaps: [],
     };
 
     const tags = extractReasonTags(result);
     expect(tags.length).toBe(0);
-  });
-});
-
-describe("getSaferSwaps", () => {
-  it("returns max 3 swaps", () => {
-    const tags = ["acidic", "spicy", "high-fat", "caffeine"];
-    const swaps = getSaferSwaps(tags, 3);
-    expect(swaps.length).toBeLessThanOrEqual(3);
-  });
-
-  it("returns swaps for known tags", () => {
-    const swaps = getSaferSwaps(["caffeine"]);
-    expect(swaps.length).toBeGreaterThan(0);
-    expect(swaps[0].original).toBeTruthy();
-    expect(swaps[0].suggestion).toBeTruthy();
-    expect(swaps[0].reason).toBeTruthy();
-  });
-
-  it("returns empty array for no tags", () => {
-    const swaps = getSaferSwaps([]);
-    expect(swaps).toEqual([]);
-  });
-
-  it("skips personal-trigger tag", () => {
-    const swaps = getSaferSwaps(["personal-trigger"]);
-    expect(swaps).toEqual([]);
-  });
-
-  it("avoids duplicate suggestions", () => {
-    const swaps = getSaferSwaps(["acidic", "citrus"]); // both may suggest non-acidic fruit
-    const suggestions = swaps.map((s) => s.suggestion);
-    const unique = new Set(suggestions);
-    expect(suggestions.length).toBe(unique.size);
   });
 });
 
@@ -122,31 +112,57 @@ describe("enhanceScanResult", () => {
       score: 1,
       label: "Low",
       confidence: 0.9,
+      detectedFoods: ["plain rice"],
       reasons: ["Plain rice is generally safe"],
       suggestions: ["Keep portions moderate"],
+      saferSwaps: [],
     };
 
     const enhanced = enhanceScanResult(result);
     expect(enhanced.trafficLight).toBe("Likely Safe");
-    expect(enhanced.saferSwaps).toEqual([]); // No swaps for safe food
+    expect(enhanced.saferSwaps).toEqual([]);
+    expect(enhanced.detectedFoods).toEqual(["plain rice"]);
     expect(enhanced.score).toBe(1);
     expect(enhanced.reasons).toEqual(result.reasons);
   });
 
-  it("enhances a high-risk result with swaps", () => {
+  it("enhances a high-risk result with AI swaps", () => {
     const result = {
       score: 5,
       label: "High",
       confidence: 0.9,
+      detectedFoods: ["fried chicken", "hot sauce"],
       reasons: ["Very spicy and acidic dish with fried elements"],
       suggestions: ["Avoid this meal"],
+      saferSwaps: [
+        { original: "Fried chicken", suggestion: "Grilled chicken", reason: "Less fat" },
+        { original: "Hot sauce", suggestion: "Herbs", reason: "No capsaicin" },
+      ],
     };
 
     const enhanced = enhanceScanResult(result);
     expect(enhanced.trafficLight).toBe("Likely Trigger");
     expect(enhanced.reasonTags.length).toBeGreaterThan(0);
-    expect(enhanced.saferSwaps.length).toBeGreaterThan(0);
-    expect(enhanced.saferSwaps.length).toBeLessThanOrEqual(3);
+    expect(enhanced.saferSwaps.length).toBe(2);
+    expect(enhanced.saferSwaps[0].suggestion).toBe("Grilled chicken");
+  });
+
+  it("does not include swaps for safe foods even if AI provided them", () => {
+    const result = {
+      score: 1,
+      label: "Low",
+      confidence: 0.9,
+      detectedFoods: ["banana"],
+      reasons: ["Safe fruit"],
+      suggestions: [],
+      saferSwaps: [
+        { original: "Banana", suggestion: "Apple", reason: "Variety" },
+      ],
+    };
+
+    const enhanced = enhanceScanResult(result);
+    expect(enhanced.trafficLight).toBe("Likely Safe");
+    expect(enhanced.saferSwaps).toEqual([]);
   });
 
   it("preserves all original fields", () => {
@@ -154,8 +170,10 @@ describe("enhanceScanResult", () => {
       score: 3,
       label: "Moderate",
       confidence: 0.6,
+      detectedFoods: ["pasta", "garlic bread"],
       reasons: ["Moderate risk"],
       suggestions: ["Be careful"],
+      saferSwaps: [],
       personalTriggerMatch: ["onion"],
     };
 
@@ -163,6 +181,7 @@ describe("enhanceScanResult", () => {
     expect(enhanced.score).toBe(3);
     expect(enhanced.label).toBe("Moderate");
     expect(enhanced.confidence).toBe(0.6);
+    expect(enhanced.detectedFoods).toEqual(["pasta", "garlic bread"]);
     expect(enhanced.personalTriggerMatch).toEqual(["onion"]);
   });
 });

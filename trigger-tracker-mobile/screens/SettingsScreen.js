@@ -16,7 +16,7 @@ import {
   syncSmartNotifications,
 } from "../services/notifications";
 
-const APP_VERSION = "1.0.5";
+const APP_VERSION = "2.0.0";
 
 export default function SettingsScreen({ navigation }) {
   const {
@@ -189,9 +189,9 @@ export default function SettingsScreen({ navigation }) {
         </Text>
         <Card className="divide-y divide-border">
           <View className="flex-row items-center justify-between p-4">
-            <View className="flex-row items-center gap-3">
+            <View className="flex-row items-center gap-3 flex-1 mr-3">
               <Bell size={20} color="#3aa27f" />
-              <View>
+              <View className="flex-1">
                 <Text className="font-medium text-foreground">Daily Reminders</Text>
                 <Text className="text-sm text-muted-foreground">Remind me to log meals</Text>
               </View>
@@ -200,9 +200,9 @@ export default function SettingsScreen({ navigation }) {
           </View>
 
           <View className="flex-row items-center justify-between p-4">
-            <View className="flex-row items-center gap-3">
+            <View className="flex-row items-center gap-3 flex-1 mr-3">
               <Moon size={20} color="#5f6f74" />
-              <View>
+              <View className="flex-1">
                 <Text className="font-medium text-foreground">Evening Reminder</Text>
                 <Text className="text-sm text-muted-foreground">
                   Avoid eating 2 hours before bed
@@ -243,11 +243,11 @@ export default function SettingsScreen({ navigation }) {
             {isAuthenticated ? (
               <>
                 <View className="flex-row items-center justify-between p-4">
-                  <View className="flex-row items-center gap-3">
+                  <View className="flex-row items-center gap-3 flex-1">
                     <Mail size={20} color="#3aa27f" />
-                    <View>
+                    <View className="flex-1">
                       <Text className="font-medium text-foreground">Email</Text>
-                      <Text className="text-sm text-muted-foreground">
+                      <Text className="text-sm text-muted-foreground" numberOfLines={1}>
                         {authUser?.email}
                       </Text>
                     </View>
@@ -276,9 +276,9 @@ export default function SettingsScreen({ navigation }) {
                   onPress={() => navigation.navigate("SignUp")}
                   className="flex-row items-center justify-between p-4"
                 >
-                  <View className="flex-row items-center gap-3">
+                  <View className="flex-row items-center gap-3 flex-1 mr-3">
                     <User size={20} color="#3aa27f" />
-                    <View>
+                    <View className="flex-1">
                       <Text className="font-medium text-foreground">Create Account</Text>
                       <Text className="text-sm text-muted-foreground">
                         Sync your data across devices
@@ -332,7 +332,7 @@ export default function SettingsScreen({ navigation }) {
               <Text className="font-medium text-foreground">About the Developer</Text>
             </View>
             <Text className="text-sm text-muted-foreground leading-relaxed">
-              My name is Luke, and I am a 19 year old college student that struggles with GERD and wanted to help others that also struggle. Over winter break, I grinded multiple hours a day working on GERDBuddy to bring users the best possible experience, and something that acutally helps. I didn't want people to waste time tracking meals and symptoms, so I try to constantly improve. If there is any suggestions you have on improvements for the app, please feel free to leave them down below. Thanks!
+              My name is Luke, and I'm a 19 year old college student who struggles with GERD. I built GERDBuddy to help others like me track their triggers and take control of their symptoms. I'm constantly working to improve the app and make it genuinely useful. If you have any suggestions, I'd love to hear them below!
             </Text>
           </View>
           <Pressable
@@ -397,9 +397,9 @@ export default function SettingsScreen({ navigation }) {
               onPress={() => setShowFeedbackForm(true)}
               className="flex-row items-center justify-between p-4"
             >
-              <View className="flex-row items-center gap-3">
+              <View className="flex-row items-center gap-3 flex-1 mr-3">
                 <MessageSquare size={20} color="#3aa27f" />
-                <View>
+                <View className="flex-1">
                   <Text className="font-medium text-foreground">Send Feedback</Text>
                   <Text className="text-sm text-muted-foreground">Bug reports, ideas, or questions</Text>
                 </View>
@@ -495,7 +495,7 @@ export default function SettingsScreen({ navigation }) {
 
       <View className="items-center gap-1 pt-4 pb-2">
         <Text className="text-sm text-muted-foreground">GERDBuddy v{APP_VERSION}</Text>
-        <Text className="text-xs text-muted-foreground">Built by someone that struggles with GERD</Text>
+        <Text className="text-xs text-muted-foreground">Built by someone who gets it</Text>
       </View>
     </Screen>
   );

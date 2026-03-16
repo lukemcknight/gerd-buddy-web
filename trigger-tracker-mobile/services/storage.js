@@ -96,6 +96,7 @@ export const createUser = async (...args) => {
         };
 
   const {
+    conditions = ["gerd"],
     topSymptoms = [],
     symptomTiming = [],
     symptomFrequency = null,
@@ -114,6 +115,7 @@ export const createUser = async (...args) => {
   const user = {
     id: generateId(),
     onboardingComplete: true,
+    conditions,
     symptoms: topSymptoms,
     topSymptoms,
     symptomTiming,
@@ -261,8 +263,22 @@ export const clearAllData = async () => {
     "known_triggers_v1",
     "smart_notification_ids_v1",
     "gerdbuddy_onboarding_plan",
+    "gerdbuddy_seen_accessories",
   ]);
 };
+
+// ── Buddy accessory tracking ──────────────────────────────────────────
+const SEEN_ACCESSORIES_KEY = "gerdbuddy_seen_accessories";
+
+export const getSeenAccessories = async () => readJson(SEEN_ACCESSORIES_KEY, []);
+
+export const markAccessorySeen = async (accessoryId) => {
+  const seen = await getSeenAccessories();
+  if (!seen.includes(accessoryId)) {
+    await writeJson(SEEN_ACCESSORIES_KEY, [...seen, accessoryId]);
+  }
+};
+
 
 export const getPersonalTriggers = async (limit = 10) => {
   const [meals, symptoms] = await Promise.all([getMeals(), getSymptoms()]);

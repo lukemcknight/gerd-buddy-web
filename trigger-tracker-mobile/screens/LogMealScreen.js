@@ -14,14 +14,14 @@ import { showToast } from "../utils/feedback";
 import { syncSmartNotifications } from "../services/notifications";
 
 const quickMeals = [
-  "☕ Coffee",
-  "🍕 Pizza",
-  "🍝 Pasta with tomato sauce",
-  "🌶️ Spicy food",
-  "🍫 Chocolate",
-  "🍊 Citrus fruit",
-  "🧅 Onions or garlic",
-  "🍟 Fried food",
+  "Coffee",
+  "Pizza",
+  "Pasta with tomato sauce",
+  "Spicy food",
+  "Chocolate",
+  "Citrus fruit",
+  "Onions or garlic",
+  "Fried food",
 ];
 
 export default function LogMealScreen({ navigation }) {
@@ -35,9 +35,8 @@ export default function LogMealScreen({ navigation }) {
   }, []);
 
   const handleQuickAdd = (meal) => {
-    const cleanMeal = meal.replace(/^\S+\s/, "");
-    setMealText((prev) => (prev ? `${prev}, ${cleanMeal}` : cleanMeal));
-    posthog?.capture("quick_add_used", { meal: cleanMeal });
+    setMealText((prev) => (prev ? `${prev}, ${meal}` : meal));
+    posthog?.capture("quick_add_used", { meal });
   };
 
   const handleSubmit = async () => {

@@ -6,6 +6,7 @@ export type SeverityLevel = "light" | "moderate" | "severe";
 export type MedsStatus = "none" | "ppi" | "h2" | "other";
 
 export type TriageAnswers = {
+  conditions?: string[]; // ["gerd"], ["gastritis"], or ["gerd", "gastritis"]
   severity: SeverityLevel;
   fearFoods: string[];
   customFearFoods: string[];
@@ -96,7 +97,7 @@ export const isPlanComplete = (plan: OnboardingPlan): boolean => {
 
 // ── Fear food options ──────────────────────────────────────────────────
 
-export const FEAR_FOOD_OPTIONS = [
+export const GERD_FEAR_FOOD_OPTIONS = [
   { id: "tomato", label: "Tomatoes / tomato sauce" },
   { id: "coffee", label: "Coffee" },
   { id: "chocolate", label: "Chocolate" },
@@ -110,6 +111,48 @@ export const FEAR_FOOD_OPTIONS = [
   { id: "onion_garlic", label: "Onions / garlic" },
   { id: "fatty_meats", label: "Fatty meats" },
 ];
+
+export const GASTRITIS_FEAR_FOOD_OPTIONS = [
+  { id: "spicy", label: "Spicy foods" },
+  { id: "alcohol", label: "Alcohol" },
+  { id: "coffee", label: "Coffee / caffeine" },
+  { id: "fried", label: "Fried / greasy foods" },
+  { id: "acidic", label: "Acidic foods (tomatoes, citrus)" },
+  { id: "dairy", label: "Dairy products" },
+  { id: "processed", label: "Processed / packaged foods" },
+  { id: "red_meat", label: "Red meat" },
+  { id: "carbonated", label: "Carbonated drinks" },
+  { id: "onion_garlic", label: "Onions / garlic" },
+  { id: "nsaids", label: "NSAIDs (ibuprofen, aspirin)" },
+  { id: "heavy_meals", label: "Large / heavy meals" },
+];
+
+export const BOTH_FEAR_FOOD_OPTIONS = [
+  { id: "spicy", label: "Spicy foods" },
+  { id: "coffee", label: "Coffee / caffeine" },
+  { id: "alcohol", label: "Alcohol" },
+  { id: "fried", label: "Fried / greasy foods" },
+  { id: "tomato", label: "Tomatoes / tomato sauce" },
+  { id: "citrus", label: "Citrus fruits" },
+  { id: "chocolate", label: "Chocolate" },
+  { id: "dairy", label: "Dairy products" },
+  { id: "carbonated", label: "Carbonated drinks" },
+  { id: "onion_garlic", label: "Onions / garlic" },
+  { id: "processed", label: "Processed / packaged foods" },
+  { id: "mint", label: "Mint / peppermint" },
+  { id: "heavy_meals", label: "Large / heavy meals" },
+];
+
+/** @deprecated Use condition-specific options instead */
+export const FEAR_FOOD_OPTIONS = GERD_FEAR_FOOD_OPTIONS;
+
+export const getFearFoodOptions = (conditions: string[] = ["gerd"]) => {
+  const hasGerd = conditions.includes("gerd");
+  const hasGastritis = conditions.includes("gastritis");
+  if (hasGerd && hasGastritis) return BOTH_FEAR_FOOD_OPTIONS;
+  if (hasGastritis) return GASTRITIS_FEAR_FOOD_OPTIONS;
+  return GERD_FEAR_FOOD_OPTIONS;
+};
 
 export const MEAL_TIME_OPTIONS = [
   { id: "breakfast", label: "Breakfast (~7-9 AM)" },
@@ -138,6 +181,10 @@ const buildDayTasks = (
   const isModerate = triage.severity === "moderate";
   const hasFearFoods = triage.fearFoods.length > 0 || triage.customFearFoods.length > 0;
   const onMeds = triage.medsStatus !== "none";
+  const conditions = triage.conditions || ["gerd"];
+  const hasGerd = conditions.includes("gerd");
+  const hasGastritis = conditions.includes("gastritis");
+  const gastritisOnly = hasGastritis && !hasGerd;
 
   const plans: Record<number, { focus: string; tasks: string[] }> = {
     1: {
@@ -146,7 +193,9 @@ const buildDayTasks = (
         "Log every meal today (aim for at least 2)",
         "Note how you feel 1-2 hours after each meal",
         ...(isSevere ? ["Avoid your top fear food today"] : []),
-        "Set a bedtime eating cutoff (3 hours before bed)",
+        ...(gastritisOnly
+          ? ["Try eating smaller, more frequent meals today"]
+          : ["Set a bedtime eating cutoff (3 hours before bed)"]),
       ],
     },
     2: {
@@ -154,7 +203,9 @@ const buildDayTasks = (
       tasks: [
         "Log all meals and any symptoms",
         "Eat smaller portions at dinner",
-        "Try not to lie down within 2 hours of eating",
+        ...(gastritisOnly
+          ? ["Notice if stress affects your symptoms today"]
+          : ["Try not to lie down within 2 hours of eating"]),
         ...(onMeds ? ["Take medication at the same time today"] : []),
       ],
     },
@@ -175,9 +226,9 @@ const buildDayTasks = (
         "Log all meals and symptoms",
         "Choose meals you know are safe for you",
         "Eat slowly — aim for 20+ minutes per meal",
-        ...(isModerate || isSevere
-          ? ["Elevate your head while sleeping tonight"]
-          : []),
+        ...(gastritisOnly
+          ? (isModerate || isSevere ? ["Try a bland, gentle meal for dinner tonight"] : [])
+          : (isModerate || isSevere ? ["Elevate your head while sleeping tonight"] : [])),
       ],
     },
     5: {

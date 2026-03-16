@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { cn } from "../utils/style";
 
 const severityLabels = ["None", "Mild", "Light", "Moderate", "Severe", "Intense"];
-const severityEmojis = ["😊", "😐", "😕", "😣", "😖", "😫"];
+const severityColors = ["#3aa27f", "#5db88a", "#c4a93a", "#e0943a", "#e06a3a", "#d44040"];
 
 const severityColor = (value) => {
   if (value <= 1) return "text-success";
@@ -32,7 +32,10 @@ export const SeveritySlider = ({ value, onChange, className, showHeader = true }
         <View className="flex-row items-center justify-between">
           <Text className="text-sm text-muted-foreground font-medium">Severity</Text>
           <View className="flex-row items-center gap-2">
-            <Text className="text-2xl">{severityEmojis[value]}</Text>
+            <View
+              className="w-6 h-6 rounded-full"
+              style={{ backgroundColor: severityColors[value] }}
+            />
             <Text className={cn("font-semibold", severityColor(value))}>
               {severityLabels[value]}
             </Text>

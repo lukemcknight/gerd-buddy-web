@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Text, View, Pressable, TextInput } from "react-native";
 import {
   ArrowRight, Clock, CalendarDays, Activity, Utensils, Moon, Bell,
-  Pill, AlertTriangle, ChevronRight,
+  Pill, AlertTriangle, ChevronRight, Heart,
 } from "lucide-react-native";
 import { usePostHog } from "posthog-react-native";
 import Screen from "../components/Screen";
@@ -12,7 +12,7 @@ import { createUser } from "../services/storage";
 import { configureRevenueCat } from "../services/revenuecat";
 import { registerForPushNotifications, syncReminderNotifications } from "../services/notifications";
 import { showToast } from "../utils/feedback";
-import { generatePlan, FEAR_FOOD_OPTIONS, MEAL_TIME_OPTIONS, MEDS_OPTIONS } from "../services/onboardingPlan";
+import { generatePlan, getFearFoodOptions, MEAL_TIME_OPTIONS, MEDS_OPTIONS } from "../services/onboardingPlan";
 import { EVENTS } from "../services/analytics";
 
 const symptomTimingOptions = [
@@ -29,13 +29,33 @@ const symptomFrequencyOptions = [
   { id: "daily", label: "Daily" },
 ];
 
-const topSymptomOptions = [
-  { id: "heartburn", label: "Heartburn", emoji: "🔥" },
-  { id: "chest_burning", label: "Chest burning", emoji: "💥" },
-  { id: "regurgitation", label: "Regurgitation", emoji: "😮‍💨" },
-  { id: "sour_taste", label: "Sour taste", emoji: "🍋" },
-  { id: "throat_irritation", label: "Throat irritation / cough", emoji: "🧣" },
-  { id: "bloating_pressure", label: "Bloating / pressure", emoji: "🎈" },
+const gerdSymptomOptions = [
+  { id: "heartburn", label: "Heartburn" },
+  { id: "chest_burning", label: "Chest burning" },
+  { id: "regurgitation", label: "Regurgitation" },
+  { id: "sour_taste", label: "Sour taste" },
+  { id: "throat_irritation", label: "Throat irritation / cough" },
+  { id: "bloating_pressure", label: "Bloating / pressure" },
+];
+
+const gastritisSymptomOptions = [
+  { id: "stomach_pain", label: "Stomach pain / cramping" },
+  { id: "nausea", label: "Nausea" },
+  { id: "bloating_pressure", label: "Bloating / pressure" },
+  { id: "loss_of_appetite", label: "Loss of appetite" },
+  { id: "feeling_full", label: "Feeling full quickly" },
+  { id: "indigestion", label: "Indigestion / burning" },
+];
+
+const bothSymptomOptions = [
+  { id: "heartburn", label: "Heartburn" },
+  { id: "stomach_pain", label: "Stomach pain / cramping" },
+  { id: "nausea", label: "Nausea" },
+  { id: "regurgitation", label: "Regurgitation" },
+  { id: "bloating_pressure", label: "Bloating / pressure" },
+  { id: "sour_taste", label: "Sour taste" },
+  { id: "throat_irritation", label: "Throat irritation / cough" },
+  { id: "loss_of_appetite", label: "Loss of appetite" },
 ];
 
 const afterEatingOptions = [
@@ -49,6 +69,11 @@ const lyingDownOptions = [
   { id: "yes", label: "Yes" },
   { id: "no", label: "No" },
   { id: "sometimes", label: "Sometimes" },
+];
+
+const conditionOptions = [
+  { id: "gerd", label: "Acid Reflux / GERD" },
+  { id: "gastritis", label: "Gastritis" },
 ];
 
 const severityOptions = [
@@ -68,6 +93,8 @@ export default function OnboardingScreen({ navigation, route }) {
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
+  // Condition selection
+  const [conditions, setConditions] = useState([]);
   // New triage fields
   const [severity, setSeverity] = useState(null);
   const [fearFoods, setFearFoods] = useState([]);
@@ -77,7 +104,7 @@ export default function OnboardingScreen({ navigation, route }) {
   const [medsStatus, setMedsStatus] = useState(null);
 
   const onComplete = route?.params?.onComplete;
-  const totalSteps = 10; // 0=welcome, 1=severity, 2=timing, 3=frequency, 4=symptoms, 5=afterEating, 6=lyingDown, 7=fearFoods, 8=mealTimes+meds, 9=reminders
+  const totalSteps = 11; // 0=welcome, 1=conditions, 2=severity, 3=timing, 4=frequency, 5=symptoms, 6=afterEating, 7=lyingDown, 8=fearFoods, 9=mealTimes+meds, 10=reminders
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -93,6 +120,12 @@ export default function OnboardingScreen({ navigation, route }) {
       posthog?.capture("onboarding_step_completed", { step: step - 1 });
     }
   }, [step]);
+
+  const handleConditionToggle = (id) => {
+    setConditions((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  };
 
   const handleSymptomToggle = (id) => {
     setTopSymptoms((prev) =>
@@ -170,6 +203,7 @@ export default function OnboardingScreen({ navigation, route }) {
     try {
       const reminderSettings = await normalizeReminderSettings();
       const user = await createUser({
+        conditions: conditions.length > 0 ? conditions : ["gerd"],
         topSymptoms,
         symptomTiming,
         symptomFrequency,
@@ -196,6 +230,7 @@ export default function OnboardingScreen({ navigation, route }) {
 
       // Generate 7-day plan
       const plan = await generatePlan({
+        conditions: conditions.length > 0 ? conditions : ["gerd"],
         severity: severity || "moderate",
         fearFoods,
         customFearFoods,
@@ -204,6 +239,7 @@ export default function OnboardingScreen({ navigation, route }) {
       });
 
       posthog?.capture(EVENTS.ONBOARDING_TRIAGE_COMPLETED, {
+        conditions,
         severity_level: severity,
         fear_foods_count: fearFoods.length + customFearFoods.length,
         meds_status: medsStatus,
@@ -301,7 +337,7 @@ export default function OnboardingScreen({ navigation, route }) {
               GERDBuddy
             </Text>
             <Text className="text-lg text-muted-foreground text-center leading-relaxed">
-              Your calm companion for understanding GERD patterns
+              Your calm companion for acid reflux & gastritis
             </Text>
           </View>
           <View className="w-full gap-4 mt-4">
@@ -312,6 +348,7 @@ export default function OnboardingScreen({ navigation, route }) {
               className="w-full py-5 rounded-2xl shadow-sm"
               onPress={() => setStep(1)}
             >
+
               <View className="flex-row items-center justify-center gap-3">
                 <Text className="text-primary-foreground font-bold text-lg">Get Started</Text>
                 <ArrowRight size={20} color="#ffffff" />
@@ -324,8 +361,40 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* Step 1: Symptom Severity (NEW) */}
+      {/* Step 1: Condition Selection */}
       {step === 1 && (
+        <View className="gap-6">
+          <View className="items-center gap-3">
+            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
+              <Heart size={26} color="#3aa27f" />
+            </View>
+            <Text className="text-2xl font-bold text-foreground">
+              What are you dealing with?
+            </Text>
+            <Text className="text-muted-foreground">Select all that apply</Text>
+          </View>
+
+          <View className="gap-3">
+            {conditionOptions.map((option) =>
+              renderMultiSelectOption(option, conditions, handleConditionToggle)
+            )}
+          </View>
+
+          <Button
+            disabled={conditions.length === 0}
+            onPress={() => setStep(2)}
+            className="w-full py-4 rounded-2xl"
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
+            </View>
+          </Button>
+        </View>
+      )}
+
+      {/* Step 2: Symptom Severity */}
+      {step === 2 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
@@ -345,7 +414,7 @@ export default function OnboardingScreen({ navigation, route }) {
 
           <Button
             disabled={!severity}
-            onPress={() => setStep(2)}
+            onPress={() => setStep(3)}
             className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
@@ -356,8 +425,8 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* Step 2: Symptom Timing */}
-      {step === 2 && (
+      {/* Step 3: Symptom Timing */}
+      {step === 3 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
@@ -377,7 +446,7 @@ export default function OnboardingScreen({ navigation, route }) {
 
           <Button
             disabled={symptomTiming.length === 0}
-            onPress={() => setStep(3)}
+            onPress={() => setStep(4)}
             className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
@@ -388,15 +457,15 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* Step 3: Frequency */}
-      {step === 3 && (
+      {/* Step 4: Frequency */}
+      {step === 4 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
               <CalendarDays size={26} color="#f07c52" />
             </View>
             <Text className="text-2xl font-bold text-foreground">
-              How often do you experience reflux symptoms?
+              How often do you experience symptoms?
             </Text>
             <Text className="text-muted-foreground">Choose one</Text>
           </View>
@@ -409,36 +478,6 @@ export default function OnboardingScreen({ navigation, route }) {
 
           <Button
             disabled={!symptomFrequency}
-            onPress={() => setStep(4)}
-            className="w-full py-4 rounded-2xl"
-          >
-            <View className="flex-row items-center justify-center gap-2">
-              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
-              <ArrowRight size={18} color="#ffffff" />
-            </View>
-          </Button>
-        </View>
-      )}
-
-      {/* Step 4: Top Symptoms */}
-      {step === 4 && (
-        <View className="gap-6">
-          <View className="items-center gap-3">
-            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
-              <Activity size={26} color="#3aa27f" />
-            </View>
-            <Text className="text-2xl font-bold text-foreground">Which symptoms do you experience most?</Text>
-            <Text className="text-muted-foreground">Select all that apply</Text>
-          </View>
-
-          <View className="gap-3">
-            {topSymptomOptions.map((symptom) =>
-              renderMultiSelectOption(symptom, topSymptoms, handleSymptomToggle)
-            )}
-          </View>
-
-          <Button
-            disabled={topSymptoms.length === 0}
             onPress={() => setStep(5)}
             className="w-full py-4 rounded-2xl"
           >
@@ -450,8 +489,43 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* Step 5: After Eating */}
+      {/* Step 5: Top Symptoms */}
       {step === 5 && (
+        <View className="gap-6">
+          <View className="items-center gap-3">
+            <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
+              <Activity size={26} color="#3aa27f" />
+            </View>
+            <Text className="text-2xl font-bold text-foreground">Which symptoms do you experience most?</Text>
+            <Text className="text-muted-foreground">Select all that apply</Text>
+          </View>
+
+          <View className="gap-3">
+            {(conditions.includes("gerd") && conditions.includes("gastritis")
+              ? bothSymptomOptions
+              : conditions.includes("gastritis")
+              ? gastritisSymptomOptions
+              : gerdSymptomOptions
+            ).map((symptom) =>
+              renderMultiSelectOption(symptom, topSymptoms, handleSymptomToggle)
+            )}
+          </View>
+
+          <Button
+            disabled={topSymptoms.length === 0}
+            onPress={() => setStep(6)}
+            className="w-full py-4 rounded-2xl"
+          >
+            <View className="flex-row items-center justify-center gap-2">
+              <Text className="text-primary-foreground font-bold text-base">Continue</Text>
+              <ArrowRight size={18} color="#ffffff" />
+            </View>
+          </Button>
+        </View>
+      )}
+
+      {/* Step 6: After Eating */}
+      {step === 6 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
@@ -470,7 +544,7 @@ export default function OnboardingScreen({ navigation, route }) {
 
           <Button
             disabled={!symptomAfterEating}
-            onPress={() => setStep(6)}
+            onPress={() => setStep(7)}
             className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
@@ -481,8 +555,8 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* Step 6: Lying Down */}
-      {step === 6 && (
+      {/* Step 7: Lying Down */}
+      {step === 7 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
@@ -499,7 +573,7 @@ export default function OnboardingScreen({ navigation, route }) {
 
           <Button
             disabled={!worseLyingDown}
-            onPress={() => setStep(7)}
+            onPress={() => setStep(8)}
             className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
@@ -510,8 +584,8 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* Step 7: Fear Foods (NEW) */}
-      {step === 7 && (
+      {/* Step 8: Fear Foods */}
+      {step === 8 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-accent-light items-center justify-center">
@@ -524,7 +598,7 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
 
           <View className="gap-2">
-            {FEAR_FOOD_OPTIONS.map((option) =>
+            {getFearFoodOptions(conditions).map((option) =>
               renderMultiSelectOption(option, fearFoods, handleFearFoodToggle)
             )}
           </View>
@@ -567,7 +641,7 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
 
           <Button
-            onPress={() => setStep(8)}
+            onPress={() => setStep(9)}
             className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
@@ -580,8 +654,8 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* Step 8: Meal Times + Meds (NEW) */}
-      {step === 8 && (
+      {/* Step 9: Meal Times + Meds */}
+      {step === 9 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">
@@ -616,7 +690,7 @@ export default function OnboardingScreen({ navigation, route }) {
 
           <Button
             disabled={mealTimes.length === 0 || !medsStatus}
-            onPress={() => setStep(9)}
+            onPress={() => setStep(10)}
             className="w-full py-4 rounded-2xl"
           >
             <View className="flex-row items-center justify-center gap-2">
@@ -627,8 +701,8 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
       )}
 
-      {/* Step 9: Reminders */}
-      {step === 9 && (
+      {/* Step 10: Reminders */}
+      {step === 10 && (
         <View className="gap-6">
           <View className="items-center gap-3">
             <View className="w-14 h-14 rounded-2xl bg-primary/10 items-center justify-center">

@@ -1,4 +1,4 @@
-import type { FoodAnalysisResult } from "./foodAnalysis";
+import type { FoodAnalysisResult, SaferSwapResult } from "./foodAnalysis";
 
 // ── Traffic light labels ───────────────────────────────────────────────
 
@@ -20,16 +20,13 @@ export type ReasonTag =
   | "onion"
   | "personal-trigger";
 
-export type SaferSwap = {
-  original: string;
-  suggestion: string;
-  reason: string;
-};
+export type SaferSwap = SaferSwapResult;
 
 export type EnhancedScanResult = {
   trafficLight: TrafficLightLabel;
   reasonTags: ReasonTag[];
   saferSwaps: SaferSwap[];
+  detectedFoods: string[];
   // Original fields preserved
   score: number;
   label: string;
@@ -76,6 +73,7 @@ export const extractReasonTags = (
   const searchText = [
     ...result.reasons,
     ...result.suggestions,
+    ...(result.detectedFoods || []),
   ]
     .join(" ")
     .toLowerCase();
@@ -97,81 +95,6 @@ export const extractReasonTags = (
   return Array.from(tags);
 };
 
-// ── Safer swaps ────────────────────────────────────────────────────────
-
-// TODO: When backend supports swaps, fetch from API instead
-const SWAP_DATABASE: Record<string, SaferSwap[]> = {
-  acidic: [
-    { original: "Tomato sauce", suggestion: "Pesto or olive oil dressing", reason: "Lower acidity" },
-    { original: "Orange juice", suggestion: "Melon or banana smoothie", reason: "Non-acidic fruit" },
-  ],
-  spicy: [
-    { original: "Hot sauce", suggestion: "Herbs (basil, oregano, thyme)", reason: "Flavor without heat" },
-    { original: "Chili peppers", suggestion: "Bell peppers", reason: "Sweet pepper, no capsaicin" },
-  ],
-  "high-fat": [
-    { original: "Fried chicken", suggestion: "Grilled or baked chicken", reason: "Less fat, same protein" },
-    { original: "Cream sauce", suggestion: "Broth-based sauce", reason: "Lighter on the stomach" },
-  ],
-  caffeine: [
-    { original: "Coffee", suggestion: "Low-acid coffee or herbal tea", reason: "Less stomach irritation" },
-    { original: "Energy drink", suggestion: "Water with lemon (small amount)", reason: "Hydration without caffeine" },
-  ],
-  carbonation: [
-    { original: "Soda", suggestion: "Still water or herbal tea", reason: "No gas buildup" },
-    { original: "Sparkling water", suggestion: "Still water with cucumber", reason: "Refreshing, no bubbles" },
-  ],
-  mint: [
-    { original: "Peppermint tea", suggestion: "Chamomile or ginger tea", reason: "Soothing without relaxing LES" },
-  ],
-  chocolate: [
-    { original: "Chocolate dessert", suggestion: "Vanilla pudding or banana", reason: "Sweet without theobromine" },
-  ],
-  alcohol: [
-    { original: "Wine", suggestion: "Non-alcoholic alternative", reason: "Avoids acid stimulation" },
-  ],
-  fried: [
-    { original: "French fries", suggestion: "Baked potato wedges", reason: "Same taste, less grease" },
-    { original: "Fried fish", suggestion: "Baked or steamed fish", reason: "Lighter preparation" },
-  ],
-  citrus: [
-    { original: "Orange", suggestion: "Banana or melon", reason: "Non-acidic fruit" },
-  ],
-  dairy: [
-    { original: "Whole milk", suggestion: "Almond or oat milk", reason: "Plant-based, easier to digest" },
-  ],
-  garlic: [
-    { original: "Raw garlic", suggestion: "Garlic-infused oil (strained)", reason: "Milder flavor, less irritation" },
-  ],
-  onion: [
-    { original: "Raw onion", suggestion: "Cooked onion (small amounts)", reason: "Cooking reduces irritation" },
-  ],
-};
-
-export const getSaferSwaps = (
-  reasonTags: ReasonTag[],
-  maxSwaps: number = 3
-): SaferSwap[] => {
-  const swaps: SaferSwap[] = [];
-
-  for (const tag of reasonTags) {
-    if (tag === "personal-trigger") continue;
-    const tagSwaps = SWAP_DATABASE[tag];
-    if (tagSwaps) {
-      for (const swap of tagSwaps) {
-        if (swaps.length >= maxSwaps) break;
-        // Avoid duplicates
-        if (!swaps.some((s) => s.suggestion === swap.suggestion)) {
-          swaps.push(swap);
-        }
-      }
-    }
-    if (swaps.length >= maxSwaps) break;
-  }
-
-  return swaps;
-};
-
 // ── Main adapter ───────────────────────────────────────────────────────
 
 export const enhanceScanResult = (
@@ -179,13 +102,14 @@ export const enhanceScanResult = (
 ): EnhancedScanResult => {
   const trafficLight = mapToTrafficLight(result.label, result.score);
   const reasonTags = extractReasonTags(result);
-  const saferSwaps =
-    trafficLight !== "Likely Safe" ? getSaferSwaps(reasonTags) : [];
+  // Use AI-generated swaps directly
+  const saferSwaps = trafficLight !== "Likely Safe" ? (result.saferSwaps || []) : [];
 
   return {
     trafficLight,
     reasonTags,
     saferSwaps,
+    detectedFoods: result.detectedFoods || [],
     score: result.score,
     label: result.label,
     confidence: result.confidence,

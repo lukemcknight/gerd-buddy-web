@@ -38,7 +38,7 @@ const bypassFlag = process.env.EXPO_PUBLIC_BYPASS_PAYWALL;
 const shouldBypassPaywall = isExpoGo || (__DEV__ && bypassFlag !== "false");
 
 const benefits = [
-  { icon: Camera, text: "Scan any meal — get instant GERD risk analysis" },
+  { icon: Camera, text: "Scan any meal — get instant digestive risk analysis" },
   { icon: TrendingUp, text: "Full trigger analysis with confidence scores" },
   { icon: Zap, text: "Detailed analytics: severity, timing & symptom-free days" },
   { icon: ShieldCheck, text: "Share your pattern reports with your doctor" },
@@ -456,7 +456,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
           className="rounded-2xl"
         />
         <Text className="text-center text-2xl font-extrabold text-foreground">
-          {isScannerLimit ? scannerLimitHeadline : "Find your top reflux triggers in 14 days."}
+          {isScannerLimit ? scannerLimitHeadline : "Find your top triggers in 14 days."}
         </Text>
         <Text className="text-center text-sm text-muted-foreground px-4">
           {isScannerLimit

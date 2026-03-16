@@ -13,12 +13,20 @@ export type PersonalTrigger = {
   avgSeverity: number;
 };
 
+export type SaferSwapResult = {
+  original: string;
+  suggestion: string;
+  reason: string;
+};
+
 export type FoodAnalysisResult = {
   score: number; // 1–5
   label: "Low" | "Moderate" | "High";
   confidence: number; // 0–1
+  detectedFoods: string[]; // what the AI sees in the photo
   reasons: string[];
   suggestions: string[];
+  saferSwaps: SaferSwapResult[]; // AI-generated swaps for detected trigger items
   personalTriggerMatch?: string[]; // ingredients that matched user's personal triggers
 };
 
@@ -34,8 +42,10 @@ const fallbackResult: FoodAnalysisResult = {
   score: 3,
   label: "Moderate",
   confidence: 0.5,
+  detectedFoods: [],
   reasons: ["We could not confidently read this image. Try a clearer photo."],
   suggestions: ["Retake the photo in better lighting and avoid glare."],
+  saferSwaps: [],
 };
 
 const clampScore = (value?: number | string | null) => {
@@ -87,6 +97,18 @@ const parseModelJson = (content: unknown) => {
   return null;
 };
 
+const normalizeSaferSwaps = (raw: unknown): SaferSwapResult[] => {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((s: any) => s && typeof s === "object" && s.original && s.suggestion)
+    .map((s: any) => ({
+      original: String(s.original).trim(),
+      suggestion: String(s.suggestion).trim(),
+      reason: String(s.reason || "").trim(),
+    }))
+    .slice(0, 3);
+};
+
 const normalizeResult = (raw: any): FoodAnalysisResult => {
   if (!raw || typeof raw !== "object") {
     return fallbackResult;
@@ -95,6 +117,7 @@ const normalizeResult = (raw: any): FoodAnalysisResult => {
   const score = clampScore(raw.score);
   const label = normalizeLabel(raw.label, score);
   const confidence = Math.max(0, Math.min(1, Number(raw.confidence) || 0.5));
+  const detectedFoods = ensureArray(raw.detectedFoods, []);
   const reasons = ensureArray(
     raw.reasons,
     fallbackResult.reasons
@@ -103,6 +126,7 @@ const normalizeResult = (raw: any): FoodAnalysisResult => {
     raw.suggestions,
     ["Eat smaller portions and avoid lying down soon after eating."]
   );
+  const saferSwaps = normalizeSaferSwaps(raw.saferSwaps);
   const personalTriggerMatch = Array.isArray(raw.personalTriggerMatch)
     ? raw.personalTriggerMatch.map((item: unknown) => String(item).trim()).filter(Boolean)
     : undefined;
@@ -111,8 +135,10 @@ const normalizeResult = (raw: any): FoodAnalysisResult => {
     score,
     label,
     confidence,
+    detectedFoods,
     reasons,
     suggestions,
+    saferSwaps,
     ...(personalTriggerMatch?.length ? { personalTriggerMatch } : {}),
   };
 };
@@ -152,11 +178,13 @@ const buildPersonalTriggerContext = (triggers: PersonalTrigger[]): string => {
 
 export const analyzeFoodImage = async (
   asset: FoodImageAsset,
-  personalTriggers?: PersonalTrigger[]
+  personalTriggers?: PersonalTrigger[],
+  conditions?: string[]
 ): Promise<FoodAnalysisResult> => {
   logDebug("Starting analysis", {
     asset: summarizeAsset(asset),
     personalTriggerCount: personalTriggers?.length || 0,
+    conditions,
   });
 
   if (!AI_API_KEY || placeholderKeys.includes(AI_API_KEY)) {
@@ -173,17 +201,27 @@ export const analyzeFoodImage = async (
 
   const personalContext = buildPersonalTriggerContext(personalTriggers || []);
 
+  // Build condition-aware prompts
+  const { conditionAIContext } = require("../utils/conditionLabels");
+  const aiCtx = conditionAIContext(conditions);
+
   const systemPrompt =
-    "You are a concise assistant that estimates GERD trigger risk from food photos. " +
+    `You are a concise assistant that ${aiCtx.description}. ` +
     "Stay cautious, avoid medical claims, and keep outputs brief." +
     (personalTriggers?.length
       ? " You personalize risk scores based on the user's tracked symptom history."
       : "");
 
   const userPrompt =
-    "Analyze this food image for GERD trigger risk. " +
-    'Return ONLY JSON: {"score":1-5,"label":"Low"|"Moderate"|"High","confidence":0-1,"reasons":string[],"suggestions":string[],"personalTriggerMatch":string[]}. ' +
-    "Keep reasons short, call out trigger categories when relevant (fat, spice, acid, carbonation, caffeine, chocolate, mint, alcohol). " +
+    `Analyze this food image for ${aiCtx.focus}. ` +
+    "Return ONLY JSON with these fields: " +
+    '{"detectedFoods":string[] (list every food/drink item you can identify in the photo),' +
+    '"score":1-5,"label":"Low"|"Moderate"|"High","confidence":0-1,' +
+    '"reasons":string[] (short, why this score),' +
+    '"suggestions":string[],' +
+    '"saferSwaps":[{"original":"trigger item seen","suggestion":"safer alternative","reason":"why it\'s better"}] (only for items scoring 3+),' +
+    '"personalTriggerMatch":string[]}. ' +
+    `Call out trigger categories when relevant (${aiCtx.categories}). ` +
     "No markdown, no code fences, no extra text." +
     personalContext;
 

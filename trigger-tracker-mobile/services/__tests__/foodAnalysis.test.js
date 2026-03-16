@@ -70,8 +70,10 @@ describe("analyzeFoodImage", () => {
       score: 4,
       label: "High",
       confidence: 1,
+      detectedFoods: [],
       reasons: ["Spicy", "Fried"],
       suggestions: ["Try grilled"],
+      saferSwaps: [],
       personalTriggerMatch: ["onion"],
     });
 
@@ -130,8 +132,10 @@ describe("analyzeFoodImage", () => {
       score: 3,
       label: "Moderate",
       confidence: 0.5,
+      detectedFoods: [],
       reasons: ["We could not confidently read this image. Try a clearer photo."],
       suggestions: ["Retake the photo in better lighting and avoid glare."],
+      saferSwaps: [],
     });
   });
 
