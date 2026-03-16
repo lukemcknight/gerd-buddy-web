@@ -109,6 +109,46 @@ const faqSchema = {
         text: "With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks. Using a tracking app like GERDBuddy can speed this up by automatically surfacing correlations between foods and symptoms.",
       },
     },
+    {
+      "@type": "Question",
+      name: "Can a hiatal hernia cause GERD?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, a hiatal hernia can contribute to GERD by weakening the lower esophageal sphincter (LES) and allowing stomach acid to flow back into the esophagus. However, many people with small hiatal hernias have no reflux symptoms at all. Treatment typically involves the same lifestyle modifications and medications used for GERD, with surgery reserved for severe cases.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can acid reflux cause breathing problems or asthma?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, GERD can trigger or worsen asthma and breathing problems through two mechanisms: microaspiration (tiny amounts of acid reaching the airways) and vagal nerve reflexes that cause airway tightening. Up to 80% of asthma sufferers also have GERD. If you have adult-onset asthma or asthma that worsens after meals or at night, acid reflux may be a contributing factor.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What should I do during a GERD flare-up?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "During a GERD flare-up, take an antacid for quick relief, stay upright, sip water, and stick to bland foods like oatmeal, bananas, plain rice, and steamed vegetables. Avoid all known triggers, eat small portions, and keep your head elevated while sleeping. Most flare-ups resolve within a few days to a week. If symptoms persist beyond a week or include difficulty swallowing, vomiting blood, or severe pain, see a doctor.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Do children get GERD?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes, GERD can affect children of all ages. Infant reflux (spitting up) is very common and usually resolves by 12-18 months. However, if a baby is refusing feeds, not gaining weight, or showing signs of pain, it may indicate GERD requiring treatment. Older children may experience heartburn, chronic cough, sore throat, or food refusal. Treatment includes dietary adjustments, lifestyle changes, and sometimes medication under pediatric guidance.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How do eating habits affect GERD?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "How you eat is just as important as what you eat for GERD management. Eating too fast, large portions, eating late at night, slouching while eating, and lying down after meals can all trigger acid reflux. Helpful habits include eating smaller meals, chewing thoroughly, sitting upright during and after meals, waiting 2-3 hours before lying down, and taking a gentle walk after dinner.",
+      },
+    },
   ],
 };
 
@@ -332,6 +372,36 @@ const Index = () => {
               <AccordionTrigger>How long does it take to identify GERD triggers?</AccordionTrigger>
               <AccordionContent>
                 With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks. Using a tracking app like GERDBuddy can speed this up by automatically surfacing correlations between foods and symptoms.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="hiatal-hernia">
+              <AccordionTrigger>Can a hiatal hernia cause GERD?</AccordionTrigger>
+              <AccordionContent>
+                Yes, a hiatal hernia can contribute to GERD by weakening the lower esophageal sphincter (LES) and allowing stomach acid to flow back into the esophagus. However, many people with small hiatal hernias have no reflux symptoms at all. Treatment typically involves the same lifestyle modifications and medications used for GERD, with surgery reserved for severe cases.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="breathing">
+              <AccordionTrigger>Can acid reflux cause breathing problems or asthma?</AccordionTrigger>
+              <AccordionContent>
+                Yes, GERD can trigger or worsen asthma and breathing problems through two mechanisms: microaspiration (tiny amounts of acid reaching the airways) and vagal nerve reflexes that cause airway tightening. Up to 80% of asthma sufferers also have GERD. If you have adult-onset asthma or asthma that worsens after meals or at night, acid reflux may be a contributing factor.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="flare-up">
+              <AccordionTrigger>What should I do during a GERD flare-up?</AccordionTrigger>
+              <AccordionContent>
+                During a GERD flare-up, take an antacid for quick relief, stay upright, sip water, and stick to bland foods like oatmeal, bananas, plain rice, and steamed vegetables. Avoid all known triggers, eat small portions, and keep your head elevated while sleeping. Most flare-ups resolve within a few days to a week. If symptoms persist beyond a week or include difficulty swallowing, vomiting blood, or severe pain, see a doctor.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="children">
+              <AccordionTrigger>Do children get GERD?</AccordionTrigger>
+              <AccordionContent>
+                Yes, GERD can affect children of all ages. Infant reflux (spitting up) is very common and usually resolves by 12-18 months. However, if a baby is refusing feeds, not gaining weight, or showing signs of pain, it may indicate GERD requiring treatment. Older children may experience heartburn, chronic cough, sore throat, or food refusal. Treatment includes dietary adjustments, lifestyle changes, and sometimes medication under pediatric guidance.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="eating-habits">
+              <AccordionTrigger>How do eating habits affect GERD?</AccordionTrigger>
+              <AccordionContent>
+                How you eat is just as important as what you eat for GERD management. Eating too fast, large portions, eating late at night, slouching while eating, and lying down after meals can all trigger acid reflux. Helpful habits include eating smaller meals, chewing thoroughly, sitting upright during and after meals, waiting 2-3 hours before lying down, and taking a gentle walk after dinner.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

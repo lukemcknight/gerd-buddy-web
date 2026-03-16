@@ -22,6 +22,12 @@ import gerdAndSleepApnea from "./gerd-and-sleep-apnea";
 import gerdAndWeightLoss from "./gerd-and-weight-loss";
 import gerdAndCoffee from "./gerd-and-coffee";
 import gerdAndAlcohol from "./gerd-and-alcohol";
+import hiatalHerniaAndGerd from "./hiatal-hernia-and-gerd";
+import gerdAndAsthma from "./gerd-and-asthma";
+import eatingHabitsForGerd from "./eating-habits-for-gerd";
+import travelingWithGerd from "./traveling-with-gerd";
+import gerdFlareUp from "./gerd-flare-up";
+import gerdInChildren from "./gerd-in-children";
 
 const posts: BlogPost[] = [
   gerdTriggerFoods,
@@ -42,6 +48,12 @@ const posts: BlogPost[] = [
   gerdAndWeightLoss,
   gerdAndCoffee,
   gerdAndAlcohol,
+  hiatalHerniaAndGerd,
+  gerdAndAsthma,
+  eatingHabitsForGerd,
+  travelingWithGerd,
+  gerdFlareUp,
+  gerdInChildren,
 ];
 
 // Sort by date, newest first
