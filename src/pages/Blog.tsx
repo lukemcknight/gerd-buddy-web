@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { BookOpen } from "lucide-react";
 import { posts } from "@/content/blog";
 import SEO from "@/components/SEO";
 import { SITE_URL } from "@/config/site";
@@ -56,40 +55,45 @@ const Blog = () => {
         jsonLd={[collectionSchema, breadcrumbSchema]}
       />
 
-      <div className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">
+      <div className="mx-auto w-full max-w-screen-xl px-4 py-12 space-y-8">
         <header className="space-y-2 opacity-0 animate-fade-in">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">GERDBuddy</p>
           <h1 className="text-3xl font-display font-bold">Blog</h1>
           <p className="text-muted-foreground">
             Guides and tips for managing GERD, understanding your triggers, and feeling your best.
           </p>
         </header>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post, i) => (
             <Link key={post.slug} to={`/blog/${post.slug}`} className="block group">
               <article
-                className={`card-elevated p-6 space-y-2 transition-all duration-200 group-hover:shadow-lg group-hover:border-primary/30 opacity-0 animate-slide-up stagger-${Math.min(i + 1, 4)}`}
+                className={`card-elevated p-6 h-full flex flex-col space-y-3 transition-all duration-200 group-hover:shadow-lg group-hover:border-primary/30 opacity-0 animate-slide-up stagger-${Math.min(i + 1, 4)}`}
               >
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <BookOpen className="w-4 h-4" />
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <time dateTime={post.date}>
                     {format(new Date(post.date), "MMMM d, yyyy")}
                   </time>
                   <span>&middot;</span>
                   <span>{readTime(post.content)} min read</span>
-                  <span>&middot;</span>
-                  <span>{post.author}</span>
                 </div>
-                <h2 className="text-xl font-display font-semibold group-hover:text-primary transition-colors">
+                <h2 className="text-lg font-display font-semibold group-hover:text-primary transition-colors">
                   {post.title}
                 </h2>
-                <p className="text-muted-foreground text-sm leading-relaxed">
+                <p className="text-muted-foreground text-sm leading-relaxed flex-1">
                   {post.description}
                 </p>
-                <span className="inline-block text-primary text-sm font-semibold group-hover:underline">
-                  Read more &rarr;
-                </span>
+                {post.tags && post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="inline-block text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </article>
             </Link>
           ))}

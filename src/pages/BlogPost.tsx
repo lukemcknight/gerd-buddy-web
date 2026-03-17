@@ -151,104 +151,101 @@ const BlogPost = () => {
         jsonLd={[articleSchema, medicalWebPageSchema, breadcrumbSchema]}
       />
 
-      <article className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">
-        {/* Visible breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-sm text-muted-foreground opacity-0 animate-fade-in">
-          <Link to="/" className="hover:text-primary transition-colors">Home</Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <Link to="/blog" className="hover:text-primary transition-colors">Blog</Link>
-          <ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-foreground truncate max-w-[200px] sm:max-w-none">{post.title}</span>
-        </nav>
+      <article className="mx-auto w-full max-w-screen-xl px-4 py-12 space-y-8">
+        <div className="max-w-prose mx-auto space-y-8">
+          {/* Visible breadcrumb */}
+          <nav className="flex items-center gap-1.5 text-sm text-muted-foreground opacity-0 animate-fade-in">
+            <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <Link to="/blog" className="hover:text-primary transition-colors">Blog</Link>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="text-foreground truncate max-w-[200px] sm:max-w-none">{post.title}</span>
+          </nav>
 
-        <nav className="opacity-0 animate-fade-in">
-          <Link
-            to="/blog"
-            className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to all articles
-          </Link>
-        </nav>
+          <nav className="opacity-0 animate-fade-in">
+            <Link
+              to="/blog"
+              className="inline-flex items-center gap-1.5 text-primary font-semibold hover:underline text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to all articles
+            </Link>
+          </nav>
 
-        <header className="space-y-4 opacity-0 animate-slide-up stagger-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            GERDBuddy Blog
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-display font-bold leading-tight">
-            {post.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
-              <time dateTime={post.date}>
-                {format(new Date(post.date), "MMMM d, yyyy")}
-              </time>
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <User className="w-4 h-4" />
-              {post.author}
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="w-4 h-4" />
-              {readTime(post.content)} min read
-            </span>
-            {post.dateModified && post.dateModified !== post.date && (
-              <span className="inline-flex items-center gap-1.5 text-xs">
-                Updated{" "}
-                <time dateTime={post.dateModified}>
-                  {format(new Date(post.dateModified), "MMM d, yyyy")}
+          <header className="space-y-4 opacity-0 animate-slide-up stagger-1">
+            <h1 className="text-3xl sm:text-4xl font-display font-bold leading-tight">
+              {post.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
+                <time dateTime={post.date}>
+                  {format(new Date(post.date), "MMMM d, yyyy")}
                 </time>
               </span>
-            )}
-          </div>
-        </header>
+              <span className="inline-flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                {post.author}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="w-4 h-4" />
+                {readTime(post.content)} min read
+              </span>
+              {post.dateModified && post.dateModified !== post.date && (
+                <span className="inline-flex items-center gap-1.5 text-xs">
+                  Updated{" "}
+                  <time dateTime={post.dateModified}>
+                    {format(new Date(post.dateModified), "MMM d, yyyy")}
+                  </time>
+                </span>
+              )}
+            </div>
+          </header>
 
-        <div className="prose prose-slate max-w-none prose-headings:font-display prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:leading-relaxed prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline opacity-0 animate-slide-up stagger-2">
-          <ReactMarkdown
-            components={{
-              h2: ({ children, ...props }) => <h2 {...props}>{children}</h2>,
-              h3: ({ children, ...props }) => <h3 {...props}>{children}</h3>,
-            }}
-          >
-            {post.content}
-          </ReactMarkdown>
-        </div>
-
-        {/* CTA Section */}
-        <section className="card-elevated p-6 sm:p-8 space-y-4 text-center opacity-0 animate-slide-up stagger-3">
-          <div className="w-16 h-16 mx-auto">
-            <img
-              src="/turtle.png"
-              alt="GERDBuddy mascot"
-              width={64}
-              height={64}
-              loading="lazy"
-              className="w-full h-full rounded-2xl object-cover"
-            />
-          </div>
-          <h2 className="text-2xl font-display font-semibold">
-            Start Tracking Your Triggers Today
-          </h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            GERDBuddy helps you log meals, track symptoms, and discover your personal GERD
-            triggers — all in a simple, friendly app.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3 pt-2">
-            <a
-              href="https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary-gradient inline-flex items-center gap-2"
+          <div className="prose prose-slate max-w-none prose-headings:font-display prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:leading-relaxed prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline opacity-0 animate-slide-up stagger-2">
+            <ReactMarkdown
+              components={{
+                h2: ({ children, ...props }) => <h2 {...props}>{children}</h2>,
+                h3: ({ children, ...props }) => <h3 {...props}>{children}</h3>,
+              }}
             >
-              Download on the App Store
-            </a>
+              {post.content}
+            </ReactMarkdown>
           </div>
-        </section>
+
+          {/* CTA Section */}
+          <section className="card-elevated p-6 sm:p-8 space-y-4 text-center opacity-0 animate-slide-up stagger-3">
+            <h2 className="text-2xl font-display font-semibold">
+              Join the Conversation
+            </h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Have thoughts on this topic? Share your experience in the forum.
+            </p>
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <Link
+                to="/forum"
+                className="btn-primary-gradient inline-flex items-center gap-2"
+              >
+                Discuss in the Forum
+              </Link>
+              <p className="text-xs text-muted-foreground">
+                Or track your triggers with the{" "}
+                <a
+                  href="https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  GERDBuddy app
+                </a>
+              </p>
+            </div>
+          </section>
+        </div>
 
         {/* Related Articles */}
         {relatedPosts.length > 0 && (
-          <section className="space-y-4 pt-4 opacity-0 animate-slide-up stagger-4">
+          <section className="max-w-prose mx-auto space-y-4 pt-4 opacity-0 animate-slide-up stagger-4">
             <h2 className="text-2xl font-display font-semibold">More Articles</h2>
             <div className="grid gap-4">
               {relatedPosts.map((related) => (

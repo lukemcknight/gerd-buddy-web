@@ -8,7 +8,8 @@ const Privacy = () => {
         description="Learn how GERDBuddy handles your data. Your information stays on your device — no analytics, no tracking, and no data is sold or shared."
         path="/privacy"
       />
-      <div className="mx-auto w-full max-w-3xl px-4 py-12 space-y-8">
+      <div className="mx-auto w-full max-w-screen-xl px-4 py-12">
+        <div className="max-w-prose mx-auto space-y-8">
         <header className="space-y-2 opacity-0 animate-fade-in">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">GERDBuddy</p>
           <h1 className="text-3xl font-display font-bold">Privacy Policy</h1>
@@ -53,6 +54,7 @@ const Privacy = () => {
             .
           </p>
         </section>
+        </div>
       </div>
     </div>
   );
