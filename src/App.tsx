@@ -16,6 +16,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Forum = lazy(() => import("./pages/Forum"));
 const ForumCategory = lazy(() => import("./pages/ForumCategory"));
 const NewThread = lazy(() => import("./pages/NewThread"));
+const ForumThread = lazy(() => import("./pages/ForumThread"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => (
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/forum" element={<Forum />} />
               <Route path="/forum/:category/new" element={<NewThread />} />
+              <Route path="/forum/:category/:threadId" element={<ForumThread />} />
               <Route path="/forum/:category" element={<ForumCategory />} />
               <Route path="*" element={<NotFound />} />
             </Route>
