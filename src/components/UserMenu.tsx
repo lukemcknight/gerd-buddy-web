@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import InitialAvatar from "./InitialAvatar";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, CircleUserRound } from "lucide-react";
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
@@ -21,7 +20,7 @@ const UserMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="flex items-center gap-2 outline-none">
-        <InitialAvatar name={user.displayName || "User"} size="sm" />
+        <CircleUserRound className="w-7 h-7 text-muted-foreground hover:text-foreground transition-colors" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>

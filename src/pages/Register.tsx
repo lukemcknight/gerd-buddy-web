@@ -68,11 +68,11 @@ const Register = () => {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="displayName">Display Name</Label>
+            <Label htmlFor="displayName">Username</Label>
             <Input
               id="displayName"
               type="text"
-              placeholder="Your name"
+              placeholder="Choose a username"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               required

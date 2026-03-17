@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import UserMenu from "./UserMenu";
-import VerificationBanner from "./VerificationBanner";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -93,9 +92,6 @@ const Layout = () => {
           </div>
         )}
       </nav>
-
-      {/* Verification banner */}
-      <VerificationBanner />
 
       {/* Page content */}
       <main className="flex-1">

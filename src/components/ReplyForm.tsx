@@ -44,16 +44,6 @@ const ReplyForm = ({ threadId, categorySlug, onReplyAdded }: ReplyFormProps) => 
     );
   }
 
-  if (!user.emailVerified) {
-    return (
-      <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4">
-        <p className="text-sm text-yellow-700 dark:text-yellow-400">
-          Verify your email to reply. Check your inbox for a verification link.
-        </p>
-      </div>
-    );
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

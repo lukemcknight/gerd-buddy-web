@@ -45,8 +45,6 @@ const NewThread = () => {
     return <Navigate to="/login" replace />;
   }
 
-  const emailVerified = user.emailVerified;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -143,14 +141,6 @@ const NewThread = () => {
       <div className="max-w-2xl">
         <h1 className="text-2xl font-display font-bold mb-6">New Thread</h1>
 
-        {!emailVerified && (
-          <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 mb-6">
-            <p className="text-sm text-yellow-700 dark:text-yellow-400">
-              Please verify your email before posting. Check your inbox for a verification link.
-            </p>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
@@ -159,7 +149,7 @@ const NewThread = () => {
               placeholder="What's on your mind?"
               value={title}
               onChange={(e) => setTitle(e.target.value.slice(0, TITLE_MAX))}
-              disabled={!emailVerified || submitting}
+              disabled={submitting}
               maxLength={TITLE_MAX}
             />
             <p className="text-xs text-muted-foreground text-right">
@@ -174,7 +164,7 @@ const NewThread = () => {
               placeholder="Share your thoughts, questions, or experiences..."
               value={body}
               onChange={(e) => setBody(e.target.value.slice(0, BODY_MAX))}
-              disabled={!emailVerified || submitting}
+              disabled={submitting}
               maxLength={BODY_MAX}
               rows={8}
             />
@@ -188,7 +178,7 @@ const NewThread = () => {
           )}
 
           <div className="flex items-center gap-3">
-            <Button type="submit" disabled={!emailVerified || submitting}>
+            <Button type="submit" disabled={submitting}>
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />

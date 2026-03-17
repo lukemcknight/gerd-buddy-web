@@ -6,7 +6,6 @@ service cloud.firestore {
       allow create: if false;
       allow delete: if false;
       allow update: if request.auth != null
-        && request.auth.token.email_verified == true
         && request.resource.data.diff(resource.data).affectedKeys()
            .hasOnly(["threadCount", "lastActivity"]);
     }
@@ -14,7 +13,6 @@ service cloud.firestore {
     match /threads/{threadId} {
       allow read: if true;
       allow create: if request.auth != null
-        && request.auth.token.email_verified == true
         && request.resource.data.authorId == request.auth.uid
         && request.resource.data.title is string
         && request.resource.data.title.size() > 0
@@ -26,8 +24,7 @@ service cloud.firestore {
         && (
           (resource.data.authorId == request.auth.uid
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["body", "updatedAt"]))
-          || (request.auth.token.email_verified == true
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["replyCount", "lastReplyAt"]))
+          || request.resource.data.diff(resource.data).affectedKeys().hasOnly(["replyCount", "lastReplyAt"])
         );
       allow delete: if request.auth != null
         && resource.data.authorId == request.auth.uid;
@@ -35,7 +32,6 @@ service cloud.firestore {
       match /replies/{replyId} {
         allow read: if true;
         allow create: if request.auth != null
-          && request.auth.token.email_verified == true
           && request.resource.data.authorId == request.auth.uid
           && request.resource.data.body is string
           && request.resource.data.body.size() > 0
