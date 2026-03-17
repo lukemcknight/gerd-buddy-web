@@ -17,35 +17,37 @@ const Layout = () => {
       {/* Sticky nav */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border/50">
         <div className="mx-auto w-full max-w-screen-xl px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group" onClick={() => setMenuOpen(false)}>
-            <img
-              src="/turtle.png"
-              alt="GERDBuddy"
-              className="w-8 h-8 rounded-lg object-cover"
-            />
-            <span className="font-display font-bold text-foreground group-hover:text-primary transition-colors">
-              GERDBuddy
-            </span>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="flex items-center gap-2 group" onClick={() => setMenuOpen(false)}>
+              <img
+                src="/turtle.png"
+                alt="GERDBuddy"
+                className="w-8 h-8 rounded-lg object-cover"
+              />
+              <span className="font-display font-bold text-foreground group-hover:text-primary transition-colors">
+                GERDBuddy
+              </span>
+            </Link>
 
-          {/* Desktop links */}
-          <div className="hidden sm:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === "/"}
-                className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
+            {/* Desktop links */}
+            <div className="hidden sm:flex items-center gap-1">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={link.to === "/"}
+                  className={({ isActive }) =>
+                    `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "text-primary bg-primary/10"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    }`
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
