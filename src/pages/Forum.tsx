@@ -13,7 +13,7 @@ interface CategoryData {
   name: string;
   description: string;
   threadCount: number;
-  lastActivityAt: Date | null;
+  lastActivity: Date | null;
 }
 
 const Forum = () => {
@@ -21,7 +21,7 @@ const Forum = () => {
     FORUM_CATEGORIES.map((c) => ({
       ...c,
       threadCount: 0,
-      lastActivityAt: null,
+      lastActivity: null,
     }))
   );
   const [loading, setLoading] = useState(true);
@@ -35,12 +35,12 @@ const Forum = () => {
           return;
         }
 
-        const firestoreData = new Map<string, { threadCount: number; lastActivityAt: Date | null }>();
+        const firestoreData = new Map<string, { threadCount: number; lastActivity: Date | null }>();
         snap.forEach((doc) => {
           const data = doc.data();
           firestoreData.set(doc.id, {
             threadCount: data.threadCount ?? 0,
-            lastActivityAt: data.lastActivityAt?.toDate?.() ?? null,
+            lastActivity: data.lastActivity?.toDate?.() ?? null,
           });
         });
 
@@ -50,7 +50,7 @@ const Forum = () => {
             return {
               ...c,
               threadCount: fsData?.threadCount ?? 0,
-              lastActivityAt: fsData?.lastActivityAt ?? null,
+              lastActivity: fsData?.lastActivity ?? null,
             };
           })
         );
@@ -118,8 +118,8 @@ const Forum = () => {
                     <Clock className="w-3.5 h-3.5" />
                     {loading ? (
                       <span className="inline-block w-16 h-3 bg-muted animate-pulse rounded" />
-                    ) : category.lastActivityAt ? (
-                      <span>{formatDistanceToNow(category.lastActivityAt, { addSuffix: true })}</span>
+                    ) : category.lastActivity ? (
+                      <span>{formatDistanceToNow(category.lastActivity, { addSuffix: true })}</span>
                     ) : (
                       <span>No activity yet</span>
                     )}

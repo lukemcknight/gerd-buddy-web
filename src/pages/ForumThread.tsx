@@ -189,10 +189,12 @@ const ForumThread = () => {
   const handleDeleteReply = async (replyId: string) => {
     if (!threadId) return;
     try {
-      await deleteDoc(doc(db, "threads", threadId, "replies", replyId));
-      await updateDoc(doc(db, "threads", threadId), {
+      const batch = writeBatch(db);
+      batch.delete(doc(db, "threads", threadId, "replies", replyId));
+      batch.update(doc(db, "threads", threadId), {
         replyCount: increment(-1),
       });
+      await batch.commit();
       setReplies((prev) => prev.filter((r) => r.id !== replyId));
       setThread((prev) =>
         prev ? { ...prev, replyCount: Math.max(0, prev.replyCount - 1) } : prev

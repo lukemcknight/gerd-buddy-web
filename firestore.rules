@@ -3,7 +3,12 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /forums/{categorySlug} {
       allow read: if true;
-      allow write: if false;
+      allow create: if false;
+      allow delete: if false;
+      allow update: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(["threadCount", "lastActivity"]);
     }
 
     match /threads/{threadId} {
@@ -18,8 +23,12 @@ service cloud.firestore {
         && request.resource.data.body.size() > 0
         && request.resource.data.body.size() <= 5000;
       allow update: if request.auth != null
-        && resource.data.authorId == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["body", "updatedAt"]);
+        && (
+          (resource.data.authorId == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["body", "updatedAt"]))
+          || (request.auth.token.email_verified == true
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["replyCount", "lastReplyAt"]))
+        );
       allow delete: if request.auth != null
         && resource.data.authorId == request.auth.uid;
 
