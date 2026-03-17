@@ -1,13 +1,12 @@
 import { Link } from "react-router-dom";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { ShieldCheck, Mail, LifeBuoy, BookOpen } from "lucide-react";
+import { BookOpen, MessageSquare, Smartphone } from "lucide-react";
 import { format } from "date-fns";
 import { posts } from "@/content/blog";
 import SEO from "@/components/SEO";
 import { SITE_URL } from "@/config/site";
 
-const latestPost = posts[0];
+const latestPosts = posts.slice(0, 3);
 
 const faqSchema = {
   "@context": "https://schema.org",
@@ -196,116 +195,136 @@ const Index = () => {
   return (
     <div className="bg-gradient-to-b from-primary/10 via-background to-background text-foreground">
       <SEO
-        title="Discover Your GERD Triggers"
-        description="Track meals and symptoms for 7 days to discover your personal GERD triggers. Identify what causes your acid reflux with AI-powered insights."
+        title="Your All-in-One GERD Resource — Articles, Tracking & Community"
+        description="Track triggers, explore expert articles, and connect with a community that gets it. GERDBuddy is your all-in-one resource for managing GERD and acid reflux."
         path="/"
         jsonLd={[faqSchema, organizationSchema, webSiteSchema, softwareAppSchema]}
       />
-      <header className="mx-auto w-full max-w-3xl px-4 pt-10 pb-6 space-y-6 opacity-0 animate-fade-in">
-        <div className="flex items-start gap-4">
-          <div className="w-20 h-20 flex items-center justify-center">
-            <img src="/turtle.png" alt="GERDBuddy turtle mascot" width={64} height={64} className="w-16 h-16 rounded-2xl object-cover" />
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">GERDBuddy</p>
-            <h1 className="text-3xl font-display font-bold leading-tight">
-              A simple companion app to help manage GERD symptoms and triggers.
-            </h1>
-            <p className="text-muted-foreground text-base">
-              Friendly, calming support for day-to-day tracking—built to feel as gentle as its mascot.
-            </p>
-          </div>
-        </div>
 
-        {/* App Store CTA */}
-        <div className="flex flex-wrap gap-3">
-          <a
-            href="https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-primary-gradient inline-flex items-center gap-2 text-base"
-          >
-            Download on the App Store
-          </a>
-        </div>
-
-        <div className="card-elevated p-5 sm:p-6 flex flex-col gap-4">
-          <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Mail className="w-5 h-5" />
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm uppercase font-semibold text-muted-foreground tracking-wide">Need help?</p>
-              <a href="mailto:gerdbuddy2@gmail.com" className="text-lg font-semibold text-foreground hover:underline">
-                gerdbuddy2@gmail.com
-              </a>
-              <p className="text-muted-foreground text-sm">
-                If you're experiencing issues or have questions, reach out and we'll get back to you.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <a href="mailto:gerdbuddy2@gmail.com" className="inline-flex">
-              <Button size="lg" className="px-6">
-                Email Support
-              </Button>
-            </a>
-            <Link to="/privacy" className="inline-flex">
-              <Button variant="outline" size="lg" className="px-6">
-                Privacy Policy
-              </Button>
-            </Link>
-            <Link to="/terms" className="inline-flex">
-              <Button variant="outline" size="lg" className="px-6">
-                Terms of Service
-              </Button>
-            </Link>
-          </div>
-        </div>
+      {/* Hero Section */}
+      <header className="mx-auto w-full max-w-screen-xl px-4 pt-12 pb-10 text-center space-y-5 opacity-0 animate-fade-in">
+        <img
+          src="/turtle.png"
+          alt="GERDBuddy turtle mascot"
+          width={80}
+          height={80}
+          className="mx-auto w-20 h-20 rounded-2xl object-cover"
+        />
+        <h1 className="text-4xl md:text-5xl font-display font-bold leading-tight">
+          Your All-in-One GERD Resource
+        </h1>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          Track triggers, explore expert articles, and connect with a community that gets it.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Join our growing community of GERD warriors
+        </p>
       </header>
 
-      <div className="mx-auto w-full max-w-3xl px-4 pb-16 space-y-10">
-        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-1">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-secondary text-secondary-foreground flex items-center justify-center">
-              <LifeBuoy className="w-5 h-5" />
+      <div className="mx-auto w-full max-w-screen-xl px-4 pb-16 space-y-16">
+
+        {/* Three Pillars Grid */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 opacity-0 animate-slide-up stagger-1">
+          {/* Blog & Articles */}
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-4 flex flex-col">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <BookOpen className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="text-2xl font-display font-semibold">Support</h2>
-              <p className="text-muted-foreground text-sm">
-                Quick answers for App Store review and users installing GERDBuddy.
-              </p>
-            </div>
+            <h2 className="text-xl font-display font-semibold">Blog & Articles</h2>
+            <p className="text-muted-foreground text-sm flex-1">
+              {latestPosts[0]
+                ? `Latest: ${latestPosts[0].title} — ${latestPosts[0].description}`
+                : "Expert-written articles on managing GERD, trigger foods, and lifestyle tips."}
+            </p>
+            <Link to="/blog" className="text-primary text-sm font-semibold hover:underline">
+              Browse articles &rarr;
+            </Link>
           </div>
-          <ul className="grid gap-3 text-base text-foreground">
-            <li className="p-4 rounded-xl bg-primary/5 border border-border/70">
-              <span className="font-semibold">Contact:</span>{" "}
-              <a href="mailto:gerdbuddy2@gmail.com" className="text-primary font-medium hover:underline">
-                gerdbuddy2@gmail.com
-              </a>
-            </li>
-            <li className="p-4 rounded-xl bg-primary/5 border border-border/70">
-              <span className="font-semibold">Hours:</span> Monday–Friday, replies within 1–2 business days.
-            </li>
-            <li className="p-4 rounded-xl bg-primary/5 border border-border/70">
-              <span className="font-semibold">Purpose:</span> GERDBuddy helps track potential triggers and patterns; it does not
-              provide medical advice.
-            </li>
-          </ul>
+
+          {/* Community Forum */}
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-4 flex flex-col">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <MessageSquare className="w-5 h-5" />
+            </div>
+            <h2 className="text-xl font-display font-semibold">Community Forum</h2>
+            <p className="text-muted-foreground text-sm flex-1">
+              Ask questions, share what works, and connect with others who understand life with GERD.
+            </p>
+            <Link to="/forum" className="text-primary text-sm font-semibold hover:underline">
+              Visit the forum &rarr;
+            </Link>
+          </div>
+
+          {/* GERDBuddy App */}
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-4 flex flex-col">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <h2 className="text-xl font-display font-semibold">GERDBuddy App</h2>
+            <p className="text-muted-foreground text-sm flex-1">
+              Track your triggers on the go. Log meals and symptoms, then let AI surface your personal patterns.
+            </p>
+            <a
+              href="https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary text-sm font-semibold hover:underline"
+            >
+              Get it on the App Store &rarr;
+            </a>
+          </div>
         </section>
 
-        <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5" />
+        {/* Latest Activity Section */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 opacity-0 animate-slide-up stagger-2">
+          {/* Recent Blog Posts */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-display font-semibold">Recent Blog Posts</h2>
+            <div className="space-y-3">
+              {latestPosts.map((post) => (
+                <Link
+                  key={post.slug}
+                  to={`/blog/${post.slug}`}
+                  className="block group rounded-xl border border-border bg-card p-4 space-y-1 transition-all duration-200 hover:border-primary/30 hover:shadow-sm"
+                >
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(post.date), "MMMM d, yyyy")}
+                  </p>
+                  <h3 className="text-base font-display font-semibold group-hover:text-primary transition-colors">
+                    {post.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm line-clamp-2">{post.description}</p>
+                </Link>
+              ))}
             </div>
-            <div>
-              <h2 className="text-2xl font-display font-semibold">FAQ</h2>
-              <p className="text-muted-foreground text-sm">Simple answers to the most common questions.</p>
-            </div>
+            <Link to="/blog" className="text-primary text-sm font-semibold hover:underline">
+              View all articles &rarr;
+            </Link>
           </div>
 
-          <Accordion type="single" collapsible className="w-full">
+          {/* Recent Forum Threads */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-display font-semibold">Recent Forum Threads</h2>
+            <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
+              <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto" />
+              <p className="text-muted-foreground">
+                Forum coming soon! Check back for community discussions.
+              </p>
+              <Link to="/forum" className="text-primary text-sm font-semibold hover:underline">
+                Visit the forum &rarr;
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="space-y-4 opacity-0 animate-slide-up stagger-3">
+          <div className="text-center space-y-2 mb-8">
+            <h2 className="text-3xl font-display font-bold">Frequently Asked Questions</h2>
+            <p className="text-muted-foreground">Everything you need to know about GERD, triggers, and GERDBuddy.</p>
+          </div>
+
+          <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
             <AccordionItem value="medical">
               <AccordionTrigger>Is GERDBuddy a medical app?</AccordionTrigger>
               <AccordionContent>
@@ -407,50 +426,13 @@ const Index = () => {
           </Accordion>
         </section>
 
-        <section className="card-elevated p-6 space-y-3 opacity-0 animate-slide-up stagger-3">
-          <h2 className="text-2xl font-display font-semibold">Legal</h2>
-          <p className="text-muted-foreground">
-            Read the details on how your data is handled and the terms that govern use of GERDBuddy.
+        {/* Founder Section */}
+        <section className="max-w-3xl mx-auto text-center space-y-4 opacity-0 animate-slide-up stagger-4">
+          <h2 className="text-2xl font-display font-semibold">Why GERDBuddy?</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            I built GERDBuddy because I know how frustrating it is to manage GERD without clear answers. This started as a simple tracking app and has grown into a community resource for everyone dealing with acid reflux. Whether you're newly diagnosed or have been managing symptoms for years, you deserve better tools and a supportive community to help you figure out what works for your body.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link to="/privacy" className="text-primary font-semibold hover:underline">
-              Privacy Policy
-            </Link>
-            <span className="text-muted-foreground">&bull;</span>
-            <Link to="/terms" className="text-primary font-semibold hover:underline">
-              Terms of Service
-            </Link>
-          </div>
         </section>
-
-        {/* Latest from the Blog */}
-        {latestPost && (
-          <section className="card-elevated p-6 space-y-4 opacity-0 animate-slide-up stagger-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <h2 className="text-2xl font-display font-semibold">Latest from the Blog</h2>
-            </div>
-            <Link to={`/blog/${latestPost.slug}`} className="block group">
-              <div className="p-4 rounded-xl bg-primary/5 border border-border/70 space-y-2 transition-all duration-200 group-hover:border-primary/30 group-hover:shadow-sm">
-                <p className="text-sm text-muted-foreground">
-                  {format(new Date(latestPost.date), "MMMM d, yyyy")}
-                </p>
-                <h3 className="text-lg font-display font-semibold group-hover:text-primary transition-colors">
-                  {latestPost.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{latestPost.description}</p>
-                <span className="inline-block text-primary text-sm font-semibold group-hover:underline">
-                  Read more &rarr;
-                </span>
-              </div>
-            </Link>
-            <Link to="/blog" className="text-primary text-sm font-semibold hover:underline">
-              View all articles &rarr;
-            </Link>
-          </section>
-        )}
       </div>
     </div>
   );
