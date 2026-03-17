@@ -407,7 +407,7 @@ const Index = () => {
             <p className="text-muted-foreground">Everything you need to know about GERD, triggers, and GERDBuddy.</p>
           </div>
 
-          <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
+          <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto space-y-3 [&>div]:bg-white [&>div]:rounded-lg [&>div]:px-4 [&>div]:border [&>div]:border-border/50">
             <AccordionItem value="medical">
               <AccordionTrigger>Is GERDBuddy a medical app?</AccordionTrigger>
               <AccordionContent>
