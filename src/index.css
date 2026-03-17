@@ -65,7 +65,7 @@
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(158 35% 45%), hsl(175 35% 50%));
     --gradient-warm: linear-gradient(135deg, hsl(15 85% 60%), hsl(35 90% 55%));
-    --gradient-surface: linear-gradient(180deg, hsl(150 20% 98%), hsl(150 15% 96%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(150 10% 98%));
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
