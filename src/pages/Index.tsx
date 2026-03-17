@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { BookOpen, MessageSquare, Smartphone } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { posts } from "@/content/blog";
 import SEO from "@/components/SEO";
-import { SITE_URL } from "@/config/site";
+import { SITE_URL, FORUM_CATEGORIES } from "@/config/site";
 
 const latestPosts = posts.slice(0, 3);
 
@@ -191,7 +194,44 @@ const softwareAppSchema = {
   description: "Track meals and symptoms for 7 days to discover your personal GERD triggers. Identify what causes your acid reflux with AI-powered insights.",
 };
 
+interface ForumThread {
+  id: string;
+  title: string;
+  categorySlug: string;
+  authorName: string;
+  createdAt: { toDate: () => Date } | null;
+}
+
 const Index = () => {
+  const [threads, setThreads] = useState<ForumThread[]>([]);
+  const [threadsLoading, setThreadsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchThreads = async () => {
+      try {
+        const q = query(
+          collection(db, "threads"),
+          orderBy("createdAt", "desc"),
+          limit(5)
+        );
+        const snapshot = await getDocs(q);
+        const results: ForumThread[] = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          title: doc.data().title,
+          categorySlug: doc.data().categorySlug,
+          authorName: doc.data().authorName,
+          createdAt: doc.data().createdAt,
+        }));
+        setThreads(results);
+      } catch (err) {
+        console.error("Failed to fetch forum threads:", err);
+      } finally {
+        setThreadsLoading(false);
+      }
+    };
+    fetchThreads();
+  }, []);
+
   return (
     <div className="bg-gradient-to-b from-primary/10 via-background to-background text-foreground">
       <SEO
@@ -305,15 +345,58 @@ const Index = () => {
           {/* Recent Forum Threads */}
           <div className="space-y-4">
             <h2 className="text-2xl font-display font-semibold">Recent Forum Threads</h2>
-            <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
-              <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto" />
-              <p className="text-muted-foreground">
-                Forum coming soon! Check back for community discussions.
-              </p>
-              <Link to="/forum" className="text-primary text-sm font-semibold hover:underline">
-                Visit the forum &rarr;
-              </Link>
-            </div>
+            {threadsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-2 animate-pulse">
+                    <div className="h-3 bg-muted rounded w-1/4" />
+                    <div className="h-4 bg-muted rounded w-3/4" />
+                    <div className="h-3 bg-muted rounded w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : threads.length === 0 ? (
+              <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
+                <MessageSquare className="w-8 h-8 text-muted-foreground mx-auto" />
+                <p className="text-muted-foreground">
+                  Be the first to start a discussion!
+                </p>
+                <Link to="/forum" className="text-primary text-sm font-semibold hover:underline">
+                  Visit the forum &rarr;
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {threads.map((thread) => {
+                  const category = FORUM_CATEGORIES.find((c) => c.slug === thread.categorySlug);
+                  return (
+                    <Link
+                      key={thread.id}
+                      to={`/forum/${thread.categorySlug}/${thread.id}`}
+                      className="block group rounded-xl border border-border bg-card p-4 space-y-1 transition-all duration-200 hover:border-primary/30 hover:shadow-sm"
+                    >
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {category && <span>{category.name}</span>}
+                        {category && <span>&middot;</span>}
+                        <span>{thread.authorName}</span>
+                        {thread.createdAt && (
+                          <>
+                            <span>&middot;</span>
+                            <span>{formatDistanceToNow(thread.createdAt.toDate(), { addSuffix: true })}</span>
+                          </>
+                        )}
+                      </div>
+                      <h3 className="text-base font-display font-semibold group-hover:text-primary transition-colors">
+                        {thread.title}
+                      </h3>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+            <Link to="/forum" className="text-primary text-sm font-semibold hover:underline">
+              Visit the forum &rarr;
+            </Link>
           </div>
         </section>
 
