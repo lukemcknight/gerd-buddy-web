@@ -17,6 +17,12 @@ const SITE_URL = "https://gerdbuddy.app";
 const staticPages = [
   { path: "/", priority: "1.0", changefreq: "weekly" },
   { path: "/blog", priority: "0.8", changefreq: "weekly" },
+  { path: "/forum", priority: "0.8", changefreq: "daily" },
+  { path: "/forum/food-and-triggers", priority: "0.7", changefreq: "daily" },
+  { path: "/forum/medication-and-treatment", priority: "0.7", changefreq: "daily" },
+  { path: "/forum/lifestyle-and-tips", priority: "0.7", changefreq: "daily" },
+  { path: "/forum/new-to-gerd", priority: "0.7", changefreq: "daily" },
+  { path: "/forum/general-discussion", priority: "0.7", changefreq: "daily" },
   { path: "/privacy", priority: "0.3", changefreq: "yearly" },
   { path: "/terms", priority: "0.3", changefreq: "yearly" },
 ];
