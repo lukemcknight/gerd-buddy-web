@@ -1,0 +1,62 @@
+# GERDBuddy
+
+> GERDBuddy is an all-in-one GERD (gastroesophageal reflux disease) resource featuring a symptom tracking iOS app, expert-written articles, and a community forum for people managing acid reflux.
+
+GERDBuddy helps people identify their personal GERD trigger foods by tracking meals and symptoms, then using AI-powered insights to surface patterns and correlations. The site also provides educational articles about GERD management and a community forum for peer support.
+
+## Key Pages
+
+- [Homepage](https://gerdbuddy.app/): Overview of GERDBuddy's resources including blog, forum, app, and FAQ
+- [Blog](https://gerdbuddy.app/blog): 24 expert-written articles about GERD management, trigger foods, lifestyle tips, and related conditions
+- [Community Forum](https://gerdbuddy.app/forum): Discussion categories for food triggers, medications, lifestyle tips, and general GERD topics
+- [App Store](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910): GERDBuddy iOS app for tracking GERD triggers
+
+## Blog Articles
+
+- [Common GERD Trigger Foods](https://gerdbuddy.app/blog/gerd-trigger-foods): Comprehensive guide to foods that commonly trigger acid reflux
+- [Nighttime GERD Tips](https://gerdbuddy.app/blog/nighttime-gerd-tips): Sleep positions and habits to reduce nighttime acid reflux
+- [Stress and GERD](https://gerdbuddy.app/blog/stress-and-gerd): How stress impacts GERD and strategies for managing stress-related symptoms
+- [GERD-Friendly Meals](https://gerdbuddy.app/blog/gerd-friendly-meals): Meal ideas and recipes safe for acid reflux sufferers
+- [Understanding LPR](https://gerdbuddy.app/blog/understanding-lpr): Guide to laryngopharyngeal reflux (silent reflux)
+- [Natural Remedies for Acid Reflux](https://gerdbuddy.app/blog/natural-remedies-acid-reflux): Evidence-based natural approaches to managing GERD
+- [GERD Diet Guide](https://gerdbuddy.app/blog/gerd-diet-guide): Complete dietary guide for managing acid reflux
+- [GERD vs Heartburn](https://gerdbuddy.app/blog/gerd-vs-heartburn): Differences between occasional heartburn and chronic GERD
+- [Acid Reflux During Pregnancy](https://gerdbuddy.app/blog/acid-reflux-pregnancy): Managing acid reflux safely during pregnancy
+- [GERD Medications Explained](https://gerdbuddy.app/blog/gerd-medications-explained): Overview of PPIs, H2 blockers, and antacids
+- [Exercise and GERD](https://gerdbuddy.app/blog/exercise-and-gerd): Which exercises help or worsen acid reflux
+- [GERD and Anxiety](https://gerdbuddy.app/blog/gerd-and-anxiety): The bidirectional relationship between GERD and anxiety
+- [Foods That Help Acid Reflux](https://gerdbuddy.app/blog/foods-that-help-acid-reflux): Foods that soothe and prevent acid reflux symptoms
+- [When to See a Doctor for Acid Reflux](https://gerdbuddy.app/blog/when-to-see-doctor-acid-reflux): Warning signs that require medical attention
+- [GERD and Sleep Apnea](https://gerdbuddy.app/blog/gerd-and-sleep-apnea): Connection between GERD and sleep disorders
+- [GERD and Weight Loss](https://gerdbuddy.app/blog/gerd-and-weight-loss): How weight management affects acid reflux
+- [GERD and Coffee](https://gerdbuddy.app/blog/gerd-and-coffee): Can you drink coffee with GERD?
+- [GERD and Alcohol](https://gerdbuddy.app/blog/gerd-and-alcohol): How alcohol affects acid reflux
+- [Hiatal Hernia and GERD](https://gerdbuddy.app/blog/hiatal-hernia-and-gerd): Relationship between hiatal hernias and GERD
+- [GERD and Asthma](https://gerdbuddy.app/blog/gerd-and-asthma): How acid reflux triggers or worsens asthma
+- [Eating Habits for GERD](https://gerdbuddy.app/blog/eating-habits-for-gerd): How eating habits affect acid reflux
+- [Traveling with GERD](https://gerdbuddy.app/blog/traveling-with-gerd): Tips for managing GERD while traveling
+- [GERD Flare-Up Guide](https://gerdbuddy.app/blog/gerd-flare-up): What to do during a GERD flare-up
+- [GERD in Children](https://gerdbuddy.app/blog/gerd-in-children): Acid reflux in infants and children
+
+## Forum Categories
+
+- [Food & Triggers](https://gerdbuddy.app/forum/food-and-triggers): What to eat, what to avoid, recipes
+- [Medication & Treatment](https://gerdbuddy.app/forum/medication-and-treatment): PPIs, H2 blockers, natural remedies
+- [Lifestyle & Tips](https://gerdbuddy.app/forum/lifestyle-and-tips): Sleep positions, stress management, exercise
+- [New to GERD](https://gerdbuddy.app/forum/new-to-gerd): Introductions, newly diagnosed, basic questions
+- [General Discussion](https://gerdbuddy.app/forum/general-discussion): Anything GERD-related that doesn't fit above
+
+## Frequently Asked Questions
+
+- **What foods trigger GERD?** Common triggers include spicy foods, fatty or fried foods, citrus fruits, tomatoes, chocolate, mint, coffee, alcohol, and carbonated drinks. Triggers vary from person to person.
+- **What is the difference between GERD and heartburn?** Heartburn is a symptom (burning in chest). GERD is a chronic condition where acid reflux happens frequently, typically twice a week or more.
+- **Can GERD be managed without medication?** Many people manage mild GERD through lifestyle changes: elevating the head of the bed, eating smaller meals, avoiding trigger foods, not eating before bed, and managing stress.
+- **What foods help with acid reflux?** Oatmeal, bananas, ginger, melons, green vegetables, lean proteins, whole grains, and non-citrus fruits.
+- **How long does it take to identify GERD triggers?** With consistent tracking, most people identify primary triggers within 1-2 weeks. A complete picture typically emerges after 3-4 weeks.
+- **Is acid reflux common during pregnancy?** Yes, up to 80% of pregnant women experience acid reflux due to hormonal changes and pressure from the growing uterus.
+- **Can exercise make GERD worse?** High-impact activities can trigger reflux, but moderate exercise helps long-term. Walking, swimming, and yoga are generally well-tolerated.
+
+## Contact
+
+- Email: gerdbuddy2@gmail.com
+- Website: https://gerdbuddy.app
