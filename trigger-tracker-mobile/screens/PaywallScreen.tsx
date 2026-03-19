@@ -2,12 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   Image,
   Linking,
   Pressable,
+  ScrollView,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Purchases, {
   PURCHASES_ERROR_CODE,
 } from "react-native-purchases";
@@ -18,9 +21,8 @@ import type {
 } from "react-native-purchases";
 import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
-import { X, Camera, Zap, ShieldCheck, TrendingUp } from "lucide-react-native";
+import { X, Check } from "lucide-react-native";
 import { usePostHog } from "posthog-react-native";
-import Screen from "../components/Screen";
 import Button from "../components/Button";
 import { configureRevenueCat, helpers } from "../services/revenuecat";
 import { getTrialInfo } from "../services/storage";
@@ -32,30 +34,17 @@ type PaywallScreenProps = {
   route?: any;
 };
 
-const turtle = require("../assets/mascot/turtle_shell_standing.png");
+const turtle = require("../assets/mascot/turtle_excited.png");
 const isExpoGo = Constants?.appOwnership === "expo";
 const bypassFlag = process.env.EXPO_PUBLIC_BYPASS_PAYWALL;
 const shouldBypassPaywall = isExpoGo || (__DEV__ && bypassFlag !== "false");
 
 const benefits = [
-  { icon: Camera, text: "Scan any meal — get instant digestive risk analysis" },
-  { icon: TrendingUp, text: "Full trigger analysis with confidence scores" },
-  { icon: Zap, text: "Detailed analytics: severity, timing & symptom-free days" },
-  { icon: ShieldCheck, text: "Share your pattern reports with your doctor" },
+  "Scan any meal",
+  "Full trigger analysis with confidence scores",
+  "Detailed analytics & pattern reports",
+  "Share your pattern reports",
 ];
-
-const valueLabel = (pkg: PurchasesPackage) => {
-  switch (pkg.packageType) {
-    case "ANNUAL":
-      return "Best value · Most savings";
-    case "MONTHLY":
-      return "Flexible · Cancel anytime";
-    case "WEEKLY":
-      return "Quick check-in";
-    default:
-      return "Popular choice";
-  }
-};
 
 const cadenceLabel = (pkg: PurchasesPackage) => {
   switch (pkg.packageType) {
@@ -93,7 +82,7 @@ const hasFreeTrial = (pkg: PurchasesPackage | null) => {
 
 const trialCtaText = (pkg: PurchasesPackage | null) => {
   const intro = getIntroductoryPrice(pkg);
-  if (!intro) return "Start Free Trial";
+  if (!intro) return "Try for 7 Days Free";
 
   const parsePeriod = () => {
     const iso = intro.period || "";
@@ -102,28 +91,28 @@ const trialCtaText = (pkg: PurchasesPackage | null) => {
     const unitChar = iso.replace(/^P/, "").replace(/\d+/g, "").charAt(0);
     const unitFromIso =
       unitChar === "D"
-        ? "day"
+        ? "Day"
         : unitChar === "W"
-        ? "week"
+        ? "Week"
         : unitChar === "M"
-        ? "month"
+        ? "Month"
         : unitChar === "Y"
-        ? "year"
+        ? "Year"
         : null;
 
     const units = intro.periodNumberOfUnits || valueFromIso;
     const unit =
       intro.periodUnit?.toString?.().toLowerCase?.() ||
-      (unitFromIso ? `${unitFromIso}` : null);
+      (unitFromIso ? unitFromIso.toLowerCase() : null);
     return { units, unit };
   };
 
   const { units, unit } = parsePeriod();
-  if (!units || !unit) return "Start Free Trial";
+  if (!units || !unit) return "Try for 7 Days Free";
 
   const singularUnit = unit.replace(/s$/, "");
-  const duration = `${units}-${singularUnit.charAt(0).toUpperCase()}${singularUnit.slice(1)}`;
-  return `Start ${duration} Free Trial`;
+  const capitalUnit = singularUnit.charAt(0).toUpperCase() + singularUnit.slice(1);
+  return `Try for ${units} ${capitalUnit}${Number(units) !== 1 ? "s" : ""} Free`;
 };
 
 const entitlementActive = (info: CustomerInfo | null) => {
@@ -136,9 +125,32 @@ const entitlementActive = (info: CustomerInfo | null) => {
   );
 };
 
-const scannerLimitHeadline = "Try Pro free for 7 days";
-const scannerLimitSubtext =
-  "You've used your 3 free scans. Unlock unlimited scanning and premium insights.";
+const getMonthlyEquivalent = (pkg: PurchasesPackage) => {
+  const price = pkg.product?.price;
+  if (typeof price !== "number") return null;
+  switch (pkg.packageType) {
+    case "ANNUAL":
+      return (price / 12).toFixed(2);
+    case "WEEKLY":
+      return (price * 4.33).toFixed(2);
+    default:
+      return null;
+  }
+};
+
+const getSavingsPercent = (
+  annualPkg: PurchasesPackage,
+  monthlyPkg: PurchasesPackage | undefined
+) => {
+  if (!monthlyPkg) return null;
+  const annualPrice = annualPkg.product?.price;
+  const monthlyPrice = monthlyPkg.product?.price;
+  if (typeof annualPrice !== "number" || typeof monthlyPrice !== "number") return null;
+  const monthlyTotal = monthlyPrice * 12;
+  if (monthlyTotal <= 0) return null;
+  const savings = Math.round(((monthlyTotal - annualPrice) / monthlyTotal) * 100);
+  return savings > 0 ? savings : null;
+};
 
 export default function PaywallScreen({ navigation, route }: PaywallScreenProps) {
   const triggerSource = route?.params?.trigger_source || "manual";
@@ -191,7 +203,6 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
         if (!mounted) return;
 
         const offeringMap = offerings?.all || {};
-        // Prefer RevenueCat's default/current offering; fallback to the first with packages.
         const preferredOffering =
           (offerings?.current?.availablePackages?.length ? offerings.current : null) ||
           Object.values(offeringMap).find(
@@ -243,8 +254,6 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
   }, []);
 
   const unlockApp = () => {
-    // After successful purchase, go back to the previous screen (FoodScan)
-    // which will re-check subscription status via useFocusEffect
     if (navigation.canGoBack()) {
       navigation.goBack();
     } else {
@@ -356,189 +365,450 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
     ? trialCtaText(selectedPackage)
     : "Unlock Pro";
 
+  const monthlyPkg = packages.find((p) => p.packageType === "MONTHLY");
+
   const renderPackage = (pkg: PurchasesPackage) => {
     const isSelected = selectedPackage?.identifier === pkg.identifier;
     const best = bestValueId === pkg.identifier;
     const disabled = isPurchasing || isRestoring || isLoading;
+    const monthlyEquiv = getMonthlyEquivalent(pkg);
+    const savings = best ? getSavingsPercent(pkg, monthlyPkg) : null;
 
     return (
       <Pressable
         key={pkg.identifier}
         onPress={() => setSelectedPackage(pkg)}
         disabled={disabled}
-        className="rounded-2xl border border-border/80 bg-white"
         style={{
-          shadowColor: "#1f3d33",
-          shadowOpacity: best ? 0.10 : 0.04,
-          shadowRadius: best ? 8 : 4,
-          shadowOffset: { width: 0, height: 3 },
-          elevation: best ? 4 : 2,
+          borderRadius: 14,
+          borderWidth: 1.5,
+          borderColor: isSelected ? "#3aa27f" : "#333333",
+          backgroundColor: isSelected ? "rgba(58, 162, 127, 0.08)" : "#1a1a1a",
+          padding: 16,
+          position: "relative",
+          overflow: "visible",
         }}
       >
-        <LinearGradient
-          colors={best ? ["#e1f3ec", "#f5fbf8"] : ["#ffffff", "#ffffff"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ borderRadius: 16, padding: 1 }}
-        >
+        {savings ? (
           <View
-            className={`rounded-2xl px-3 py-2.5 ${
-              isSelected ? "border border-primary/50 bg-primary/5" : "bg-white"
-            }`}
+            style={{
+              position: "absolute",
+              top: -11,
+              right: 16,
+              backgroundColor: "#3aa27f",
+              borderRadius: 8,
+              paddingHorizontal: 10,
+              paddingVertical: 3,
+            }}
           >
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <View className="flex-row items-center gap-1.5">
-                  <Text className="text-base font-semibold text-foreground">
-                    {pkg.product?.title || "Premium"}
-                  </Text>
-                  {best ? (
-                    <View className="rounded-full bg-primary/15 px-2 py-0.5">
-                      <Text className="text-[10px] font-semibold text-primary">Best value</Text>
-                    </View>
-                  ) : null}
-                </View>
-                <Text className="text-xs text-muted-foreground">
-                  {valueLabel(pkg)}
-                </Text>
-              </View>
-              <View className="items-end">
-                <Text className="text-lg font-bold text-foreground">
-                  {pkg.product?.priceString}
-                </Text>
-                <Text className="text-[10px] text-muted-foreground">
-                  {cadenceLabel(pkg)}
-                </Text>
-              </View>
+            <Text style={{ color: "#ffffff", fontSize: 11, fontWeight: "700" }}>
+              {savings}% OFF
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1 }}>
+            <View
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: 11,
+                borderWidth: 2,
+                borderColor: isSelected ? "#3aa27f" : "#555555",
+                backgroundColor: isSelected ? "#3aa27f" : "transparent",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {isSelected ? <Check size={13} color="#ffffff" strokeWidth={3} /> : null}
+            </View>
+            <View>
+              <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "700" }}>
+                {cadenceLabel(pkg)}
+              </Text>
+              <Text style={{ color: "#999999", fontSize: 13, marginTop: 1 }}>
+                {best ? "Most Popular" : "Flexible"}
+                {monthlyEquiv ? ` \u00B7 $${monthlyEquiv}/m` : ""}
+              </Text>
             </View>
           </View>
-        </LinearGradient>
+          <Text style={{ color: "#ffffff", fontSize: 17, fontWeight: "700" }}>
+            {pkg.product?.priceString}/{pkg.packageType === "ANNUAL" ? "yr" : pkg.packageType === "WEEKLY" ? "wk" : "mo"}
+          </Text>
+        </View>
       </Pressable>
     );
   };
 
   const renderFallback = () => (
-    <View className="rounded-2xl border border-border bg-white p-3">
-      <Text className="text-base font-semibold text-foreground">Plans unavailable</Text>
-      <Text className="text-xs text-muted-foreground mt-1">
+    <View
+      style={{
+        borderRadius: 14,
+        borderWidth: 1,
+        borderColor: "#333333",
+        backgroundColor: "#1a1a1a",
+        padding: 16,
+      }}
+    >
+      <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "600" }}>
+        Plans unavailable
+      </Text>
+      <Text style={{ color: "#999999", fontSize: 13, marginTop: 4 }}>
         We couldn't load subscription options right now. Please try again in a moment.
       </Text>
-      <Button
+      <Pressable
         onPress={handleRestore}
-        variant="outline"
-        className="mt-2"
-        textClassName="text-foreground font-semibold text-sm"
+        style={{
+          marginTop: 12,
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: "#444444",
+          paddingVertical: 10,
+          alignItems: "center",
+        }}
       >
-        Restore purchases
-      </Button>
+        <Text style={{ color: "#ffffff", fontWeight: "600", fontSize: 14 }}>
+          Restore purchases
+        </Text>
+      </Pressable>
     </View>
   );
 
+  const screenWidth = Dimensions.get("window").width;
+
   return (
-    <Screen contentClassName="gap-3 pb-4 pt-4">
-      {/* Dismiss button */}
-      <View className="flex-row justify-end">
-        <Pressable
-          onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.replace("Main")}
-          className="p-2 rounded-full bg-muted/60"
-          accessibilityLabel="Close"
-          accessibilityRole="button"
+    <View style={{ flex: 1, backgroundColor: "#000000" }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero section */}
+        <LinearGradient
+          colors={["#3aa27f", "#2d8a6b"]}
+          style={{
+            width: screenWidth,
+            paddingTop: 60,
+            paddingBottom: 40,
+            alignItems: "center",
+            borderBottomLeftRadius: 24,
+            borderBottomRightRadius: 24,
+          }}
         >
-          <X size={20} color="#5f6f74" />
-        </Pressable>
-      </View>
+          {/* Close button */}
+          <Pressable
+            onPress={() =>
+              navigation.canGoBack()
+                ? navigation.goBack()
+                : navigation.replace("Main")
+            }
+            style={{
+              position: "absolute",
+              top: 56,
+              right: 20,
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              backgroundColor: "rgba(0,0,0,0.2)",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10,
+            }}
+            accessibilityLabel="Close"
+            accessibilityRole="button"
+          >
+            <X size={18} color="#ffffff" />
+          </Pressable>
 
-      <View className="items-center gap-2">
-        <Image
-          source={turtle}
-          style={{ width: 72, height: 72 }}
-          resizeMode="contain"
-          className="rounded-2xl"
-        />
-        <Text className="text-center text-2xl font-extrabold text-foreground">
-          {isScannerLimit ? scannerLimitHeadline : "Find your top triggers in 14 days."}
-        </Text>
-        <Text className="text-center text-sm text-muted-foreground px-4">
-          {isScannerLimit
-            ? scannerLimitSubtext
-            : "Unlimited scanning, full trigger analysis, detailed reports, and more — everything you need to take control."}
-        </Text>
-      </View>
+          {/* Scanner bracket corners with mascot */}
+          <View
+            style={{
+              width: 180,
+              height: 180,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {/* Corner brackets */}
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: 40,
+                height: 40,
+                borderTopWidth: 3,
+                borderLeftWidth: 3,
+                borderColor: "#ffffff",
+                borderTopLeftRadius: 12,
+              }}
+            />
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                width: 40,
+                height: 40,
+                borderTopWidth: 3,
+                borderRightWidth: 3,
+                borderColor: "#ffffff",
+                borderTopRightRadius: 12,
+              }}
+            />
+            <View
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                width: 40,
+                height: 40,
+                borderBottomWidth: 3,
+                borderLeftWidth: 3,
+                borderColor: "#ffffff",
+                borderBottomLeftRadius: 12,
+              }}
+            />
+            <View
+              style={{
+                position: "absolute",
+                bottom: 0,
+                right: 0,
+                width: 40,
+                height: 40,
+                borderBottomWidth: 3,
+                borderRightWidth: 3,
+                borderColor: "#ffffff",
+                borderBottomRightRadius: 12,
+              }}
+            />
 
-      <View className="rounded-2xl border border-border bg-white p-3">
-        <Text className="text-base font-semibold text-foreground">What you get</Text>
-        <View className="mt-2 gap-2">
-          {benefits.map((benefit) => {
-            const Icon = benefit.icon;
-            return (
-              <View key={benefit.text} className="flex-row items-center gap-3">
-                <View className="w-8 h-8 rounded-lg bg-primary/10 items-center justify-center">
-                  <Icon size={16} color="#3aa27f" />
-                </View>
-                <Text className="flex-1 text-sm text-foreground">{benefit.text}</Text>
+            <Image
+              source={turtle}
+              style={{ width: 120, height: 120 }}
+              resizeMode="contain"
+            />
+          </View>
+        </LinearGradient>
+
+        {/* Headline */}
+        <View style={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: 8 }}>
+          {!isScannerLimit ? (
+            <>
+              <Text
+                className="text-2xl font-extrabold"
+                style={{
+                  color: "#ffffff",
+                  fontSize: 32,
+                  fontWeight: "800",
+                  textAlign: "center",
+                  lineHeight: 38,
+                }}
+              >
+                Find your top triggers in 14 days.
+              </Text>
+              <Text
+                style={{
+                  color: "#999999",
+                  fontSize: 15,
+                  textAlign: "center",
+                  marginTop: 8,
+                }}
+              >
+                Unlimited scanning, trigger analysis, and detailed reports
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text
+                className="text-2xl font-extrabold"
+                style={{
+                  color: "#ffffff",
+                  fontSize: 32,
+                  fontWeight: "800",
+                  textAlign: "center",
+                  lineHeight: 38,
+                }}
+              >
+                Try Pro free for 7 days
+              </Text>
+              <Text
+                style={{
+                  color: "#999999",
+                  fontSize: 15,
+                  textAlign: "center",
+                  marginTop: 8,
+                }}
+              >
+                You've used your 3 free scans
+              </Text>
+            </>
+          )}
+        </View>
+
+        {/* Benefits */}
+        <View style={{ paddingHorizontal: 24, paddingTop: 16, gap: 14 }}>
+          {benefits.map((text) => (
+            <View
+              key={text}
+              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+            >
+              <View
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 13,
+                  backgroundColor: "#3aa27f",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Check size={15} color="#ffffff" strokeWidth={3} />
               </View>
-            );
-          })}
+              <Text style={{ color: "#ffffff", fontSize: 16, flex: 1 }}>{text}</Text>
+            </View>
+          ))}
         </View>
-      </View>
 
-      {isLoading ? (
-        <View className="flex-1 items-center justify-center gap-2 py-4">
-          <ActivityIndicator size="small" color="#3aa27f" />
-          <Text className="text-muted-foreground text-sm">Loading your plans…</Text>
-        </View>
-      ) : packages.length ? (
-        <View className="gap-2">{packages.map(renderPackage)}</View>
-      ) : (
-        renderFallback()
-      )}
-
-      <View className="gap-2">
-        <Button
-          onPress={handlePurchase}
-          disabled={!selectedPackage || isPurchasing || isRestoring || isLoading}
-          className="w-full"
-        >
-          <View className="flex-row items-center justify-center gap-2">
-            {isPurchasing && <ActivityIndicator size="small" color="#ffffff" />}
-            <Text className="text-base font-semibold text-primary-foreground">
-              {selectedPackage ? primaryCtaText : "Plans unavailable"}
+        {/* Free trial card */}
+        <View style={{ paddingHorizontal: 24, paddingTop: 28 }}>
+          <View
+            style={{
+              backgroundColor: "#2a2a2a",
+              borderRadius: 14,
+              paddingVertical: 16,
+              paddingHorizontal: 20,
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "700" }}>
+              Get 7 Day Free Trial!
+            </Text>
+            <Text style={{ color: "#999999", fontSize: 13, marginTop: 4 }}>
+              Try Risk Free. Cancel Anytime.
             </Text>
           </View>
-        </Button>
+        </View>
 
-        <Text className="text-center text-xs text-muted-foreground">
-          Cancel anytime. Meal tracking and symptom logging are always free.
-        </Text>
+        {/* Plan selection */}
+        <View style={{ paddingHorizontal: 24, paddingTop: 20, gap: 14 }}>
+          {isLoading ? (
+            <View style={{ alignItems: "center", paddingVertical: 20, gap: 8 }}>
+              <ActivityIndicator size="small" color="#3aa27f" />
+              <Text style={{ color: "#999999", fontSize: 14 }}>Loading plans...</Text>
+            </View>
+          ) : packages.length ? (
+            packages.map(renderPackage)
+          ) : (
+            renderFallback()
+          )}
+        </View>
 
-        <Button
-          variant="ghost"
-          onPress={handleRestore}
-          disabled={isPurchasing || isRestoring}
-          className="w-full py-1"
-          textClassName="text-foreground font-semibold text-sm"
+        {/* Subscription disclaimers */}
+        <View style={{ paddingHorizontal: 24, paddingTop: 28, gap: 12 }}>
+          <Text
+            style={{
+              color: "#666666",
+              fontSize: 12,
+              textAlign: "center",
+              lineHeight: 18,
+            }}
+          >
+            Subscriptions are charged via your Apple account. Your subscription will
+            automatically renew unless it is cancelled at least 24 hours before the end of
+            the current period.
+          </Text>
+
+          <Text
+            style={{
+              color: "#666666",
+              fontSize: 12,
+              textAlign: "center",
+              lineHeight: 18,
+            }}
+          >
+            Any unused portion of a Free Trial, if offered, is forfeited when you buy a
+            subscription.
+          </Text>
+        </View>
+
+        {/* Links row */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 24,
+            paddingTop: 16,
+            paddingBottom: 8,
+          }}
         >
-          {isRestoring ? "Restoring…" : "Restore purchases"}
-        </Button>
-
-        {statusMessage ? (
-          <Text className="text-center text-[10px] text-muted-foreground">{statusMessage}</Text>
-        ) : null}
-
-        <Text className="text-center text-[10px] text-muted-foreground leading-tight">
-          Subscription automatically renews unless canceled at least 24 hours before the end of the
-          current period. Free trial auto-renews to a paid subscription.
-        </Text>
-
-        <View className="flex-row justify-center gap-4">
-          <Pressable onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/privacy")}>
-            <Text className="text-[10px] text-primary underline">Privacy Policy</Text>
+          <Pressable onPress={handleRestore} disabled={isPurchasing || isRestoring}>
+            <Text style={{ color: "#999999", fontSize: 13, textDecorationLine: "underline" }}>
+              {isRestoring ? "Restoring..." : "Restore Purchases"}
+            </Text>
           </Pressable>
-          <Pressable onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/terms")}>
-            <Text className="text-[10px] text-primary underline">Terms of Service</Text>
+          <Pressable
+            onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/terms")}
+          >
+            <Text style={{ color: "#999999", fontSize: 13, textDecorationLine: "underline" }}>
+              Terms
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/privacy")}
+          >
+            <Text style={{ color: "#999999", fontSize: 13, textDecorationLine: "underline" }}>
+              Privacy
+            </Text>
           </Pressable>
         </View>
-      </View>
-    </Screen>
+
+        {statusMessage ? (
+          <Text
+            style={{
+              color: "#999999",
+              fontSize: 11,
+              textAlign: "center",
+              paddingHorizontal: 24,
+              paddingTop: 8,
+            }}
+          >
+            {statusMessage}
+          </Text>
+        ) : null}
+      </ScrollView>
+
+      {/* Sticky CTA at bottom */}
+      <SafeAreaView
+        edges={["bottom"]}
+        style={{ backgroundColor: "#000000" }}
+      >
+        <View style={{ paddingHorizontal: 24, paddingTop: 12, paddingBottom: 8 }}>
+          <Pressable
+            onPress={handlePurchase}
+            disabled={!selectedPackage || isPurchasing || isRestoring || isLoading}
+            style={{
+              backgroundColor: "#3aa27f",
+              borderRadius: 16,
+              paddingVertical: 18,
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "row",
+              gap: 8,
+              opacity:
+                !selectedPackage || isPurchasing || isRestoring || isLoading ? 0.6 : 1,
+            }}
+          >
+            {isPurchasing ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : null}
+            <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "700" }}>
+              {selectedPackage ? primaryCtaText : "Plans unavailable"}
+            </Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }

@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Alert, Linking, Platform, Pressable, Text, TextInput, View, Switch } from "react-native";
-import { Bell, Trash2, Info, ChevronRight, LogOut, Moon, CreditCard, FileText, Shield, User, Mail, Heart, MessageSquare, Send, X } from "lucide-react-native";
+import {
+  Bell, Trash2, Info, ChevronRight, LogOut, Moon, CreditCard, FileText, Shield,
+  User, Mail, Heart, MessageSquare, Send, X,
+} from "lucide-react-native";
 import { useAuth } from "../contexts/AuthContext";
 import Screen from "../components/Screen";
-import Card from "../components/Card";
 import Button from "../components/Button";
+import Mascot from "../components/Mascot";
 import { clearAllData, getUser, saveUser } from "../services/storage";
 import { showToast } from "../utils/feedback";
 import {
@@ -15,8 +18,35 @@ import {
   syncReminderNotifications,
   syncSmartNotifications,
 } from "../services/notifications";
+import { getEntitlementState } from "../services/paywallTrigger";
 
 const APP_VERSION = "2.0.0";
+
+const SettingsCard = ({ icon: Icon, iconColor = "#3aa27f", label, subtitle, onPress, right, destructive, children }) => {
+  const content = (
+    <View className="bg-card rounded-2xl px-4 py-4 flex-row items-center">
+      <View className="w-10 h-10 rounded-xl items-center justify-center mr-3 bg-muted/50">
+        <Icon size={20} color={iconColor} />
+      </View>
+      <View className="flex-1">
+        <Text className={`text-base font-semibold ${destructive ? "text-destructive" : "text-foreground"}`}>
+          {label}
+        </Text>
+        {subtitle && (
+          <Text className="text-sm text-muted-foreground mt-0.5" numberOfLines={1}>
+            {subtitle}
+          </Text>
+        )}
+      </View>
+      {right || (onPress && <ChevronRight size={20} color="#c4c4c0" />)}
+    </View>
+  );
+  if (children) {
+    return <View className="bg-card rounded-2xl px-4 py-4">{children}</View>;
+  }
+  if (onPress) return <Pressable onPress={onPress}>{content}</Pressable>;
+  return content;
+};
 
 export default function SettingsScreen({ navigation }) {
   const {
@@ -37,6 +67,7 @@ export default function SettingsScreen({ navigation }) {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
   const [isSendingFeedback, setIsSendingFeedback] = useState(false);
+  const [isPro, setIsPro] = useState(false);
 
   const refreshNotificationStatus = useCallback(async () => {
     const status = await getPermissionStatus();
@@ -59,6 +90,9 @@ export default function SettingsScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       refreshNotificationStatus();
+      getEntitlementState()
+        .then((state) => setIsPro(state === "pro" || state === "trial"))
+        .catch(() => {});
     }, [refreshNotificationStatus])
   );
 
@@ -182,38 +216,72 @@ export default function SettingsScreen({ navigation }) {
   };
 
   return (
-    <Screen contentClassName="gap-6">
-      <View className="gap-3">
-        <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          Notifications
-        </Text>
-        <Card className="divide-y divide-border">
-          <View className="flex-row items-center justify-between p-4">
-            <View className="flex-row items-center gap-3 flex-1 mr-3">
-              <Bell size={20} color="#3aa27f" />
-              <View className="flex-1">
-                <Text className="font-medium text-foreground">Daily Reminders</Text>
-                <Text className="text-sm text-muted-foreground">Remind me to log meals</Text>
-              </View>
-            </View>
-            <Switch value={remindersEnabled} onValueChange={handleRemindersToggle} />
-          </View>
+    <Screen contentClassName="gap-4 pb-8">
+      {/* Profile header */}
+      <View className="items-center py-4 gap-3">
+        <Mascot size="small" />
+        <View className="items-center">
+          <Text className="text-xl font-bold text-foreground">
+            {isAuthenticated ? authUser?.email?.split("@")[0] : "Buddy"}
+          </Text>
+          {isAuthenticated && (
+            <Text className="text-sm text-muted-foreground">{authUser?.email}</Text>
+          )}
+        </View>
+      </View>
 
-          <View className="flex-row items-center justify-between p-4">
-            <View className="flex-row items-center gap-3 flex-1 mr-3">
-              <Moon size={20} color="#5f6f74" />
-              <View className="flex-1">
-                <Text className="font-medium text-foreground">Evening Reminder</Text>
-                <Text className="text-sm text-muted-foreground">
-                  Avoid eating 2 hours before bed
-                </Text>
-              </View>
+      {/* Upgrade to Pro banner */}
+      {!isPro && (
+        <Pressable onPress={() => navigation.navigate("Paywall", { trigger_source: "settings" })}>
+          <View className="bg-primary rounded-2xl px-5 py-4 flex-row items-center justify-between overflow-hidden">
+            <View className="flex-1 z-10">
+              <Text className="text-white text-lg font-bold">Upgrade to Pro</Text>
+              <Text className="text-white/80 text-sm mt-0.5">
+                Unlimited tracking, full trigger analysis, and more.
+              </Text>
             </View>
-            <Switch value={eveningReminderEnabled} onValueChange={handleEveningReminderToggle} />
+            <View
+              className="absolute right-0 top-0 bottom-0 opacity-10"
+              style={{ width: 120 }}
+            >
+              <View className="absolute -right-4 -top-4 w-28 h-28 rounded-full bg-white" />
+              <View className="absolute right-6 top-8 w-20 h-20 rounded-full bg-white" />
+            </View>
+            <ChevronRight size={22} color="#ffffff" className="z-10" />
           </View>
-        </Card>
+        </Pressable>
+      )}
+
+      {/* Notifications */}
+      <View className="gap-3 mt-2">
+        <Text className="text-lg font-bold text-foreground">Notifications</Text>
+        <SettingsCard
+          icon={Bell}
+          label="Daily Reminders"
+          subtitle="Remind me to log meals"
+          right={
+            <Switch
+              value={remindersEnabled}
+              onValueChange={handleRemindersToggle}
+              trackColor={{ true: "#3aa27f" }}
+            />
+          }
+        />
+        <SettingsCard
+          icon={Moon}
+          iconColor="#5f6f74"
+          label="Evening Reminder"
+          subtitle="Avoid eating 2 hours before bed"
+          right={
+            <Switch
+              value={eveningReminderEnabled}
+              onValueChange={handleEveningReminderToggle}
+              trackColor={{ true: "#3aa27f" }}
+            />
+          }
+        />
         {!notificationPermission.granted && !notificationPermission.provisional && (
-          <Card className="p-4 gap-3 bg-amber-50 border border-amber-200">
+          <View className="bg-amber-50 rounded-2xl px-4 py-4 gap-3 border border-amber-200">
             <View className="flex-row items-center gap-2">
               <Info size={18} color="#b45309" />
               <Text className="font-semibold text-amber-900">Notifications are off</Text>
@@ -230,272 +298,190 @@ export default function SettingsScreen({ navigation }) {
             >
               <Text className="text-foreground font-semibold">Open Settings</Text>
             </Button>
-          </Card>
+          </View>
         )}
       </View>
 
+      {/* Account */}
       {isFirebaseConfigured && (
-        <View className="gap-3">
-          <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            Account
-          </Text>
-          <Card className="divide-y divide-border">
-            {isAuthenticated ? (
-              <>
-                <View className="flex-row items-center justify-between p-4">
-                  <View className="flex-row items-center gap-3 flex-1">
-                    <Mail size={20} color="#3aa27f" />
-                    <View className="flex-1">
-                      <Text className="font-medium text-foreground">Email</Text>
-                      <Text className="text-sm text-muted-foreground" numberOfLines={1}>
-                        {authUser?.email}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-                <Pressable
-                  onPress={() =>
-                    confirmAction(
-                      "Sign out?",
-                      "You can sign back in anytime.",
-                      handleSignOut
-                    )
-                  }
-                  className="flex-row items-center justify-between p-4"
-                >
-                  <View className="flex-row items-center gap-3">
-                    <LogOut size={20} color="#5f6f74" />
-                    <Text className="font-medium text-foreground">Sign Out</Text>
-                  </View>
-                  <ChevronRight size={20} color="#5f6f74" />
-                </Pressable>
-              </>
-            ) : (
-              <>
-                <Pressable
-                  onPress={() => navigation.navigate("SignUp")}
-                  className="flex-row items-center justify-between p-4"
-                >
-                  <View className="flex-row items-center gap-3 flex-1 mr-3">
-                    <User size={20} color="#3aa27f" />
-                    <View className="flex-1">
-                      <Text className="font-medium text-foreground">Create Account</Text>
-                      <Text className="text-sm text-muted-foreground">
-                        Sync your data across devices
-                      </Text>
-                    </View>
-                  </View>
-                  <ChevronRight size={20} color="#5f6f74" />
-                </Pressable>
-                <Pressable
-                  onPress={() => navigation.navigate("Login")}
-                  className="flex-row items-center justify-between p-4"
-                >
-                  <View className="flex-row items-center gap-3">
-                    <Mail size={20} color="#5f6f74" />
-                    <Text className="font-medium text-foreground">Sign In</Text>
-                  </View>
-                  <ChevronRight size={20} color="#5f6f74" />
-                </Pressable>
-              </>
-            )}
-          </Card>
+        <View className="gap-3 mt-2">
+          <Text className="text-lg font-bold text-foreground">Account</Text>
+          {isAuthenticated ? (
+            <>
+              <SettingsCard
+                icon={Mail}
+                label="Email"
+                subtitle={authUser?.email}
+              />
+              <SettingsCard
+                icon={LogOut}
+                iconColor="#5f6f74"
+                label="Sign Out"
+                onPress={() =>
+                  confirmAction("Sign out?", "You can sign back in anytime.", handleSignOut)
+                }
+              />
+            </>
+          ) : (
+            <>
+              <SettingsCard
+                icon={User}
+                label="Create Account"
+                subtitle="Sync your data across devices"
+                onPress={() => navigation.navigate("SignUp")}
+              />
+              <SettingsCard
+                icon={Mail}
+                iconColor="#5f6f74"
+                label="Sign In"
+                onPress={() => navigation.navigate("Login")}
+              />
+            </>
+          )}
         </View>
       )}
 
-      <View className="gap-3">
-        <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          Subscription
-        </Text>
-        <Card className="divide-y divide-border">
-          <Pressable
+      {/* Subscription */}
+      {isPro && (
+        <View className="gap-3 mt-2">
+          <Text className="text-lg font-bold text-foreground">Subscription</Text>
+          <SettingsCard
+            icon={CreditCard}
+            label="Manage Subscription"
             onPress={() => navigation.navigate("CustomerCenter")}
-            className="flex-row items-center justify-between p-4"
-          >
-            <View className="flex-row items-center gap-3">
-              <CreditCard size={20} color="#3aa27f" />
-              <Text className="font-medium text-foreground">Manage Subscription</Text>
-            </View>
-            <ChevronRight size={20} color="#5f6f74" />
-          </Pressable>
-        </Card>
-      </View>
+          />
+        </View>
+      )}
 
-      <View className="gap-3">
-        <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          About
-        </Text>
-        <Card className="divide-y divide-border">
-          <View className="p-4 gap-3">
-            <View className="flex-row items-center gap-3">
-              <Heart size={20} color="#3aa27f" />
-              <Text className="font-medium text-foreground">About the Developer</Text>
-            </View>
-            <Text className="text-sm text-muted-foreground leading-relaxed">
-              My name is Luke, and I'm a 19 year old college student who struggles with GERD. I built GERDBuddy to help others like me track their triggers and take control of their symptoms. I'm constantly working to improve the app and make it genuinely useful. If you have any suggestions, I'd love to hear them below!
-            </Text>
-          </View>
-          <Pressable
-            onPress={() =>
-              Alert.alert(
-                "How GERDBuddy Works",
-                "1. Log what you eat and any symptoms you experience\n\n2. Over time, GERDBuddy looks for patterns between your meals and symptoms\n\n3. After about a week of consistent logging, you'll start seeing which foods may be connected to your symptoms\n\n4. Use these patterns to have more informed conversations with your doctor\n\nThis is a tracking tool — not a replacement for medical advice."
-              )
-            }
-            className="flex-row items-center justify-between p-4"
-          >
-            <View className="flex-row items-center gap-3">
-              <Info size={20} color="#3aa27f" />
-              <Text className="font-medium text-foreground">How It Works</Text>
-            </View>
-            <ChevronRight size={20} color="#5f6f74" />
-          </Pressable>
-        </Card>
-      </View>
-
-      <View className="gap-3">
-        <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          Feedback
-        </Text>
-        <Card className="divide-y divide-border">
-          {showFeedbackForm ? (
-            <View className="p-4 gap-3">
-              <View className="flex-row items-center justify-between">
-                <Text className="font-medium text-foreground">Send Feedback</Text>
-                <Pressable onPress={() => { setShowFeedbackForm(false); setFeedbackText(""); }}>
-                  <X size={18} color="#5f6f74" />
-                </Pressable>
-              </View>
-              <Text className="text-sm text-muted-foreground">
-                Bug reports, feature ideas, or just saying hi — I read every message.
-              </Text>
-              <TextInput
-                value={feedbackText}
-                onChangeText={setFeedbackText}
-                placeholder="What's on your mind?"
-                placeholderTextColor="#9ca3af"
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-                className="border border-border rounded-xl p-3 text-foreground min-h-[100px] bg-muted/30"
-              />
-              <Button
-                onPress={handleSendFeedback}
-                disabled={!feedbackText.trim() || isSendingFeedback}
-                className="w-full"
+      {/* Help */}
+      <View className="gap-3 mt-2">
+        <Text className="text-lg font-bold text-foreground">Help</Text>
+        <SettingsCard
+          icon={Info}
+          label="How It Works"
+          onPress={() =>
+            Alert.alert(
+              "How GERDBuddy Works",
+              "1. Log what you eat and any symptoms you experience\n\n2. Over time, GERDBuddy looks for patterns between your meals and symptoms\n\n3. After about a week of consistent logging, you'll start seeing which foods may be connected to your symptoms\n\n4. Use these patterns to have more informed conversations with your doctor\n\nThis is a tracking tool — not a replacement for medical advice."
+            )
+          }
+        />
+        <SettingsCard
+          icon={Heart}
+          label="About the Developer"
+          onPress={() =>
+            Alert.alert(
+              "About",
+              "My name is Luke, and I'm a 19 year old college student who struggles with GERD. I built GERDBuddy to help others like me track their triggers and take control of their symptoms. I'm constantly working to improve the app and make it genuinely useful. If you have any suggestions, I'd love to hear them!"
+            )
+          }
+        />
+        {showFeedbackForm ? (
+          <View className="bg-card rounded-2xl px-4 py-4 gap-3">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-semibold text-foreground">Send Feedback</Text>
+              <Pressable
+                onPress={() => { setShowFeedbackForm(false); setFeedbackText(""); }}
+                className="w-8 h-8 items-center justify-center rounded-full bg-muted/40"
               >
-                <View className="flex-row items-center justify-center gap-2">
-                  <Send size={16} color="#ffffff" />
-                  <Text className="text-primary-foreground font-semibold">
-                    {isSendingFeedback ? "Opening email..." : "Send Feedback"}
-                  </Text>
-                </View>
-              </Button>
+                <X size={16} color="#5f6f74" />
+              </Pressable>
             </View>
-          ) : (
-            <Pressable
-              onPress={() => setShowFeedbackForm(true)}
-              className="flex-row items-center justify-between p-4"
+            <Text className="text-sm text-muted-foreground">
+              Bug reports, feature ideas, or just saying hi — I read every message.
+            </Text>
+            <TextInput
+              value={feedbackText}
+              onChangeText={setFeedbackText}
+              placeholder="What's on your mind?"
+              placeholderTextColor="#9ca3af"
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              className="rounded-xl p-3 text-foreground min-h-[100px] bg-background"
+            />
+            <Button
+              onPress={handleSendFeedback}
+              disabled={!feedbackText.trim() || isSendingFeedback}
+              className="w-full"
             >
-              <View className="flex-row items-center gap-3 flex-1 mr-3">
-                <MessageSquare size={20} color="#3aa27f" />
-                <View className="flex-1">
-                  <Text className="font-medium text-foreground">Send Feedback</Text>
-                  <Text className="text-sm text-muted-foreground">Bug reports, ideas, or questions</Text>
-                </View>
+              <View className="flex-row items-center justify-center gap-2">
+                <Send size={16} color="#ffffff" />
+                <Text className="text-primary-foreground font-semibold">
+                  {isSendingFeedback ? "Opening email..." : "Send Feedback"}
+                </Text>
               </View>
-              <ChevronRight size={20} color="#5f6f74" />
-            </Pressable>
-          )}
-        </Card>
+            </Button>
+          </View>
+        ) : (
+          <SettingsCard
+            icon={MessageSquare}
+            label="Send Feedback"
+            subtitle="Bug reports, ideas, or questions"
+            onPress={() => setShowFeedbackForm(true)}
+          />
+        )}
       </View>
 
-      <View className="gap-3">
-        <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          Medical Disclaimer
+      {/* Legal */}
+      <View className="gap-3 mt-2">
+        <Text className="text-lg font-bold text-foreground">Legal</Text>
+        <SettingsCard
+          icon={Shield}
+          label="Privacy Policy"
+          onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/privacy")}
+        />
+        <SettingsCard
+          icon={FileText}
+          label="Terms of Service"
+          onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/terms")}
+        />
+      </View>
+
+      {/* Disclaimer */}
+      <View className="bg-amber-50/70 rounded-2xl px-4 py-4 mt-2">
+        <Text className="text-sm text-foreground font-semibold">
+          This app is not medical advice
         </Text>
-        <Card className="p-4 gap-2 bg-amber-50/50 border-amber-200/50">
-          <Text className="text-sm text-foreground font-medium">
-            This app is not medical advice
-          </Text>
-          <Text className="text-xs text-muted-foreground leading-relaxed">
-            GERDBuddy is a personal tracking tool. It helps you spot patterns in your own data — it does not diagnose, treat, or cure any condition. Always talk to your doctor before making changes to your diet or treatment plan.
-          </Text>
-        </Card>
-      </View>
-
-      <View className="gap-3">
-        <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          Legal
+        <Text className="text-xs text-muted-foreground leading-relaxed mt-1">
+          GERDBuddy is a personal tracking tool. It helps you spot patterns in your own data — it does not diagnose, treat, or cure any condition. Always talk to your doctor before making changes to your diet or treatment plan.
         </Text>
-        <Card className="divide-y divide-border">
-          <Pressable
-            onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/privacy")}
-            className="flex-row items-center justify-between p-4"
-          >
-            <View className="flex-row items-center gap-3">
-              <Shield size={20} color="#3aa27f" />
-              <Text className="font-medium text-foreground">Privacy Policy</Text>
-            </View>
-            <ChevronRight size={20} color="#5f6f74" />
-          </Pressable>
-          <Pressable
-            onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/terms")}
-            className="flex-row items-center justify-between p-4"
-          >
-            <View className="flex-row items-center gap-3">
-              <FileText size={20} color="#3aa27f" />
-              <Text className="font-medium text-foreground">Terms of Service</Text>
-            </View>
-            <ChevronRight size={20} color="#5f6f74" />
-          </Pressable>
-        </Card>
       </View>
 
-      <View className="gap-3">
-        <Text className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-          Data
-        </Text>
-        <Card className="divide-y divide-border">
-          <Pressable
-            onPress={() =>
-              confirmAction(
-                "Clear all data?",
-                "This will delete all your logged meals, symptoms, and insights.",
-                handleClearData
-              )
-            }
-            className="flex-row items-center justify-between p-4"
-          >
-            <View className="flex-row items-center gap-3">
-              <Trash2 size={20} color="#c53030" />
-              <Text className="font-medium text-destructive">Clear All Data</Text>
-            </View>
-            <ChevronRight size={20} color="#5f6f74" />
-          </Pressable>
-
-          <Pressable
-            onPress={() =>
-              confirmAction(
-                "Start over?",
-                "This will reset the app and take you back to onboarding. All data will be deleted.",
-                handleStartOver
-              )
-            }
-            className="flex-row items-center justify-between p-4"
-          >
-            <View className="flex-row items-center gap-3">
-              <LogOut size={20} color="#5f6f74" />
-              <Text className="font-medium text-foreground">Start Over</Text>
-            </View>
-            <ChevronRight size={20} color="#5f6f74" />
-          </Pressable>
-        </Card>
+      {/* Data */}
+      <View className="gap-3 mt-2">
+        <Text className="text-lg font-bold text-foreground">Data</Text>
+        <SettingsCard
+          icon={Trash2}
+          iconColor="#c53030"
+          label="Clear All Data"
+          destructive
+          onPress={() =>
+            confirmAction(
+              "Clear all data?",
+              "This will delete all your logged meals, symptoms, and insights.",
+              handleClearData
+            )
+          }
+        />
+        <SettingsCard
+          icon={LogOut}
+          iconColor="#5f6f74"
+          label="Start Over"
+          onPress={() =>
+            confirmAction(
+              "Start over?",
+              "This will reset the app and take you back to onboarding. All data will be deleted.",
+              handleStartOver
+            )
+          }
+        />
       </View>
 
+      {/* Version */}
       <View className="items-center gap-1 pt-4 pb-2">
-        <Text className="text-sm text-muted-foreground">GERDBuddy v{APP_VERSION}</Text>
-        <Text className="text-xs text-muted-foreground">Built by someone who gets it</Text>
+        <Text className="text-xs text-muted-foreground/50">GERDBuddy v{APP_VERSION}</Text>
+        <Text className="text-xs text-muted-foreground/50">Built by someone who gets it</Text>
       </View>
     </Screen>
   );

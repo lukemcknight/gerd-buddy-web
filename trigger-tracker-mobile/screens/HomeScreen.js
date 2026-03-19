@@ -44,6 +44,7 @@ export default function HomeScreen({ navigation }) {
         bestStreak: streakInfo.bestStreak,
         loggedToday: streakInfo.loggedToday,
       }));
+
     } catch (error) {
       console.warn("Failed to load home data", error);
     }
