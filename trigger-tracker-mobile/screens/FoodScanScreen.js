@@ -1,33 +1,23 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ActivityIndicator, Image, Linking, Pressable, Text, View } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import Constants from "expo-constants";
 import {
-  ArrowLeft, Camera, Image as ImageIcon, Info, ShieldAlert,
-  Utensils, Flame, Sparkles, ChevronDown, ChevronUp, ArrowRightLeft, Lock,
+  ArrowLeft, Camera, Image as ImageIcon, ShieldAlert,
+  Utensils, Flame, ChevronDown, ChevronUp, ArrowRightLeft,
 } from "lucide-react-native";
 import { usePostHog } from "posthog-react-native";
 import Screen from "../components/Screen";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import Mascot from "../components/Mascot";
 import { analyzeFoodImage } from "../services/foodAnalysis";
 import { enhanceScanResult } from "../services/scannerAdapter";
 import { showToast } from "../utils/feedback";
 import {
   saveMeal, getPersonalTriggers, getMeals, getUser,
   getStreakInfo, updateBestStreak, STREAK_MILESTONES,
-  getScanCount7d, getDaysSinceStart, generateId,
+  getScanCount7d, getDaysSinceStart,
 } from "../services/storage";
 import { EVENTS } from "../services/analytics";
-import {
-  canUserScan, incrementFreeScanCount, FREE_SCAN_LIMIT, FEATURE_FLAGS,
-} from "../services/scannerGate";
-
-const isExpoGo = Constants?.appOwnership === "expo";
-const bypassFlag = process.env.EXPO_PUBLIC_BYPASS_PAYWALL;
-const shouldBypassPaywall = isExpoGo || (__DEV__ && bypassFlag !== "false");
 
 const trafficLightStyles = {
   "Likely Safe": {
@@ -84,50 +74,8 @@ export default function FoodScanScreen({ navigation }) {
     camera: null,
     gallery: null,
   });
-  // Gate state
-  const [gateResult, setGateResult] = useState(null);
-  const [isCheckingGate, setIsCheckingGate] = useState(true);
-  const scanIdRef = useRef(null);
   const userErrorMessage = "There was an error, please try again.";
   const posthog = usePostHog();
-
-  // ── Gate check (runs on focus) ─────────────────────────────────────
-  const checkGate = useCallback(async () => {
-    if (shouldBypassPaywall) {
-      setGateResult({
-        allowed: true,
-        reason: "pro",
-        entitlementState: "pro",
-        freeScanCount: 0,
-        freeScanLimit: FREE_SCAN_LIMIT,
-      });
-      setIsCheckingGate(false);
-      return;
-    }
-    try {
-      setIsCheckingGate(true);
-      const result = await canUserScan();
-      setGateResult(result);
-    } catch (err) {
-      console.warn("Gate check failed", err);
-      // Fail open for legacy behavior if flag is off
-      setGateResult({
-        allowed: false,
-        reason: "limit_reached",
-        entitlementState: "free",
-        freeScanCount: FREE_SCAN_LIMIT,
-        freeScanLimit: FREE_SCAN_LIMIT,
-      });
-    } finally {
-      setIsCheckingGate(false);
-    }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      checkGate();
-    }, [checkGate])
-  );
 
   useEffect(() => {
     posthog?.screen("FoodScan");
@@ -169,39 +117,13 @@ export default function FoodScanScreen({ navigation }) {
     }
   };
 
-  // ── Scan attempt with gate enforcement ─────────────────────────────
   const handlePick = async (type) => {
     setError(null);
     setAnalysis(null);
     setHasLoggedMeal(false);
     setExpandedTags(new Set());
 
-    // Track attempt
-    posthog?.capture(EVENTS.SCANNER_ATTEMPTED, {
-      entitlement_state: gateResult?.entitlementState,
-      free_scan_count: gateResult?.freeScanCount,
-    });
-
-    // Re-check gate at scan time (freshest state)
-    if (!shouldBypassPaywall) {
-      const freshGate = await canUserScan();
-      setGateResult(freshGate);
-
-      if (!freshGate.allowed) {
-        posthog?.capture(EVENTS.SCANNER_BLOCKED_LIMIT_REACHED, {
-          free_scan_count: freshGate.freeScanCount,
-          limit: freshGate.freeScanLimit,
-        });
-        // Navigate to paywall with scanner_limit source
-        navigation.navigate("Paywall", { trigger_source: "scanner_limit" });
-        return;
-      }
-
-      posthog?.capture(EVENTS.SCANNER_ALLOWED, {
-        entitlement_state: freshGate.entitlementState,
-        free_scan_count_before: freshGate.freeScanCount,
-      });
-    }
+    posthog?.capture(EVENTS.SCANNER_ATTEMPTED);
 
     const allowed = await handlePermission(type);
     if (!allowed) return;
@@ -232,10 +154,6 @@ export default function FoodScanScreen({ navigation }) {
 
   const analyze = async (asset) => {
     setIsAnalyzing(true);
-    // Generate unique scan ID for dedup
-    const thisScanId = generateId();
-    scanIdRef.current = thisScanId;
-
     posthog?.capture("food_scan_started");
     try {
       const [personalTriggers, user] = await Promise.all([
@@ -246,11 +164,6 @@ export default function FoodScanScreen({ navigation }) {
       const rawResult = await analyzeFoodImage(asset, personalTriggers, user?.conditions);
       const enhanced = enhanceScanResult(rawResult);
       setAnalysis(enhanced);
-
-      // Increment free scan count ONLY on successful completion, with dedup
-      if (!shouldBypassPaywall && gateResult?.entitlementState !== "pro") {
-        await incrementFreeScanCount(thisScanId);
-      }
 
       const scanCount7d = await getScanCount7d();
       const userTenureDays = await getDaysSinceStart();
@@ -264,12 +177,6 @@ export default function FoodScanScreen({ navigation }) {
         user_tenure_days: userTenureDays,
         has_personal_triggers: (enhanced.personalTriggerMatch?.length || 0) > 0,
       });
-
-      // Refresh gate state after increment
-      if (!shouldBypassPaywall) {
-        const updatedGate = await canUserScan();
-        setGateResult(updatedGate);
-      }
     } catch (err) {
       console.warn("Food analysis failed", err);
       posthog?.capture("food_scan_failed");
@@ -359,176 +266,6 @@ export default function FoodScanScreen({ navigation }) {
     (permissionStatus.camera?.status === "denied" && !permissionStatus.camera?.canAskAgain) ||
     (permissionStatus.gallery?.status === "denied" && !permissionStatus.gallery?.canAskAgain);
 
-  // ── Loading state ──────────────────────────────────────────────────
-  if (isCheckingGate) {
-    return (
-      <Screen contentClassName="flex-1 items-center justify-center gap-3">
-        <ActivityIndicator size="small" color="#3aa27f" />
-        <Text className="text-muted-foreground text-sm">Loading...</Text>
-      </Screen>
-    );
-  }
-
-  // ── Limit reached state (blocked) ─────────────────────────────────
-  const isBlocked = gateResult && !gateResult.allowed && gateResult.reason === "limit_reached";
-  const isLegacyBlocked = gateResult && !gateResult.allowed && gateResult.reason === "flag_off_pro_only";
-
-  if (isBlocked) {
-    return (
-      <Screen contentClassName="gap-6 pb-10">
-        <View className="flex-row items-center gap-3">
-          <Pressable
-            onPress={() => navigation.goBack()}
-            className="p-2 rounded-xl bg-muted/60"
-          >
-            <ArrowLeft size={18} color="#1f2a30" />
-          </Pressable>
-          <Text className="text-xl font-bold text-foreground">Food Scanner</Text>
-        </View>
-
-        <View className="flex-1 items-center justify-center gap-6 px-4">
-          <Mascot size="medium" />
-
-          <View className="items-center gap-3">
-            <View className="w-16 h-16 rounded-2xl bg-amber-100 items-center justify-center">
-              <Lock size={32} color="#d97706" />
-            </View>
-            <Text className="text-2xl font-bold text-foreground text-center">
-              You've used your {FREE_SCAN_LIMIT} free scans
-            </Text>
-            <Text className="text-base text-muted-foreground text-center leading-relaxed max-w-xs">
-              Start your 7-day free trial for unlimited scanning and premium insights.
-            </Text>
-          </View>
-
-          <View className="w-full gap-3 px-2">
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-primary/10 items-center justify-center">
-                <Camera size={20} color="#3aa27f" />
-              </View>
-              <Text className="flex-1 text-sm text-foreground">Unlimited meal scans</Text>
-            </View>
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-primary/10 items-center justify-center">
-                <ShieldAlert size={20} color="#3aa27f" />
-              </View>
-              <Text className="flex-1 text-sm text-foreground">Full trigger analysis & insights</Text>
-            </View>
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-primary/10 items-center justify-center">
-                <Utensils size={20} color="#3aa27f" />
-              </View>
-              <Text className="flex-1 text-sm text-foreground">Weekly reports you can share with your doctor</Text>
-            </View>
-          </View>
-
-          <View className="w-full gap-3 mt-2">
-            <Button
-              onPress={() => {
-                posthog?.capture(EVENTS.PAYWALL_TRIGGERED, {
-                  trigger_source: "scanner_limit",
-                });
-                navigation.navigate("Paywall", { trigger_source: "scanner_limit" });
-              }}
-              className="w-full py-4 rounded-2xl"
-            >
-              <View className="flex-row items-center justify-center gap-2">
-                <Sparkles size={18} color="#ffffff" />
-                <Text className="text-primary-foreground font-bold text-base">
-                  Start 7-Day Free Trial
-                </Text>
-              </View>
-            </Button>
-
-            <Pressable onPress={() => navigation.goBack()} className="py-3">
-              <Text className="text-center text-muted-foreground">Not now</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Screen>
-    );
-  }
-
-  // ── Legacy Pro-only gate (flag off) ────────────────────────────────
-  if (isLegacyBlocked) {
-    return (
-      <Screen contentClassName="gap-6 pb-10">
-        <View className="flex-row items-center gap-3">
-          <Pressable
-            onPress={() => navigation.goBack()}
-            className="p-2 rounded-xl bg-muted/60"
-          >
-            <ArrowLeft size={18} color="#1f2a30" />
-          </Pressable>
-          <Text className="text-xl font-bold text-foreground">Food Scanner</Text>
-        </View>
-
-        <View className="flex-1 items-center justify-center gap-6 px-4">
-          <Mascot size="medium" />
-
-          <View className="items-center gap-3">
-            <View className="w-16 h-16 rounded-2xl bg-primary/10 items-center justify-center">
-              <Camera size={32} color="#3aa27f" />
-            </View>
-            <Text className="text-2xl font-bold text-foreground text-center">
-              Know Before You Eat
-            </Text>
-            <Text className="text-base text-muted-foreground text-center leading-relaxed max-w-xs">
-              Our AI analyzes your meal photo against known digestive triggers and your personal symptom history to give you a risk score before your first bite.
-            </Text>
-          </View>
-
-          <View className="w-full gap-3 px-2">
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-primary/10 items-center justify-center">
-                <Camera size={20} color="#3aa27f" />
-              </View>
-              <Text className="flex-1 text-sm text-foreground">Snap a photo for instant risk analysis</Text>
-            </View>
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-primary/10 items-center justify-center">
-                <ShieldAlert size={20} color="#3aa27f" />
-              </View>
-              <Text className="flex-1 text-sm text-foreground">Matches against your personal trigger history</Text>
-            </View>
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-xl bg-primary/10 items-center justify-center">
-                <Utensils size={20} color="#3aa27f" />
-              </View>
-              <Text className="flex-1 text-sm text-foreground">Get tailored suggestions for safer eating</Text>
-            </View>
-          </View>
-
-          <View className="w-full gap-3 mt-2">
-            <Button
-              onPress={() => navigation.navigate("Paywall", { trigger_source: "food_scan" })}
-              className="w-full py-4 rounded-2xl"
-            >
-              <View className="flex-row items-center justify-center gap-2">
-                <Sparkles size={18} color="#ffffff" />
-                <Text className="text-primary-foreground font-bold text-base">
-                  See Plans
-                </Text>
-              </View>
-            </Button>
-
-            <Pressable onPress={() => navigation.goBack()} className="py-3">
-              <Text className="text-center text-muted-foreground">Maybe later</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Screen>
-    );
-  }
-
-  // ── Scan allowed — main scanner UI ─────────────────────────────────
-
-  // Remaining scans indicator for free users
-  const isFreeUser = gateResult?.entitlementState === "free";
-  const remainingScans = isFreeUser
-    ? Math.max(0, FREE_SCAN_LIMIT - (gateResult?.freeScanCount ?? 0))
-    : null;
-
   return (
     <Screen contentClassName="gap-6 pb-10">
       {/* Header with Streak */}
@@ -544,15 +281,6 @@ export default function FoodScanScreen({ navigation }) {
         </View>
 
         <View className="flex-row items-center gap-2">
-          {/* Free scans remaining badge */}
-          {isFreeUser && remainingScans !== null && (
-            <View className="flex-row items-center gap-1 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
-              <Camera size={14} color="#d97706" />
-              <Text className="text-amber-700 font-bold text-xs">
-                {remainingScans}/{FREE_SCAN_LIMIT}
-              </Text>
-            </View>
-          )}
           <View className="flex-row items-center gap-1 bg-orange-100 px-3 py-1.5 rounded-full border border-orange-200">
             <Flame size={16} color="#f97316" fill="#f97316" />
             <Text className="text-orange-700 font-bold">{currentStreak}</Text>
