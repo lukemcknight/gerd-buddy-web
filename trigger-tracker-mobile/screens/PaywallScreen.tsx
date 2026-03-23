@@ -19,14 +19,13 @@ import type {
   PurchasesPackage,
   PurchasesError,
 } from "react-native-purchases";
-import Constants from "expo-constants";
 import { LinearGradient } from "expo-linear-gradient";
-import { X, Check } from "lucide-react-native";
+import { Check } from "lucide-react-native";
 import { usePostHog } from "posthog-react-native";
+import { CommonActions } from "@react-navigation/native";
 import Button from "../components/Button";
 import { configureRevenueCat, helpers } from "../services/revenuecat";
-import { getTrialInfo } from "../services/storage";
-import { recordPaywallShown, getEntitlementState } from "../services/paywallTrigger";
+import { getUser } from "../services/storage";
 import { EVENTS } from "../services/analytics";
 
 type PaywallScreenProps = {
@@ -35,9 +34,8 @@ type PaywallScreenProps = {
 };
 
 const turtle = require("../assets/mascot/turtle_excited.png");
-const isExpoGo = Constants?.appOwnership === "expo";
 const bypassFlag = process.env.EXPO_PUBLIC_BYPASS_PAYWALL;
-const shouldBypassPaywall = isExpoGo || (__DEV__ && bypassFlag !== "false");
+const shouldBypassPaywall = __DEV__ && bypassFlag !== "false";
 
 const benefits = [
   "Scan any meal",
@@ -153,8 +151,6 @@ const getSavingsPercent = (
 };
 
 export default function PaywallScreen({ navigation, route }: PaywallScreenProps) {
-  const triggerSource = route?.params?.trigger_source || "manual";
-  const isScannerLimit = triggerSource === "scanner_limit";
   const [isLoading, setIsLoading] = useState(true);
   const [packages, setPackages] = useState<PurchasesPackage[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<PurchasesPackage | null>(null);
@@ -165,13 +161,8 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
 
   useEffect(() => {
     posthog?.screen("Paywall");
-    posthog?.capture(EVENTS.PAYWALL_VIEWED, {
-      trigger_source: triggerSource,
-    });
-    posthog?.capture(EVENTS.PAYWALL_TRIGGERED, {
-      trigger_source: triggerSource,
-    });
-    recordPaywallShown().catch(() => {});
+    posthog?.capture(EVENTS.PAYWALL_VIEWED);
+    posthog?.capture(EVENTS.PAYWALL_TRIGGERED);
   }, []);
 
   const bestValueId = useMemo(
@@ -194,9 +185,9 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
         setIsLoading(true);
         setStatusMessage(null);
 
-        const trialInfo = await getTrialInfo();
+        const user = await getUser();
         if (!mounted) return;
-        const currentUserId = trialInfo.user?.id ?? null;
+        const currentUserId = user?.id ?? null;
 
         await configureRevenueCat(currentUserId);
         const offerings = await Purchases.getOfferings();
@@ -254,11 +245,12 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
   }, []);
 
   const unlockApp = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    } else {
-      navigation.replace("Main");
-    }
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "Main" }],
+      })
+    );
   };
 
   const handlePurchase = async () => {
@@ -281,7 +273,6 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
         posthog?.capture(isTrial ? EVENTS.TRIAL_STARTED : EVENTS.PURCHASE_COMPLETED, {
           package_type: selectedPackage.packageType,
           price: selectedPackage.product?.priceString,
-          trigger_source: triggerSource,
         });
         unlockApp();
         return;
@@ -293,7 +284,6 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
         posthog?.capture(isTrial ? EVENTS.TRIAL_STARTED : EVENTS.PURCHASE_COMPLETED, {
           package_type: selectedPackage.packageType,
           price: selectedPackage.product?.priceString,
-          trigger_source: triggerSource,
         });
         unlockApp();
         return;
@@ -335,9 +325,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
       setStatusMessage(null);
       const restored = await Purchases.restorePurchases();
       if (entitlementActive(restored)) {
-        posthog?.capture(EVENTS.PURCHASE_RESTORED, {
-          trigger_source: triggerSource,
-        });
+        posthog?.capture(EVENTS.PURCHASE_RESTORED);
         unlockApp();
         return;
       }
@@ -359,9 +347,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
     }
   };
 
-  const primaryCtaText = isScannerLimit
-    ? "Start 7-Day Free Trial"
-    : hasFreeTrial(selectedPackage)
+  const primaryCtaText = hasFreeTrial(selectedPackage)
     ? trialCtaText(selectedPackage)
     : "Unlock Pro";
 
@@ -496,31 +482,6 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
             borderBottomRightRadius: 24,
           }}
         >
-          {/* Close button */}
-          <Pressable
-            onPress={() =>
-              navigation.canGoBack()
-                ? navigation.goBack()
-                : navigation.replace("Main")
-            }
-            style={{
-              position: "absolute",
-              top: 56,
-              right: 20,
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              backgroundColor: "rgba(0,0,0,0.2)",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 10,
-            }}
-            accessibilityLabel="Close"
-            accessibilityRole="button"
-          >
-            <X size={18} color="#ffffff" />
-          </Pressable>
-
           {/* Scanner bracket corners with mascot */}
           <View
             style={{
@@ -594,57 +555,27 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
 
         {/* Headline */}
         <View style={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: 8 }}>
-          {!isScannerLimit ? (
-            <>
-              <Text
-                className="text-2xl font-extrabold"
-                style={{
-                  color: "#ffffff",
-                  fontSize: 32,
-                  fontWeight: "800",
-                  textAlign: "center",
-                  lineHeight: 38,
-                }}
-              >
-                Find your top triggers in 14 days.
-              </Text>
-              <Text
-                style={{
-                  color: "#999999",
-                  fontSize: 15,
-                  textAlign: "center",
-                  marginTop: 8,
-                }}
-              >
-                Unlimited scanning, trigger analysis, and detailed reports
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text
-                className="text-2xl font-extrabold"
-                style={{
-                  color: "#ffffff",
-                  fontSize: 32,
-                  fontWeight: "800",
-                  textAlign: "center",
-                  lineHeight: 38,
-                }}
-              >
-                Try Pro free for 7 days
-              </Text>
-              <Text
-                style={{
-                  color: "#999999",
-                  fontSize: 15,
-                  textAlign: "center",
-                  marginTop: 8,
-                }}
-              >
-                You've used your 3 free scans
-              </Text>
-            </>
-          )}
+          <Text
+            style={{
+              color: "#ffffff",
+              fontSize: 32,
+              fontWeight: "800",
+              textAlign: "center",
+              lineHeight: 38,
+            }}
+          >
+            Find your top triggers in 14 days.
+          </Text>
+          <Text
+            style={{
+              color: "#999999",
+              fontSize: 15,
+              textAlign: "center",
+              marginTop: 8,
+            }}
+          >
+            Unlimited scanning, trigger analysis, and detailed reports
+          </Text>
         </View>
 
         {/* Benefits */}
