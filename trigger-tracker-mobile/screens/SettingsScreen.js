@@ -18,7 +18,6 @@ import {
   syncReminderNotifications,
   syncSmartNotifications,
 } from "../services/notifications";
-import { getEntitlementState } from "../services/paywallTrigger";
 
 const APP_VERSION = "2.0.0";
 
@@ -67,8 +66,6 @@ export default function SettingsScreen({ navigation }) {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
   const [isSendingFeedback, setIsSendingFeedback] = useState(false);
-  const [isPro, setIsPro] = useState(false);
-
   const refreshNotificationStatus = useCallback(async () => {
     const status = await getPermissionStatus();
     setNotificationPermission(status);
@@ -90,9 +87,6 @@ export default function SettingsScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       refreshNotificationStatus();
-      getEntitlementState()
-        .then((state) => setIsPro(state === "pro" || state === "trial"))
-        .catch(() => {});
     }, [refreshNotificationStatus])
   );
 
@@ -230,28 +224,6 @@ export default function SettingsScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Upgrade to Pro banner */}
-      {!isPro && (
-        <Pressable onPress={() => navigation.navigate("Paywall", { trigger_source: "settings" })}>
-          <View className="bg-primary rounded-2xl px-5 py-4 flex-row items-center justify-between overflow-hidden">
-            <View className="flex-1 z-10">
-              <Text className="text-white text-lg font-bold">Upgrade to Pro</Text>
-              <Text className="text-white/80 text-sm mt-0.5">
-                Unlimited tracking, full trigger analysis, and more.
-              </Text>
-            </View>
-            <View
-              className="absolute right-0 top-0 bottom-0 opacity-10"
-              style={{ width: 120 }}
-            >
-              <View className="absolute -right-4 -top-4 w-28 h-28 rounded-full bg-white" />
-              <View className="absolute right-6 top-8 w-20 h-20 rounded-full bg-white" />
-            </View>
-            <ChevronRight size={22} color="#ffffff" className="z-10" />
-          </View>
-        </Pressable>
-      )}
-
       {/* Notifications */}
       <View className="gap-3 mt-2">
         <Text className="text-lg font-bold text-foreground">Notifications</Text>
@@ -342,16 +314,14 @@ export default function SettingsScreen({ navigation }) {
       )}
 
       {/* Subscription */}
-      {isPro && (
-        <View className="gap-3 mt-2">
-          <Text className="text-lg font-bold text-foreground">Subscription</Text>
-          <SettingsCard
-            icon={CreditCard}
-            label="Manage Subscription"
-            onPress={() => navigation.navigate("CustomerCenter")}
-          />
-        </View>
-      )}
+      <View className="gap-3 mt-2">
+        <Text className="text-lg font-bold text-foreground">Subscription</Text>
+        <SettingsCard
+          icon={CreditCard}
+          label="Manage Subscription"
+          onPress={() => navigation.navigate("CustomerCenter")}
+        />
+      </View>
 
       {/* Help */}
       <View className="gap-3 mt-2">
