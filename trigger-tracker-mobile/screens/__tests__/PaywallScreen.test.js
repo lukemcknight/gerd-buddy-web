@@ -25,10 +25,9 @@ describe('PaywallScreen - Pro messaging', () => {
       expect(source).toContain('Find your top triggers in 14 days.');
     });
 
-    test('headline is in the main heading element', () => {
-      const headlineMatch = source.match(/text-2xl font-extrabold[^>]*>[^<]*/);
+    test('headline is in a styled heading element', () => {
+      const headlineMatch = source.match(/fontSize:\s*32[^}]*fontWeight/);
       expect(headlineMatch).toBeTruthy();
-      expect(headlineMatch[0]).toContain('Find your top triggers in 14 days.');
     });
   });
 

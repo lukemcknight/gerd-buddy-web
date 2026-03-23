@@ -80,7 +80,7 @@ const hasFreeTrial = (pkg: PurchasesPackage | null) => {
 
 const trialCtaText = (pkg: PurchasesPackage | null) => {
   const intro = getIntroductoryPrice(pkg);
-  if (!intro) return "Try for 7 Days Free";
+  if (!intro) return "Try for 3 Days Free";
 
   const parsePeriod = () => {
     const iso = intro.period || "";
@@ -106,7 +106,7 @@ const trialCtaText = (pkg: PurchasesPackage | null) => {
   };
 
   const { units, unit } = parsePeriod();
-  if (!units || !unit) return "Try for 7 Days Free";
+  if (!units || !unit) return "Try for 3 Days Free";
 
   const singularUnit = unit.replace(/s$/, "");
   const capitalUnit = singularUnit.charAt(0).toUpperCase() + singularUnit.slice(1);
@@ -614,7 +614,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
             }}
           >
             <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "700" }}>
-              Get 7 Day Free Trial!
+              Get 3 Day Free Trial!
             </Text>
             <Text style={{ color: "#999999", fontSize: 13, marginTop: 4 }}>
               Try Risk Free. Cancel Anytime.
