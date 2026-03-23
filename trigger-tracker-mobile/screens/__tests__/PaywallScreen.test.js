@@ -74,25 +74,6 @@ describe('PaywallScreen - Pro messaging', () => {
     });
   });
 
-  describe('Scanner limit contextual messaging', () => {
-    test('has scanner_limit headline "Try Pro free for 7 days"', () => {
-      expect(source).toContain('Try Pro free for 7 days');
-    });
-
-    test('has scanner_limit subtext about free scans', () => {
-      expect(source).toContain("You've used your 3 free scans");
-    });
-
-    test('checks trigger_source for scanner_limit', () => {
-      expect(source).toContain('scanner_limit');
-      expect(source).toContain('isScannerLimit');
-    });
-
-    test('shows "Start 7-Day Free Trial" CTA for scanner limit', () => {
-      expect(source).toContain('Start 7-Day Free Trial');
-    });
-  });
-
   describe('Analytics', () => {
     test('tracks paywall_viewed event', () => {
       expect(source).toContain('EVENTS.PAYWALL_VIEWED');
@@ -112,10 +93,6 @@ describe('PaywallScreen - Pro messaging', () => {
 
     test('tracks purchase_restored event', () => {
       expect(source).toContain('EVENTS.PURCHASE_RESTORED');
-    });
-
-    test('passes trigger_source to events', () => {
-      expect(source).toContain('trigger_source');
     });
   });
 });

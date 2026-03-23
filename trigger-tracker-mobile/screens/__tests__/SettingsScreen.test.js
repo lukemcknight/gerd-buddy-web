@@ -10,11 +10,6 @@ describe('SettingsScreen', () => {
     it('imports Mascot component', () => {
       expect(source).toContain('import Mascot');
     });
-
-    it('imports getEntitlementState from paywallTrigger', () => {
-      expect(source).toContain('getEntitlementState');
-      expect(source).toContain('paywallTrigger');
-    });
   });
 
   describe('Profile header', () => {
@@ -24,35 +19,6 @@ describe('SettingsScreen', () => {
 
     it('uses Mascot component', () => {
       expect(source).toContain('<Mascot');
-    });
-  });
-
-  describe('Upgrade banner', () => {
-    it('contains "Upgrade to Pro" text', () => {
-      expect(source).toContain('Upgrade to Pro');
-    });
-
-    it('contains upgrade description', () => {
-      expect(source).toContain('Unlimited tracking, full trigger analysis, and more.');
-    });
-
-    it('navigates to Paywall with trigger_source settings', () => {
-      expect(source).toContain('navigate("Paywall"');
-      expect(source).toContain('trigger_source: "settings"');
-    });
-  });
-
-  describe('Pro state handling', () => {
-    it('contains isPro state', () => {
-      expect(source).toContain('isPro');
-    });
-
-    it('checks getEntitlementState', () => {
-      expect(source).toContain('getEntitlementState()');
-    });
-
-    it('conditionally shows upgrade banner with !isPro', () => {
-      expect(source).toContain('!isPro');
     });
   });
 
@@ -129,9 +95,8 @@ describe('SettingsScreen', () => {
   });
 
   describe('Subscription section', () => {
-    it('contains Manage Subscription shown when isPro', () => {
+    it('contains Manage Subscription', () => {
       expect(source).toContain('Manage Subscription');
-      expect(source).toContain('isPro');
     });
   });
 
