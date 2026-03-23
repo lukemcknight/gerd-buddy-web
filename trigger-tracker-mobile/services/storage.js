@@ -1,7 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { configureRevenueCat, getSubscriptionStatus } from "./revenuecat";
 import { maybePromptForReview } from "./reviewPrompt";
-import { identifyUser } from "./analytics";
 import { calculateTriggers } from "../utils/triggerEngine";
 
 const STORAGE_KEYS = {
@@ -9,8 +7,6 @@ const STORAGE_KEYS = {
   SYMPTOMS: "acidtrack_symptoms",
   USER: "acidtrack_user",
 };
-
-const TRIAL_LENGTH_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
@@ -135,9 +131,7 @@ export const createUser = async (...args) => {
     lastScanDate: null,
     createdAt: Date.now(),
     startDate: Date.now(),
-    trialEndsAt: Date.now() + TRIAL_LENGTH_MS,
     subscriptionActive: false,
-    trialAcknowledged: false,
   };
   await saveUser(user);
   return user;
@@ -148,95 +142,6 @@ export const getDaysSinceStart = async () => {
   if (!user) return 0;
   const diff = Date.now() - user.startDate;
   return Math.floor(diff / (1000 * 60 * 60 * 24));
-};
-
-const ensureTrialFields = (user) => {
-  if (!user) return null;
-  const startDate = user.startDate || Date.now();
-  return {
-    ...user,
-    startDate,
-    trialEndsAt: user.trialEndsAt || startDate + TRIAL_LENGTH_MS,
-    subscriptionActive: Boolean(user.subscriptionActive),
-    trialAcknowledged: Boolean(user.trialAcknowledged),
-  };
-};
-
-export const getTrialInfo = async () => {
-  const storedUser = await getUser();
-  const user = ensureTrialFields(storedUser);
-  if (!user) {
-    return { user: null, trialEndsAt: null, isTrialActive: false, daysRemaining: 0 };
-  }
-
-  let subscriptionActive = Boolean(user.subscriptionActive);
-  let isTrialActive = false;
-  let subscriptionExpiresAt = null;
-
-  try {
-    await configureRevenueCat(user.id);
-    const status = await getSubscriptionStatus(user.id);
-    subscriptionActive = status.active;
-    isTrialActive = status.isTrial;
-    subscriptionExpiresAt = status.expiresAt;
-  } catch (error) {
-    console.warn("RevenueCat status lookup failed", error);
-  }
-
-  // Identify user for analytics on app load
-  identifyUser(user.id, {
-    subscription_active: subscriptionActive,
-    symptom_frequency: user.symptomFrequency,
-  }).catch(() => {});
-
-  const trialEndsAt = subscriptionExpiresAt || user.trialEndsAt;
-  const now = Date.now();
-  const msLeft = trialEndsAt ? trialEndsAt - now : 0;
-  const daysRemaining = trialEndsAt ? Math.max(Math.ceil(msLeft / (1000 * 60 * 60 * 24)), 0) : 0;
-
-  const normalizedUser = {
-    ...user,
-    subscriptionActive,
-    trialEndsAt,
-  };
-
-  if (
-    storedUser?.trialEndsAt !== normalizedUser.trialEndsAt ||
-    storedUser?.subscriptionActive !== normalizedUser.subscriptionActive ||
-    storedUser?.trialAcknowledged !== normalizedUser.trialAcknowledged
-  ) {
-    await saveUser(normalizedUser);
-  }
-
-  return {
-    user: normalizedUser,
-    trialEndsAt,
-    isTrialActive,
-    subscriptionActive,
-    daysRemaining,
-    requiresPayment: !subscriptionActive,
-  };
-};
-
-export const acknowledgePaywall = async () => {
-  const user = ensureTrialFields(await getUser());
-  if (!user) return null;
-  const updated = { ...user, trialAcknowledged: true };
-  await saveUser(updated);
-  return updated;
-};
-
-export const activateSubscription = async () => {
-  const user = ensureTrialFields(await getUser());
-  if (!user) return null;
-  const updated = {
-    ...user,
-    subscriptionActive: true,
-    subscriptionStartedAt: Date.now(),
-    trialAcknowledged: true,
-  };
-  await saveUser(updated);
-  return updated;
 };
 
 export const incrementScanCount = async () => {
