@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, AppState, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { CommonActions, useNavigation } from "@react-navigation/native";
 import { Home, BarChart3, FileText, Settings } from "lucide-react-native";
 import HomeScreen from "../screens/HomeScreen";
 import InsightsScreen from "../screens/InsightsScreen";
@@ -21,76 +22,102 @@ import BuddyAccessoriesScreen from "../screens/BuddyAccessoriesScreen";
 import { getUser } from "../services/storage";
 import { isFirebaseConfigured } from "../services/firebase";
 import { syncReminderNotifications, syncSmartNotifications } from "../services/notifications";
+import { getSubscriptionStatus, configureRevenueCat } from "../services/revenuecat";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const TabNavigator = () => (
-  <Tab.Navigator
-    screenOptions={{
-      headerShown: false,
-      tabBarShowLabel: true,
-      tabBarActiveTintColor: "#3aa27f",
-      tabBarInactiveTintColor: "#5f6f74",
-      tabBarStyle: {
-        borderTopWidth: 1,
-        borderTopColor: "#e1e8e3",
-        backgroundColor: "#ffffff",
-        paddingBottom: 6,
-        paddingTop: 6,
-      },
-      tabBarLabelStyle: {
-        fontSize: 12,
-        marginBottom: 4,
-      },
-    }}
-  >
-    <Tab.Screen
-      name="Home"
-      component={HomeScreen}
-      options={{
-        tabBarIcon: ({ color }) => <Home size={20} color={color} />,
-        title: "Home",
+const TabNavigator = () => {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", async (nextAppState) => {
+      if (nextAppState !== "active") return;
+      try {
+        const user = await getUser();
+        if (!user?.id) return;
+        await configureRevenueCat(user.id);
+        const status = await getSubscriptionStatus(user.id);
+        if (!status.active) {
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: "Paywall" }],
+            })
+          );
+        }
+      } catch {
+        // Offline — fail open
+      }
+    });
+    return () => subscription.remove();
+  }, [navigation]);
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: "#3aa27f",
+        tabBarInactiveTintColor: "#5f6f74",
+        tabBarStyle: {
+          borderTopWidth: 1,
+          borderTopColor: "#e1e8e3",
+          backgroundColor: "#ffffff",
+          paddingBottom: 6,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          marginBottom: 4,
+        },
       }}
-    />
-    <Tab.Screen
-      name="Insights"
-      component={InsightsScreen}
-      options={{
-        tabBarIcon: ({ color }) => <BarChart3 size={20} color={color} />,
-        title: "Insights",
-      }}
-    />
-    <Tab.Screen
-      name="Report"
-      component={ReportScreen}
-      options={{
-        tabBarIcon: ({ color }) => <FileText size={20} color={color} />,
-        title: "Report",
-      }}
-    />
-    <Tab.Screen
-      name="Settings"
-      component={SettingsScreen}
-      options={{
-        tabBarIcon: ({ color }) => <Settings size={20} color={color} />,
-        title: "Settings",
-      }}
-    />
-  </Tab.Navigator>
-);
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ color }) => <Home size={20} color={color} />,
+          title: "Home",
+        }}
+      />
+      <Tab.Screen
+        name="Insights"
+        component={InsightsScreen}
+        options={{
+          tabBarIcon: ({ color }) => <BarChart3 size={20} color={color} />,
+          title: "Insights",
+        }}
+      />
+      <Tab.Screen
+        name="Report"
+        component={ReportScreen}
+        options={{
+          tabBarIcon: ({ color }) => <FileText size={20} color={color} />,
+          title: "Report",
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ color }) => <Settings size={20} color={color} />,
+          title: "Settings",
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
 
 export default function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
-  const [flow, setFlow] = useState("onboarding"); // onboarding | signup | main
+  const [flow, setFlow] = useState("onboarding"); // onboarding | signup | paywall | main
 
   useEffect(() => {
     const determineFlow = async () => {
       try {
         const user = await getUser();
-
         if (user?.onboardingComplete) {
-          // Sync reminders in background - don't let failures affect navigation
           syncReminderNotifications({
             remindersEnabled: user.remindersEnabled ?? true,
             eveningReminderEnabled: user.eveningReminderEnabled ?? false,
@@ -98,12 +125,23 @@ export default function RootNavigator() {
           syncSmartNotifications().catch((err) =>
             console.warn("Failed to sync smart notifications:", err)
           );
-        }
 
-        if (!user?.onboardingComplete) {
-          setFlow("onboarding");
+          let hasActiveSubscription = false;
+          try {
+            await configureRevenueCat(user.id);
+            const status = await getSubscriptionStatus(user.id);
+            hasActiveSubscription = status.active;
+          } catch (err) {
+            hasActiveSubscription = Boolean(user.subscriptionActive);
+          }
+
+          if (hasActiveSubscription) {
+            setFlow("main");
+          } else {
+            setFlow("paywall");
+          }
         } else {
-          setFlow("main");
+          setFlow("onboarding");
         }
       } catch (error) {
         console.warn("Failed to load user state", error);
@@ -141,6 +179,8 @@ export default function RootNavigator() {
     switch (flow) {
       case "main":
         return "Main";
+      case "paywall":
+        return "Paywall";
       case "signup":
         return "SignUp";
       default:
@@ -170,7 +210,7 @@ export default function RootNavigator() {
       </Stack.Screen>
       <Stack.Screen
         name="Paywall"
-        options={{ presentation: "modal" }}
+        options={{ gestureEnabled: false }}
       >
         {(props) => <PaywallScreen {...props} />}
       </Stack.Screen>
