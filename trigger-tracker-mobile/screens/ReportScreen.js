@@ -4,26 +4,21 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Clock, TrendingDown, Calendar, Share2 } from "lucide-react-native";
 import Screen from "../components/Screen";
 import Card from "../components/Card";
-import ProTeaser from "../components/ProTeaser";
 import Button from "../components/Button";
 import { getMeals, getSymptoms, getUser } from "../services/storage";
 import { generateTriggerReport } from "../utils/triggerEngine";
 import { showToast } from "../utils/feedback";
-import { usePremiumStatus } from "../hooks/usePremiumStatus";
 
 const turtleSad = require("../assets/mascot/turtle_sad.png");
 
 export default function ReportScreen() {
   const [patternReport, setPatternReport] = useState(null);
-  const [userId, setUserId] = useState(null);
-  const { isPro, refreshStatus } = usePremiumStatus(userId);
 
   const loadData = useCallback(async () => {
     try {
-      const [meals, symptoms, user] = await Promise.all([
+      const [meals, symptoms] = await Promise.all([
         getMeals(), getSymptoms(), getUser(),
       ]);
-      if (user?.id) setUserId(user.id);
       setPatternReport(generateTriggerReport(meals, symptoms));
     } catch (error) {
       console.warn("Failed to load report data", error);
@@ -33,8 +28,7 @@ export default function ReportScreen() {
   useFocusEffect(
     useCallback(() => {
       loadData();
-      refreshStatus();
-    }, [loadData, refreshStatus])
+    }, [loadData])
   );
 
   const handleShare = async () => {
@@ -77,42 +71,33 @@ export default function ReportScreen() {
       </View>
 
       {/* Stats grid */}
-      {isPro ? (
-        <View className="flex-row flex-wrap gap-3">
-          <Card className="p-4 basis-[48%] items-center">
-            <Clock size={18} color="#5f6f74" />
-            <Text className="text-2xl font-bold text-accent mt-2">{patternReport.lateEatingRisk}%</Text>
-            <Text className="text-xs text-muted-foreground mt-1">Late eating</Text>
-          </Card>
-          <Card className="p-4 basis-[48%] items-center">
-            <TrendingDown size={18} color="#5f6f74" />
-            <Text className="text-2xl font-bold text-foreground mt-2">{patternReport.avgSeverity}/5</Text>
-            <Text className="text-xs text-muted-foreground mt-1">Avg severity</Text>
-          </Card>
-          <Card className="p-4 basis-[48%] items-center">
-            <Calendar size={18} color="#5f6f74" />
-            <Text className="text-2xl font-bold text-success mt-2">{patternReport.symptomFreeDays}</Text>
-            <Text className="text-xs text-muted-foreground mt-1">Symptom-free days</Text>
-          </Card>
-          <Card className="p-4 basis-[48%] items-center">
-            <Clock size={18} color="#5f6f74" />
-            <Text className="text-xl font-bold text-foreground mt-2">{patternReport.worstTimeOfDay}</Text>
-            <Text className="text-xs text-muted-foreground mt-1">Peak symptom time</Text>
-          </Card>
-        </View>
-      ) : (
-        <ProTeaser
-          title="Unlock analytics"
-          description="See severity trends, timing patterns, and symptom-free days."
-        />
-      )}
+      <View className="flex-row flex-wrap gap-3">
+        <Card className="p-4 basis-[48%] items-center">
+          <Clock size={18} color="#5f6f74" />
+          <Text className="text-2xl font-bold text-accent mt-2">{patternReport.lateEatingRisk}%</Text>
+          <Text className="text-xs text-muted-foreground mt-1">Late eating</Text>
+        </Card>
+        <Card className="p-4 basis-[48%] items-center">
+          <TrendingDown size={18} color="#5f6f74" />
+          <Text className="text-2xl font-bold text-foreground mt-2">{patternReport.avgSeverity}/5</Text>
+          <Text className="text-xs text-muted-foreground mt-1">Avg severity</Text>
+        </Card>
+        <Card className="p-4 basis-[48%] items-center">
+          <Calendar size={18} color="#5f6f74" />
+          <Text className="text-2xl font-bold text-success mt-2">{patternReport.symptomFreeDays}</Text>
+          <Text className="text-xs text-muted-foreground mt-1">Symptom-free days</Text>
+        </Card>
+        <Card className="p-4 basis-[48%] items-center">
+          <Clock size={18} color="#5f6f74" />
+          <Text className="text-xl font-bold text-foreground mt-2">{patternReport.worstTimeOfDay}</Text>
+          <Text className="text-xs text-muted-foreground mt-1">Peak symptom time</Text>
+        </Card>
+      </View>
 
-      {isPro && (
-        <Button onPress={handleShare} variant="outline" className="w-full flex-row gap-2">
-          <Share2 size={18} color="#1f2a30" />
-          <Text className="text-foreground font-semibold">Share</Text>
-        </Button>
-      )}
+      <Button onPress={handleShare} variant="outline" className="w-full flex-row gap-2">
+        <Share2 size={18} color="#1f2a30" />
+        <Text className="text-foreground font-semibold">Share</Text>
+      </Button>
 
       <Text className="text-[10px] text-muted-foreground text-center">
         Patterns, not diagnoses. Consult your doctor.
