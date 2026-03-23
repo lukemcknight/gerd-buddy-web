@@ -26,13 +26,20 @@ On app relaunch or foreground resume, the same check runs. If subscription has l
 - After signup/login completes, call `getSubscriptionStatus(userId)`.
 - If `active === false`, navigate to `"Paywall"` instead of `"Main"`.
 - On app relaunch (when `onboardingComplete` is true and user exists), same check before routing to Main.
-- Paywall's `onSuccess` callback navigates to `"Main"` with a navigation reset (no back to Paywall).
-- Add an `AppState` listener: on foreground resume, re-check subscription status. If lapsed, reset navigation stack to Paywall.
+- Paywall's `onSuccess` callback navigates to `"Main"` using `CommonActions.reset` to replace the entire stack (no back to Paywall).
+- Add an `AppState` listener: on foreground resume, re-check subscription status. If lapsed, reset navigation stack to Paywall. Use cached RevenueCat `CustomerInfo` as fallback when offline to avoid locking out paid users.
+
+### Post-auth routing ownership
+
+SignUpScreen and LoginScreen already check subscription status and route to Paywall if inactive. This existing behavior is kept — these screens own the post-auth routing decision. RootNavigator owns the cold-start and foreground-resume checks. No double-gating: SignUp/Login handle their own exit routing, RootNavigator handles app launch and resume.
 
 ### PaywallScreen.tsx changes
 
 - Remove all dismiss/skip/close/back affordances. The only exit is a successful purchase or restore.
+- Change navigation `presentation` from `"modal"` to `"card"` (or add `gestureEnabled: false`) to prevent iOS swipe-to-dismiss.
+- Rewrite `unlockApp` to always use `CommonActions.reset` to replace the stack with Main (remove `navigation.goBack()` fallback).
 - Remove `trigger_source` conditional logic (no more scanner_limit vs post_insight variants). Always show the same hard paywall.
+- Remove imports from deleted files: `recordPaywallShown` and `getEntitlementState` from `paywallTrigger.ts`. Remove `getTrialInfo` import from `storage.js` — replace with `getUser()` to get user ID for RevenueCat configuration.
 - Keep existing UI: turtle mascot, benefit list, plan selector cards, restore purchases, terms/privacy links.
 - Trial length text is already dynamically parsed from RevenueCat package metadata via `trialCtaText()` — will display "3 days" once configured in App Store Connect.
 - Keep `__DEV__` bypass for development only. Remove Expo Go bypass.
@@ -44,18 +51,25 @@ On app relaunch or foreground resume, the same check runs. If subscription has l
 | `services/scannerGate.ts` | Delete |
 | `services/paywallTrigger.ts` | Delete |
 | `components/ProTeaser.js` | Delete |
-| `screens/FoodScanScreen.js` | Remove all gate checks (`canUserScan`, `incrementFreeScanCount`, remaining scans UI, paywall navigation on block) |
-| `screens/InsightsScreen.js` | Remove `freeTriggerLimit`/`freeSafeFoodLimit` constants, always show up to 5 triggers/safe foods, remove ProTeaser imports and usage, remove `isPro` conditional rendering for visibility |
+| `components/__tests__/ProTeaser.test.js` | Delete |
+| `screens/FoodScanScreen.js` | Remove all gate checks (`canUserScan`, `incrementFreeScanCount`, remaining scans UI, paywall navigation on block). Remove `shouldBypassPaywall` logic (moot since gate is removed). |
+| `screens/InsightsScreen.js` | Remove `freeTriggerLimit`/`freeSafeFoodLimit` constants, `visibleTriggers`/`visibleSafeFoods` branching, and `hiddenTriggerCount`/`hiddenSafeFoodCount` variables. Replace with single `.slice(0, 5)` for all users. Remove ProTeaser imports and usage. Remove `isPro` conditional rendering. Change `TriggerBadge` `showDetails={isPro}` to `showDetails={true}` (or remove the prop). |
 | `screens/ReportScreen.js` | Remove `isPro` conditional — always render full stats grid and share button |
-| `services/storage.js` | Remove `TRIAL_LENGTH_MS` constant, remove `trialEndsAt` from `createUser()`, remove `getTrialInfo()` function |
+| `screens/SettingsScreen.js` | Remove `getEntitlementState` import from `paywallTrigger.ts`. Remove `isPro` state and "Upgrade to Pro" banner. Always show "Manage Subscription" link. |
+| `services/storage.js` | Remove `TRIAL_LENGTH_MS` constant, `trialEndsAt` from `createUser()`, `getTrialInfo()`, `ensureTrialFields()`, `acknowledgePaywall()`, and `activateSubscription()` — all part of the old local-trial system now replaced by RevenueCat as sole source of truth. |
 | `hooks/usePremiumStatus.js` | Keep — used by RootNavigator for gate check |
 
 ### Subscription lapse handling
 
 - `AppState` change listener in RootNavigator calls `getSubscriptionStatus()` on foreground resume.
 - If subscription is no longer active, reset navigation stack to Paywall.
+- **Offline behavior:** Use cached RevenueCat `CustomerInfo` when network is unavailable. Fail open (allow access) to avoid locking out paid users who are offline.
 - Covers: trial expiry, cancelled subscription, billing failure.
 - User data is preserved in AsyncStorage — they regain access upon resubscribing.
+
+### Existing freemium users
+
+Existing free users who update the app will hit the hard paywall immediately. Their data is preserved — they can subscribe to regain access. This is intentional.
 
 ## Pricing & trial configuration
 
@@ -66,7 +80,7 @@ On app relaunch or foreground resume, the same check runs. If subscription has l
 ## What stays the same
 
 - Onboarding flow (unchanged)
-- Signup/login flow (unchanged)
+- Signup/login flow (existing post-auth paywall routing preserved)
 - RevenueCat service (`services/revenuecat.js`) — no changes
 - PaywallScreen visual design — kept as-is
 - PostHog analytics events for paywall/purchase — kept
