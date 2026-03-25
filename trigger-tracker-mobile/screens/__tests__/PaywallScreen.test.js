@@ -25,9 +25,10 @@ describe('PaywallScreen - Pro messaging', () => {
       expect(source).toContain('Find your top triggers in 14 days.');
     });
 
-    test('headline is in a styled heading element', () => {
-      const headlineMatch = source.match(/fontSize:\s*32[^}]*fontWeight/);
+    test('headline is in the main heading element', () => {
+      const headlineMatch = source.match(/text-2xl font-extrabold[^>]*>[^<]*/);
       expect(headlineMatch).toBeTruthy();
+      expect(headlineMatch[0]).toContain('Find your top triggers in 14 days.');
     });
   });
 
@@ -73,6 +74,25 @@ describe('PaywallScreen - Pro messaging', () => {
     });
   });
 
+  describe('Scanner limit contextual messaging', () => {
+    test('has scanner_limit headline "Try Pro free for 3 days"', () => {
+      expect(source).toContain('Try Pro free for 3 days');
+    });
+
+    test('has scanner_limit subtext about free scans', () => {
+      expect(source).toContain("You've used your 3 free scans");
+    });
+
+    test('checks trigger_source for scanner_limit', () => {
+      expect(source).toContain('scanner_limit');
+      expect(source).toContain('isScannerLimit');
+    });
+
+    test('shows "Start 3-Day Free Trial" CTA for scanner limit', () => {
+      expect(source).toContain('Start 3-Day Free Trial');
+    });
+  });
+
   describe('Analytics', () => {
     test('tracks paywall_viewed event', () => {
       expect(source).toContain('EVENTS.PAYWALL_VIEWED');
@@ -92,6 +112,10 @@ describe('PaywallScreen - Pro messaging', () => {
 
     test('tracks purchase_restored event', () => {
       expect(source).toContain('EVENTS.PURCHASE_RESTORED');
+    });
+
+    test('passes trigger_source to events', () => {
+      expect(source).toContain('trigger_source');
     });
   });
 });

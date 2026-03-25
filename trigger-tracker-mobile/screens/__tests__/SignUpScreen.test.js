@@ -182,7 +182,7 @@ describe('SignUpScreen - Subscription Checking', () => {
       restoreTransactions.mockResolvedValue({
         active: true,
         isTrial: true,
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days from now
+        expiresAt: Date.now() + 3 * 24 * 60 * 60 * 1000, // 3 days from now
       });
       mockSignUp.mockResolvedValue();
 
