@@ -116,12 +116,9 @@ export default function RootNavigator() {
   }, []);
 
   const handleOnboardingComplete = () => {
-    // Return the next screen name - SignUp if Firebase is configured, otherwise straight to Main
-    if (isFirebaseConfigured) {
-      return "SignUp";
-    } else {
-      return "Main";
-    }
+    // After onboarding, user goes to Paywall (handled inside OnboardingScreen)
+    // This is kept for backwards compatibility but is no longer called
+    return "Main";
   };
 
   const handleSignUpComplete = () => {
@@ -168,10 +165,7 @@ export default function RootNavigator() {
           <LoginScreen {...props} onSuccess={handleSignUpComplete} />
         )}
       </Stack.Screen>
-      <Stack.Screen
-        name="Paywall"
-        options={{ presentation: "modal" }}
-      >
+      <Stack.Screen name="Paywall">
         {(props) => <PaywallScreen {...props} />}
       </Stack.Screen>
       <Stack.Screen name="Main" component={TabNavigator} />

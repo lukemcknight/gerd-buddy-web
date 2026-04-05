@@ -1,20 +1,63 @@
-import { useState, useEffect } from "react";
-import { Text, View, Pressable, TextInput } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  ArrowLeft, ArrowRight, Clock, CalendarDays, Activity, Utensils, Moon, Bell,
-  Pill, AlertTriangle, ChevronRight, Heart, Star,
+  ArrowLeft, ArrowRight, Check, X, Star, Heart, Shield, TrendingUp,
+  Clock, CalendarDays, Activity, Utensils, Moon, Bell, Pill, AlertTriangle,
+  Flame, Zap, Scan,
 } from "lucide-react-native";
+import Animated, {
+  useSharedValue, useAnimatedStyle, withTiming, FadeInDown,
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 import * as StoreReview from "expo-store-review";
 import { usePostHog } from "posthog-react-native";
-import Screen from "../components/Screen";
-import Button from "../components/Button";
-import Mascot from "../components/Mascot";
 import { createUser } from "../services/storage";
 import { configureRevenueCat } from "../services/revenuecat";
 import { registerForPushNotifications, syncReminderNotifications } from "../services/notifications";
 import { showToast } from "../utils/feedback";
 import { generatePlan, getFearFoodOptions, MEAL_TIME_OPTIONS, MEDS_OPTIONS } from "../services/onboardingPlan";
 import { EVENTS } from "../services/analytics";
+
+// -- Theme --
+
+const COLORS = {
+  primary: "#3aa27f",
+  primaryLight: "#e6f4ef",
+  primaryDark: "#2d8a6b",
+  accent: "#f07c52",
+  accentLight: "#ffe7dc",
+  bg: "#f6fbf8",
+  card: "#ffffff",
+  text: "#1f2a30",
+  textSecondary: "#5f6f74",
+  border: "#e1e8e3",
+  muted: "#edf2ee",
+  danger: "#c44040",
+  dangerLight: "#FEE2E2",
+  gold: "#D4A439",
+};
+
+const mascotExcited = require("../assets/mascot/turtle_excited.png");
+const mascotHappy = require("../assets/mascot/turtle_happy.png");
+const mascotContent = require("../assets/mascot/turtle_content.png");
+const mascotSad = require("../assets/mascot/turtle_sad.png");
+const mascotDefault = require("../assets/mascot/turtle_shell_standing.png");
+
+const TOTAL_STEPS = 16; // steps 0-15
+
+// -- Quiz data --
+
+const conditionOptions = [
+  { id: "gerd", label: "Acid Reflux / GERD" },
+  { id: "gastritis", label: "Gastritis" },
+];
+
+const severityOptions = [
+  { id: "light", label: "Light", description: "Occasional discomfort, manageable" },
+  { id: "moderate", label: "Moderate", description: "Regular symptoms, affects daily life" },
+  { id: "severe", label: "Severe", description: "Frequent, intense symptoms" },
+];
 
 const symptomTimingOptions = [
   { id: "morning", label: "Morning" },
@@ -72,40 +115,518 @@ const lyingDownOptions = [
   { id: "sometimes", label: "Sometimes" },
 ];
 
-const conditionOptions = [
-  { id: "gerd", label: "Acid Reflux / GERD" },
-  { id: "gastritis", label: "Gastritis" },
-];
+const haptic = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-const severityOptions = [
-  { id: "light", label: "Light", description: "Occasional discomfort, manageable" },
-  { id: "moderate", label: "Moderate", description: "Regular symptoms, affects daily life" },
-  { id: "severe", label: "Severe", description: "Frequent, intense symptoms" },
-];
+// -- Progress Bar --
+
+function ProgressBar({ step }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withTiming(step / (TOTAL_STEPS - 1), { duration: 300 });
+  }, [step]);
+
+  const barStyle = useAnimatedStyle(() => ({
+    width: `${progress.value * 100}%`,
+  }));
+
+  return (
+    <View style={{ height: 4, borderRadius: 2, backgroundColor: COLORS.border, flex: 1, marginLeft: 12 }}>
+      <Animated.View style={[{ height: 4, borderRadius: 2, backgroundColor: COLORS.primary }, barStyle]} />
+    </View>
+  );
+}
+
+// -- Option Card --
+
+function OptionCard({ label, description, selected, onPress, showCheck, icon: Icon }) {
+  return (
+    <Pressable
+      onPress={() => { haptic(); onPress(); }}
+      style={{
+        backgroundColor: selected ? COLORS.primary : COLORS.card,
+        borderRadius: 14,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderWidth: 1,
+        borderColor: selected ? COLORS.primary : COLORS.border,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 14, flex: 1 }}>
+        {Icon && (
+          <View style={{
+            width: 36, height: 36, borderRadius: 10,
+            backgroundColor: selected ? "rgba(255,255,255,0.2)" : COLORS.primaryLight,
+            alignItems: "center", justifyContent: "center",
+          }}>
+            <Icon size={18} color={selected ? "#FFFFFF" : COLORS.primary} />
+          </View>
+        )}
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 16, fontWeight: "600", color: selected ? "#FFFFFF" : COLORS.text }}>
+            {label}
+          </Text>
+          {description && (
+            <Text style={{ fontSize: 13, color: selected ? "rgba(255,255,255,0.7)" : COLORS.textSecondary, marginTop: 2 }}>
+              {description}
+            </Text>
+          )}
+        </View>
+      </View>
+      {showCheck && selected && <Check size={18} color="#FFFFFF" strokeWidth={3} />}
+    </Pressable>
+  );
+}
+
+// -- Continue Button --
+
+function ContinueButton({ onPress, disabled, label = "Continue" }) {
+  return (
+    <Pressable
+      onPress={() => { if (!disabled) { haptic(); onPress(); } }}
+      disabled={disabled}
+      style={{
+        backgroundColor: disabled ? COLORS.muted : COLORS.primary,
+        borderRadius: 16,
+        paddingVertical: 18,
+        alignItems: "center",
+        shadowColor: disabled ? "transparent" : COLORS.primary,
+        shadowOpacity: disabled ? 0 : 0.3,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 4 },
+        elevation: disabled ? 0 : 4,
+      }}
+    >
+      <Text style={{ fontSize: 17, fontWeight: "700", color: disabled ? COLORS.textSecondary : "#FFFFFF" }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+// -- Stat Card --
+
+function StatCard({ value, label, color = COLORS.primary }) {
+  return (
+    <View style={{
+      flex: 1, backgroundColor: COLORS.card, borderRadius: 16, padding: 16,
+      alignItems: "center", gap: 4, borderWidth: 1, borderColor: COLORS.border,
+    }}>
+      <Text style={{ fontSize: 28, fontWeight: "900", color }}>{value}</Text>
+      <Text style={{ fontSize: 12, fontWeight: "500", color: COLORS.textSecondary, textAlign: "center" }}>
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+// -- Back Button --
+
+function BackButton({ onPress }) {
+  return (
+    <Pressable
+      onPress={() => { haptic(); onPress(); }}
+      style={{
+        width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.muted,
+        alignItems: "center", justifyContent: "center",
+      }}
+    >
+      <ArrowLeft size={20} color={COLORS.text} />
+    </Pressable>
+  );
+}
+
+// -- Welcome Step (step 0) --
+
+function WelcomeStep({ onStart }) {
+  return (
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }}>
+      <View style={{
+        width: 220, height: 220, borderRadius: 110,
+        backgroundColor: COLORS.primaryLight,
+        alignItems: "center", justifyContent: "center", marginBottom: 32,
+      }}>
+        <Image source={mascotDefault} style={{ width: 160, height: 160 }} resizeMode="contain" />
+      </View>
+
+      <Text style={{
+        fontSize: 34, fontWeight: "900", color: COLORS.text,
+        textAlign: "center", letterSpacing: -0.5, lineHeight: 40,
+      }}>
+        GERDBuddy
+      </Text>
+      <Text style={{
+        fontSize: 16, color: COLORS.textSecondary,
+        textAlign: "center", marginTop: 12, lineHeight: 22,
+      }}>
+        Your calm companion for{"\n"}acid reflux & gastritis
+      </Text>
+
+      <View style={{ width: "100%", marginTop: 48, gap: 12 }}>
+        <Text style={{
+          fontSize: 14, color: COLORS.textSecondary,
+          textAlign: "center", lineHeight: 20, marginBottom: 8,
+        }}>
+          Answer a few quick questions (~60 seconds){"\n"}and we'll build your personalized 7-day plan.
+        </Text>
+        <Pressable
+          onPress={() => { haptic(); onStart(); }}
+          style={{
+            backgroundColor: COLORS.primary, borderRadius: 16,
+            paddingVertical: 20, alignItems: "center",
+            flexDirection: "row", justifyContent: "center", gap: 10,
+            shadowColor: COLORS.primary, shadowOpacity: 0.35,
+            shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: "700", color: "#FFFFFF" }}>Get Started</Text>
+          <ArrowRight size={20} color="#FFFFFF" />
+        </Pressable>
+        <Text style={{
+          fontSize: 12, color: COLORS.textSecondary,
+          textAlign: "center", marginTop: 4, opacity: 0.6,
+        }}>
+          Educational purposes only. Not medical advice.
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+// -- Health Stats Step (step 4) --
+
+function HealthStatsStep() {
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+      <View style={{ gap: 24 }}>
+        <View>
+          <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34 }}>
+            Why managing acid{"\n"}reflux matters
+          </Text>
+          <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginTop: 8 }}>
+            Here's what the research shows.
+          </Text>
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <StatCard value="72%" label="of GERD patients improve with trigger tracking" />
+          <StatCard value="3x" label="faster symptom relief with guided plans" color={COLORS.accent} />
+        </View>
+
+        <View style={{
+          backgroundColor: COLORS.card, borderRadius: 16, padding: 20, gap: 16,
+          borderWidth: 1, borderColor: COLORS.border,
+        }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View style={{
+              width: 40, height: 40, borderRadius: 12,
+              backgroundColor: COLORS.primaryLight, alignItems: "center", justifyContent: "center",
+            }}>
+              <Heart size={20} color={COLORS.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, fontWeight: "700", color: COLORS.text }}>Reduced Flare-Ups</Text>
+              <Text style={{ fontSize: 13, color: COLORS.textSecondary, marginTop: 2 }}>
+                Tracking food triggers reduces acid reflux episodes by identifying your personal patterns.
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ height: 1, backgroundColor: COLORS.border }} />
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View style={{
+              width: 40, height: 40, borderRadius: 12,
+              backgroundColor: COLORS.accentLight, alignItems: "center", justifyContent: "center",
+            }}>
+              <TrendingUp size={20} color={COLORS.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, fontWeight: "700", color: COLORS.text }}>Better Sleep & Energy</Text>
+              <Text style={{ fontSize: 13, color: COLORS.textSecondary, marginTop: 2 }}>
+                Managing symptoms at night improves sleep quality and daily energy levels significantly.
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ height: 1, backgroundColor: COLORS.border }} />
+
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <View style={{
+              width: 40, height: 40, borderRadius: 12,
+              backgroundColor: "#FFF3E0", alignItems: "center", justifyContent: "center",
+            }}>
+              <Zap size={20} color="#E65100" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 15, fontWeight: "700", color: COLORS.text }}>Long-Term Healing</Text>
+              <Text style={{ fontSize: 13, color: COLORS.textSecondary, marginTop: 2 }}>
+                Consistent tracking leads to lasting lifestyle changes, not just temporary relief.
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={{
+          backgroundColor: COLORS.primaryLight, borderRadius: 16, padding: 20,
+          flexDirection: "row", alignItems: "center", gap: 14,
+        }}>
+          <Image source={mascotContent} style={{ width: 48, height: 48 }} resizeMode="contain" />
+          <Text style={{ fontSize: 14, color: COLORS.text, flex: 1, fontWeight: "500", lineHeight: 20 }}>
+            GERDBuddy helps you identify your unique triggers and build a personalized healing plan.
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+// -- Value Prop Step (step 8) --
+
+function ValuePropStep() {
+  const withoutItems = [
+    "Randomly avoid foods and hope for the best",
+    "Miss hidden triggers in your diet",
+    "Suffer through flare-ups without answers",
+    "Feel frustrated and stuck",
+  ];
+  const withItems = [
+    "Scan meals and track triggers instantly",
+    "Identify your personal trigger patterns",
+    "Get actionable insights after every meal",
+    "Build a diet that works for you",
+  ];
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+      <View style={{ gap: 24 }}>
+        <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34 }}>
+          Take control of{"\n"}your symptoms
+        </Text>
+
+        <View style={{
+          backgroundColor: COLORS.card, borderRadius: 20, padding: 20, gap: 20,
+          borderWidth: 1, borderColor: COLORS.border,
+        }}>
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            {/* Without GerdBuddy */}
+            <View style={{ flex: 1, gap: 12 }}>
+              <View style={{ alignItems: "center" }}>
+                <Image source={mascotSad} style={{ width: 48, height: 48 }} resizeMode="contain" />
+              </View>
+              <View style={{
+                backgroundColor: COLORS.dangerLight, borderRadius: 10,
+                paddingVertical: 8, alignItems: "center",
+              }}>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: COLORS.danger }}>Without GERDBuddy</Text>
+              </View>
+              {withoutItems.map((item) => (
+                <View key={item} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+                  <View style={{
+                    width: 20, height: 20, borderRadius: 10,
+                    backgroundColor: COLORS.dangerLight,
+                    alignItems: "center", justifyContent: "center", marginTop: 1,
+                  }}>
+                    <X size={11} color={COLORS.danger} strokeWidth={3} />
+                  </View>
+                  <Text style={{ fontSize: 13, color: COLORS.textSecondary, flex: 1, lineHeight: 18 }}>{item}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* With GerdBuddy */}
+            <View style={{ flex: 1, gap: 12 }}>
+              <View style={{ alignItems: "center" }}>
+                <Image source={mascotExcited} style={{ width: 48, height: 48 }} resizeMode="contain" />
+              </View>
+              <View style={{
+                backgroundColor: COLORS.primaryLight, borderRadius: 10,
+                paddingVertical: 8, alignItems: "center",
+              }}>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: COLORS.primary }}>With GERDBuddy</Text>
+              </View>
+              {withItems.map((item) => (
+                <View key={item} style={{ flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+                  <View style={{
+                    width: 20, height: 20, borderRadius: 10,
+                    backgroundColor: COLORS.primaryLight,
+                    alignItems: "center", justifyContent: "center", marginTop: 1,
+                  }}>
+                    <Check size={11} color={COLORS.primary} strokeWidth={3} />
+                  </View>
+                  <Text style={{ fontSize: 13, color: COLORS.text, fontWeight: "500", flex: 1, lineHeight: 18 }}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        <View style={{
+          backgroundColor: COLORS.primary, borderRadius: 16, padding: 20,
+          alignItems: "center", gap: 4,
+        }}>
+          <Text style={{ fontSize: 32, fontWeight: "900", color: "#FFFFFF" }}>85%</Text>
+          <Text style={{ fontSize: 14, fontWeight: "600", color: "rgba(255,255,255,0.85)", textAlign: "center" }}>
+            of users identify their top triggers{"\n"}within 14 days
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+// -- Social Proof Step (step 14) --
+
+function SocialProofStep() {
+  const testimonials = [
+    {
+      name: "Rachel M.",
+      text: "I finally figured out that tomatoes were my #1 trigger. Haven't had heartburn in weeks.",
+      stars: 5,
+    },
+    {
+      name: "David K.",
+      text: "The meal scanning is a game changer. I used to just avoid everything. Now I know exactly what's safe for me.",
+      stars: 5,
+    },
+    {
+      name: "Ana S.",
+      text: "My gastritis flare-ups went from weekly to almost never. This app helped me understand my gut.",
+      stars: 5,
+    },
+  ];
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+      <View style={{ gap: 20 }}>
+        <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34 }}>
+          Join thousands{"\n"}finding relief
+        </Text>
+
+        <View style={{
+          backgroundColor: COLORS.card, borderRadius: 14, padding: 16,
+          flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12,
+          borderWidth: 1, borderColor: COLORS.border,
+        }}>
+          <View style={{ flexDirection: "row", gap: 3 }}>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} size={20} color={COLORS.gold} fill={COLORS.gold} />
+            ))}
+          </View>
+          <Text style={{ fontSize: 24, fontWeight: "900", color: COLORS.text }}>4.8</Text>
+          <Text style={{ fontSize: 14, color: COLORS.textSecondary }}>on the App Store</Text>
+        </View>
+
+        {testimonials.map((t) => (
+          <View key={t.name} style={{
+            backgroundColor: COLORS.card, borderRadius: 16, padding: 20, gap: 10,
+            borderWidth: 1, borderColor: COLORS.border,
+          }}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <Text style={{ fontSize: 16, fontWeight: "700", color: COLORS.text }}>{t.name}</Text>
+              <View style={{ flexDirection: "row", gap: 2 }}>
+                {Array.from({ length: t.stars }).map((_, i) => (
+                  <Star key={i} size={14} color={COLORS.gold} fill={COLORS.gold} />
+                ))}
+              </View>
+            </View>
+            <Text style={{ fontSize: 15, color: COLORS.text, lineHeight: 22, opacity: 0.8 }}>{t.text}</Text>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
+// -- Loading Step (step 15) --
+
+function LoadingStep({ onComplete }) {
+  const items = [
+    { label: "Analyzing your symptoms", icon: Shield },
+    { label: "Building your trigger profile", icon: Scan },
+    { label: "Personalizing your plan", icon: Flame },
+  ];
+  const [visibleCount, setVisibleCount] = useState(0);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    let count = 0;
+    timerRef.current = setInterval(() => {
+      count++;
+      setVisibleCount(count);
+      if (count >= items.length) {
+        clearInterval(timerRef.current);
+        setTimeout(() => onComplete(), 800);
+      }
+    }, 900);
+    return () => { clearInterval(timerRef.current); };
+  }, []);
+
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 40 }}>
+      <View style={{
+        width: 160, height: 160, borderRadius: 80,
+        backgroundColor: COLORS.primaryLight,
+        alignItems: "center", justifyContent: "center",
+      }}>
+        <Image source={mascotHappy} style={{ width: 110, height: 110 }} resizeMode="contain" />
+      </View>
+
+      <Text style={{
+        fontSize: 28, fontWeight: "900", color: COLORS.text,
+        textAlign: "center", lineHeight: 34,
+      }}>
+        Setting up your{"\n"}healing profile...
+      </Text>
+
+      <View style={{ gap: 16, width: "100%", paddingHorizontal: 32 }}>
+        {items.map((item, idx) => (
+          <Animated.View
+            key={item.label}
+            entering={FadeInDown.delay(idx * 900).duration(400)}
+            style={{
+              flexDirection: "row", alignItems: "center", gap: 14,
+              opacity: idx < visibleCount ? 1 : 0,
+            }}
+          >
+            <View style={{
+              width: 36, height: 36, borderRadius: 10,
+              backgroundColor: COLORS.primary,
+              alignItems: "center", justifyContent: "center",
+            }}>
+              <item.icon size={18} color="#FFFFFF" />
+            </View>
+            <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text }}>{item.label}</Text>
+          </Animated.View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// -- Main Screen --
 
 export default function OnboardingScreen({ navigation, route }) {
   const [step, setStep] = useState(0);
-  // Existing fields
+  const [conditions, setConditions] = useState([]);
+  const [severity, setSeverity] = useState(null);
   const [symptomTiming, setSymptomTiming] = useState([]);
   const [symptomFrequency, setSymptomFrequency] = useState(null);
   const [topSymptoms, setTopSymptoms] = useState([]);
   const [symptomAfterEating, setSymptomAfterEating] = useState(null);
   const [worseLyingDown, setWorseLyingDown] = useState(null);
-  const [remindersEnabled, setRemindersEnabled] = useState(true);
-  const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
-  const [isCompleting, setIsCompleting] = useState(false);
-  // Condition selection
-  const [conditions, setConditions] = useState([]);
-  // New triage fields
-  const [severity, setSeverity] = useState(null);
   const [fearFoods, setFearFoods] = useState([]);
   const [customFearFood, setCustomFearFood] = useState("");
   const [customFearFoods, setCustomFearFoods] = useState([]);
   const [mealTimes, setMealTimes] = useState([]);
   const [medsStatus, setMedsStatus] = useState(null);
+  const [remindersEnabled, setRemindersEnabled] = useState(true);
+  const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
+  const [isCompleting, setIsCompleting] = useState(false);
 
-  const onComplete = route?.params?.onComplete;
-  const totalSteps = 12; // 0=welcome, 1=conditions, 2=severity, 3=timing, 4=frequency, 5=symptoms, 6=afterEating, 7=lyingDown, 8=fearFoods, 9=mealTimes+meds, 10=rateUs, 11=reminders
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -114,46 +635,18 @@ export default function OnboardingScreen({ navigation, route }) {
   }, []);
 
   useEffect(() => {
-    if (step === 1) {
-      posthog?.capture(EVENTS.ONBOARDING_TRIAGE_STARTED);
-    }
-    if (step === 10) {
+    if (step === 1) posthog?.capture(EVENTS.ONBOARDING_TRIAGE_STARTED);
+    if (step === 12) {
       posthog?.capture("onboarding_rating_prompted");
       StoreReview.requestReview().catch(() => {});
     }
-    if (step > 0) {
-      posthog?.capture("onboarding_step_completed", { step: step - 1 });
-    }
+    if (step > 0) posthog?.capture("onboarding_step_completed", { step: step - 1 });
   }, [step]);
 
-  const handleConditionToggle = (id) => {
-    setConditions((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
-    );
-  };
+  // -- Toggle helpers --
 
-  const handleSymptomToggle = (id) => {
-    setTopSymptoms((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
-
-  const handleTimingToggle = (id) => {
-    setSymptomTiming((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
-
-  const handleFearFoodToggle = (id) => {
-    setFearFoods((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    );
-  };
-
-  const handleMealTimeToggle = (id) => {
-    setMealTimes((prev) =>
-      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
-    );
+  const toggle = (setter, id) => {
+    setter((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   };
 
   const addCustomFearFood = () => {
@@ -168,35 +661,27 @@ export default function OnboardingScreen({ navigation, route }) {
     setCustomFearFoods((prev) => prev.filter((f) => f !== food));
   };
 
+  // -- Completion --
+
   const normalizeReminderSettings = async () => {
     if (!remindersEnabled && !eveningReminderEnabled) {
       return { remindersEnabled: false, eveningReminderEnabled: false };
     }
-
     try {
       const result = await registerForPushNotifications();
       if (!result.permission.granted) {
         setRemindersEnabled(false);
         setEveningReminderEnabled(false);
         if (!result.permission.canAskAgain) {
-          showToast(
-            "Notifications disabled",
-            "Go to Settings > GERD Buddy > Notifications to enable reminders."
-          );
+          showToast("Notifications disabled", "Go to Settings > GERD Buddy > Notifications to enable reminders.");
         } else {
-          showToast(
-            "Notifications not enabled",
-            "You can enable reminders later in the app settings."
-          );
+          showToast("Notifications not enabled", "You can enable reminders later in the app settings.");
         }
         return { remindersEnabled: false, eveningReminderEnabled: false };
       }
       return { remindersEnabled, eveningReminderEnabled };
     } catch (error) {
-      showToast(
-        "Notifications unavailable",
-        "We could not register this device. You can retry from Settings."
-      );
+      showToast("Notifications unavailable", "We could not register this device. You can retry from Settings.");
       return { remindersEnabled: false, eveningReminderEnabled: false };
     }
   };
@@ -204,7 +689,6 @@ export default function OnboardingScreen({ navigation, route }) {
   const handleComplete = async () => {
     if (isCompleting) return;
     setIsCompleting(true);
-
     try {
       const reminderSettings = await normalizeReminderSettings();
       const user = await createUser({
@@ -216,7 +700,6 @@ export default function OnboardingScreen({ navigation, route }) {
         worseLyingDown,
         remindersEnabled: reminderSettings.remindersEnabled,
         eveningReminderEnabled: reminderSettings.eveningReminderEnabled,
-        // New triage fields
         severity: severity || "moderate",
         fearFoods,
         customFearFoods,
@@ -233,7 +716,6 @@ export default function OnboardingScreen({ navigation, route }) {
         console.warn("RevenueCat setup failed:", err)
       );
 
-      // Generate 7-day plan
       const plan = await generatePlan({
         conditions: conditions.length > 0 ? conditions : ["gerd"],
         severity: severity || "moderate",
@@ -268,9 +750,7 @@ export default function OnboardingScreen({ navigation, route }) {
         meds_status: medsStatus,
       });
 
-      // Navigate to SignUp if Firebase is configured, otherwise straight to Main
-      const nextScreen = onComplete?.() || "Main";
-      navigation.replace(nextScreen);
+      navigation.replace("Paywall");
     } catch (error) {
       console.warn("Onboarding completion failed:", error);
       showToast("Something went wrong", "Please try again.");
@@ -278,511 +758,473 @@ export default function OnboardingScreen({ navigation, route }) {
     }
   };
 
-  // -- Shared layout helpers --
+  const goNext = () => { if (step < TOTAL_STEPS - 1) setStep(step + 1); };
+  const goBack = () => { if (step > 0) { haptic(); setStep(step - 1); } };
 
-  const StepHeader = ({ icon: Icon, iconColor = "#3aa27f", title, subtitle }) => (
-    <View className="gap-4">
-      <Icon size={28} color={iconColor} />
-      <Text className="text-3xl font-extrabold text-foreground leading-tight">
-        {title}
-      </Text>
-      {subtitle && (
-        <Text className="text-base text-muted-foreground">{subtitle}</Text>
-      )}
-    </View>
-  );
-
-  const TopBar = () => (
-    <View className="flex-row items-center justify-between mb-2">
-      <Pressable
-        onPress={() => setStep((s) => Math.max(0, s - 1))}
-        className="w-10 h-10 items-center justify-center rounded-full"
-      >
-        <ArrowLeft size={22} color="#222222" />
-      </Pressable>
-      <Text className="text-base font-semibold text-muted-foreground">
-        {step}/{totalSteps - 1}
-      </Text>
-    </View>
-  );
-
-  const ContinueButton = ({ disabled, onPress, label = "Continue" }) => (
-    <Button
-      disabled={disabled}
-      onPress={onPress}
-      className="w-full py-4 rounded-2xl mt-4"
-    >
-      <Text className="text-primary-foreground font-bold text-base text-center">{label}</Text>
-    </Button>
-  );
-
-  const renderMultiSelectOption = (option, selected, onToggle) => {
-    const active = selected.includes(option.id);
-    return (
-      <Pressable
-        key={option.id}
-        onPress={() => onToggle(option.id)}
-        className={`flex-row items-center gap-4 px-5 py-4 rounded-2xl border ${
-          active ? "bg-primary/5 border-primary/30" : "bg-card border-border"
-        }`}
-      >
-        <View
-          className={`w-6 h-6 rounded-lg border-2 items-center justify-center ${
-            active ? "bg-primary border-primary" : "border-muted-foreground/30"
-          }`}
-        >
-          {active && <Text className="text-white text-xs font-bold">✓</Text>}
-        </View>
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-foreground">
-            {option.label}
-          </Text>
-          {option.description && (
-            <Text className="text-sm text-muted-foreground mt-0.5">{option.description}</Text>
-          )}
-        </View>
-      </Pressable>
-    );
+  const getSymptomOptions = () => {
+    if (conditions.includes("gerd") && conditions.includes("gastritis")) return bothSymptomOptions;
+    if (conditions.includes("gastritis")) return gastritisSymptomOptions;
+    return gerdSymptomOptions;
   };
 
-  const renderSingleSelectOption = (option, selected, onSelect) => {
-    const active = selected === option.id;
+  // -- Step 0: Welcome --
+  if (step === 0) {
     return (
-      <Pressable
-        key={option.id}
-        onPress={() => onSelect(option.id)}
-        className={`flex-row items-center gap-4 px-5 py-4 rounded-2xl border ${
-          active ? "bg-primary/5 border-primary/30" : "bg-card border-border"
-        }`}
-      >
-        <View
-          className={`w-6 h-6 rounded-full border-2 items-center justify-center ${
-            active ? "border-primary" : "border-muted-foreground/30"
-          }`}
-        >
-          {active && <View className="w-3 h-3 rounded-full bg-primary" />}
-        </View>
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-foreground">{option.label}</Text>
-          {option.description && (
-            <Text className="text-sm text-muted-foreground mt-0.5">{option.description}</Text>
-          )}
-        </View>
-      </Pressable>
+      <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.bg }}>
+        <WelcomeStep onStart={() => setStep(1)} />
+      </SafeAreaView>
     );
-  };
+  }
 
+  // -- Step 15: Loading --
+  if (step === 15) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.bg }}>
+        <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 8 }}>
+          <BackButton onPress={goBack} />
+          <ProgressBar step={step} />
+        </View>
+        <LoadingStep onComplete={handleComplete} />
+      </SafeAreaView>
+    );
+  }
+
+  // -- Steps 1-14 --
   return (
-    <Screen contentClassName="gap-6">
-      {/* Step 0: Welcome */}
-      {step === 0 && (
-        <View className="flex-1 items-center justify-center gap-8 px-2">
-          <Mascot size="large" />
-          <View className="items-center gap-3">
-            <Text className="text-4xl font-extrabold text-foreground tracking-tight">
-              GERDBuddy
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.bg }}>
+      <View style={{ flex: 1, paddingHorizontal: 24 }}>
+        {/* Header */}
+        <View style={{ flexDirection: "row", alignItems: "center", paddingTop: 8, marginBottom: 24 }}>
+          <BackButton onPress={goBack} />
+          <ProgressBar step={step} />
+        </View>
+
+        {/* Step 1: Conditions */}
+        {step === 1 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              What are you dealing with?
             </Text>
-            <Text className="text-lg text-muted-foreground text-center leading-relaxed">
-              Your calm companion for acid reflux & gastritis
-            </Text>
-          </View>
-          <View className="w-full gap-4 mt-4">
-            <Text className="text-sm text-muted-foreground/80 text-center leading-relaxed">
-              Answer a few quick questions (~60 seconds) and we'll build your personalized 7-day plan.
-            </Text>
-            <Button
-              className="w-full py-5 rounded-2xl shadow-sm"
-              onPress={() => setStep(1)}
-            >
-              <View className="flex-row items-center justify-center gap-3">
-                <Text className="text-primary-foreground font-bold text-lg">Get Started</Text>
-                <ArrowRight size={20} color="#ffffff" />
-              </View>
-            </Button>
-            <Text className="text-xs text-muted-foreground/60 text-center">
-              Educational purposes only. Not medical advice.
-            </Text>
-          </View>
-        </View>
-      )}
-
-      {/* Step 1: Condition Selection */}
-      {step === 1 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={Heart}
-            title="What are you dealing with?"
-            subtitle="Select all that apply"
-          />
-          <View className="gap-3">
-            {conditionOptions.map((option) =>
-              renderMultiSelectOption(option, conditions, handleConditionToggle)
-            )}
-          </View>
-          <View className="flex-1" />
-          <ContinueButton
-            disabled={conditions.length === 0}
-            onPress={() => setStep(2)}
-          />
-        </View>
-      )}
-
-      {/* Step 2: Symptom Severity */}
-      {step === 2 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={AlertTriangle}
-            iconColor="#f07c52"
-            title="How severe are your symptoms?"
-            subtitle="This helps us calibrate your plan"
-          />
-          <View className="gap-3">
-            {severityOptions.map((option) =>
-              renderSingleSelectOption(option, severity, setSeverity)
-            )}
-          </View>
-          <View className="flex-1" />
-          <ContinueButton
-            disabled={!severity}
-            onPress={() => setStep(3)}
-          />
-        </View>
-      )}
-
-      {/* Step 3: Symptom Timing */}
-      {step === 3 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={Clock}
-            title="When do you usually experience symptoms?"
-            subtitle="Select all that apply"
-          />
-          <View className="gap-3">
-            {symptomTimingOptions.map((option) =>
-              renderMultiSelectOption(option, symptomTiming, handleTimingToggle)
-            )}
-          </View>
-          <View className="flex-1" />
-          <ContinueButton
-            disabled={symptomTiming.length === 0}
-            onPress={() => setStep(4)}
-          />
-        </View>
-      )}
-
-      {/* Step 4: Frequency */}
-      {step === 4 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={CalendarDays}
-            iconColor="#f07c52"
-            title="How often do you experience symptoms?"
-            subtitle="Choose one"
-          />
-          <View className="gap-3">
-            {symptomFrequencyOptions.map((option) =>
-              renderSingleSelectOption(option, symptomFrequency, setSymptomFrequency)
-            )}
-          </View>
-          <View className="flex-1" />
-          <ContinueButton
-            disabled={!symptomFrequency}
-            onPress={() => setStep(5)}
-          />
-        </View>
-      )}
-
-      {/* Step 5: Top Symptoms */}
-      {step === 5 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={Activity}
-            title="Which symptoms do you experience most?"
-            subtitle="Select all that apply"
-          />
-          <View className="gap-3">
-            {(conditions.includes("gerd") && conditions.includes("gastritis")
-              ? bothSymptomOptions
-              : conditions.includes("gastritis")
-              ? gastritisSymptomOptions
-              : gerdSymptomOptions
-            ).map((symptom) =>
-              renderMultiSelectOption(symptom, topSymptoms, handleSymptomToggle)
-            )}
-          </View>
-          <View className="flex-1" />
-          <ContinueButton
-            disabled={topSymptoms.length === 0}
-            onPress={() => setStep(6)}
-          />
-        </View>
-      )}
-
-      {/* Step 6: After Eating */}
-      {step === 6 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={Utensils}
-            iconColor="#f07c52"
-            title="Do symptoms usually happen after eating?"
-          />
-          <View className="gap-3">
-            {afterEatingOptions.map((option) =>
-              renderSingleSelectOption(option, symptomAfterEating, setSymptomAfterEating)
-            )}
-          </View>
-          <View className="flex-1" />
-          <ContinueButton
-            disabled={!symptomAfterEating}
-            onPress={() => setStep(7)}
-          />
-        </View>
-      )}
-
-      {/* Step 7: Lying Down */}
-      {step === 7 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={Moon}
-            title="Are symptoms worse when lying down?"
-          />
-          <View className="gap-3">
-            {lyingDownOptions.map((option) =>
-              renderSingleSelectOption(option, worseLyingDown, setWorseLyingDown)
-            )}
-          </View>
-          <View className="flex-1" />
-          <ContinueButton
-            disabled={!worseLyingDown}
-            onPress={() => setStep(8)}
-          />
-        </View>
-      )}
-
-      {/* Step 8: Fear Foods */}
-      {step === 8 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={Utensils}
-            iconColor="#f07c52"
-            title="Which foods worry you most?"
-            subtitle="Select any you suspect are triggers"
-          />
-
-          <View className="gap-3">
-            {getFearFoodOptions(conditions).map((option) =>
-              renderMultiSelectOption(option, fearFoods, handleFearFoodToggle)
-            )}
-          </View>
-
-          {/* Custom fear food input */}
-          <View className="gap-2">
-            <Text className="text-sm font-medium text-foreground">Add your own:</Text>
-            <View className="flex-row gap-2">
-              <TextInput
-                value={customFearFood}
-                onChangeText={setCustomFearFood}
-                placeholder="e.g. avocado"
-                placeholderTextColor="#9ca3af"
-                className="flex-1 border border-border rounded-xl px-4 py-3 text-foreground bg-card"
-                onSubmitEditing={addCustomFearFood}
-                returnKeyType="done"
-              />
-              <Button
-                onPress={addCustomFearFood}
-                disabled={!customFearFood.trim()}
-                className="px-4 rounded-xl"
-              >
-                <Text className="text-primary-foreground font-semibold">Add</Text>
-              </Button>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>Select all that apply</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {conditionOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={conditions.includes(opt.id)} showCheck
+                  onPress={() => toggle(setConditions, opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={conditions.length === 0} onPress={goNext} />
             </View>
-            {customFearFoods.length > 0 && (
-              <View className="flex-row flex-wrap gap-2 mt-1">
-                {customFearFoods.map((food) => (
-                  <Pressable
-                    key={food}
-                    onPress={() => removeCustomFearFood(food)}
-                    className="flex-row items-center gap-1 bg-accent-light border border-accent/30 rounded-full px-3 py-1.5"
-                  >
-                    <Text className="text-sm text-foreground">{food}</Text>
-                    <Text className="text-muted-foreground ml-1">x</Text>
-                  </Pressable>
-                ))}
-              </View>
-            )}
           </View>
+        )}
 
-          <View className="flex-1" />
-          <ContinueButton
-            onPress={() => setStep(9)}
-            label={fearFoods.length === 0 && customFearFoods.length === 0 ? "Skip" : "Continue"}
-          />
-        </View>
-      )}
-
-      {/* Step 9: Meal Times + Meds */}
-      {step === 9 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={Clock}
-            title="Your usual meal times"
-            subtitle="Select all that apply"
-          />
-
-          <View className="gap-3">
-            {MEAL_TIME_OPTIONS.map((option) =>
-              renderMultiSelectOption(option, mealTimes, handleMealTimeToggle)
-            )}
-          </View>
-
-          <View className="gap-4 mt-2">
-            <Pill size={28} color="#f07c52" />
-            <Text className="text-3xl font-extrabold text-foreground leading-tight">
-              Current medication?
+        {/* Step 2: Severity */}
+        {step === 2 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              How severe are your symptoms?
             </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>This helps us calibrate your plan</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {severityOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label} description={opt.description}
+                  selected={severity === opt.id}
+                  onPress={() => setSeverity(opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={!severity} onPress={goNext} />
+            </View>
           </View>
+        )}
 
-          <View className="gap-3">
-            {MEDS_OPTIONS.map((option) =>
-              renderSingleSelectOption(option, medsStatus, setMedsStatus)
-            )}
+        {/* Step 3: Symptom Timing */}
+        {step === 3 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              When do you usually experience symptoms?
+            </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>Select all that apply</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {symptomTimingOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={symptomTiming.includes(opt.id)} showCheck
+                  onPress={() => toggle(setSymptomTiming, opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={symptomTiming.length === 0} onPress={goNext} />
+            </View>
           </View>
+        )}
 
-          <View className="flex-1" />
-          <ContinueButton
-            disabled={mealTimes.length === 0 || !medsStatus}
-            onPress={() => setStep(10)}
-          />
-        </View>
-      )}
+        {/* Step 4: Health Stats Interstitial */}
+        {step === 4 && (
+          <View style={{ flex: 1 }}>
+            <HealthStatsStep />
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton onPress={goNext} disabled={false} />
+            </View>
+          </View>
+        )}
 
-      {/* Step 10: Rate Us */}
-      {step === 10 && (
-        <View className="flex-1 items-center justify-center gap-8 px-2">
-          <Mascot size="large" variant="happy" />
-          <View className="items-center gap-3">
-            <Star size={28} color="#3aa27f" />
-            <Text className="text-3xl font-extrabold text-foreground">
+        {/* Step 5: Symptom Frequency */}
+        {step === 5 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              How often do you experience symptoms?
+            </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>Choose one</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {symptomFrequencyOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={symptomFrequency === opt.id}
+                  onPress={() => setSymptomFrequency(opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={!symptomFrequency} onPress={goNext} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 6: Top Symptoms */}
+        {step === 6 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              Which symptoms do you experience most?
+            </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>Select all that apply</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {getSymptomOptions().map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={topSymptoms.includes(opt.id)} showCheck
+                  onPress={() => toggle(setTopSymptoms, opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={topSymptoms.length === 0} onPress={goNext} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 7: After Eating */}
+        {step === 7 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              Do symptoms usually happen after eating?
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {afterEatingOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={symptomAfterEating === opt.id}
+                  onPress={() => setSymptomAfterEating(opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={!symptomAfterEating} onPress={goNext} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 8: Value Prop Interstitial */}
+        {step === 8 && (
+          <View style={{ flex: 1 }}>
+            <ValuePropStep />
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton onPress={goNext} disabled={false} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 9: Lying Down */}
+        {step === 9 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              Are symptoms worse when lying down?
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {lyingDownOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={worseLyingDown === opt.id}
+                  onPress={() => setWorseLyingDown(opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={!worseLyingDown} onPress={goNext} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 10: Fear Foods */}
+        {step === 10 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              Which foods worry you most?
+            </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>Select any you suspect are triggers</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 12 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {getFearFoodOptions(conditions).map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={fearFoods.includes(opt.id)} showCheck
+                  onPress={() => toggle(setFearFoods, opt.id)}
+                />
+              ))}
+
+              {/* Custom fear food input */}
+              <View style={{ gap: 8, marginTop: 8 }}>
+                <Text style={{ fontSize: 14, fontWeight: "600", color: COLORS.text }}>Add your own:</Text>
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  <TextInput
+                    value={customFearFood}
+                    onChangeText={setCustomFearFood}
+                    placeholder="e.g. avocado"
+                    placeholderTextColor={COLORS.textSecondary}
+                    style={{
+                      flex: 1, borderWidth: 1, borderColor: COLORS.border,
+                      borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12,
+                      color: COLORS.text, backgroundColor: COLORS.card, fontSize: 15,
+                    }}
+                    onSubmitEditing={addCustomFearFood}
+                    returnKeyType="done"
+                  />
+                  <Pressable
+                    onPress={() => { haptic(); addCustomFearFood(); }}
+                    disabled={!customFearFood.trim()}
+                    style={{
+                      backgroundColor: customFearFood.trim() ? COLORS.primary : COLORS.muted,
+                      borderRadius: 12, paddingHorizontal: 16, justifyContent: "center",
+                    }}
+                  >
+                    <Text style={{ color: customFearFood.trim() ? "#FFFFFF" : COLORS.textSecondary, fontWeight: "600" }}>
+                      Add
+                    </Text>
+                  </Pressable>
+                </View>
+                {customFearFoods.length > 0 && (
+                  <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
+                    {customFearFoods.map((food) => (
+                      <Pressable
+                        key={food}
+                        onPress={() => { haptic(); removeCustomFearFood(food); }}
+                        style={{
+                          flexDirection: "row", alignItems: "center", gap: 6,
+                          backgroundColor: COLORS.accentLight, borderWidth: 1,
+                          borderColor: "rgba(240,124,82,0.3)", borderRadius: 20,
+                          paddingHorizontal: 12, paddingVertical: 6,
+                        }}
+                      >
+                        <Text style={{ fontSize: 14, color: COLORS.text }}>{food}</Text>
+                        <Text style={{ color: COLORS.textSecondary }}>x</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton
+                onPress={goNext}
+                label={fearFoods.length === 0 && customFearFoods.length === 0 ? "Skip" : "Continue"}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* Step 11: Meal Times + Meds */}
+        {step === 11 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              Your usual meal times
+            </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>Select all that apply</Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 12 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {MEAL_TIME_OPTIONS.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={mealTimes.includes(opt.id)} showCheck
+                  onPress={() => toggle(setMealTimes, opt.id)}
+                />
+              ))}
+
+              <View style={{ marginTop: 16 }}>
+                <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 16 }}>
+                  Current medication?
+                </Text>
+                <View style={{ gap: 10 }}>
+                  {MEDS_OPTIONS.map((opt) => (
+                    <OptionCard
+                      key={opt.id} label={opt.label}
+                      selected={medsStatus === opt.id}
+                      onPress={() => setMedsStatus(opt.id)}
+                    />
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={mealTimes.length === 0 || !medsStatus} onPress={goNext} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 12: Rate Us */}
+        {step === 12 && (
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+            <View style={{
+              width: 220, height: 220, borderRadius: 110,
+              backgroundColor: COLORS.primaryLight,
+              alignItems: "center", justifyContent: "center", marginBottom: 32,
+            }}>
+              <Image source={mascotHappy} style={{ width: 160, height: 160 }} resizeMode="contain" />
+            </View>
+
+            <Star size={28} color={COLORS.primary} />
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, textAlign: "center", marginTop: 12 }}>
               Enjoying GERDBuddy?
             </Text>
-            <Text className="text-base text-muted-foreground text-center">
+            <Text style={{ fontSize: 16, color: COLORS.textSecondary, textAlign: "center", marginTop: 8 }}>
               Your feedback helps others find relief too
             </Text>
+
+            <View style={{ width: "100%", gap: 12, marginTop: 40 }}>
+              <Pressable
+                onPress={async () => {
+                  haptic();
+                  posthog?.capture("onboarding_rating_accepted");
+                  try { await StoreReview.requestReview(); } catch (e) { console.warn("StoreReview failed:", e); }
+                  setStep(13);
+                }}
+                style={{
+                  backgroundColor: COLORS.primary, borderRadius: 16, paddingVertical: 18,
+                  alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8,
+                  shadowColor: COLORS.primary, shadowOpacity: 0.3, shadowRadius: 8,
+                  shadowOffset: { width: 0, height: 4 }, elevation: 4,
+                }}
+              >
+                <Text style={{ fontSize: 17, fontWeight: "700", color: "#FFFFFF" }}>Rate Us</Text>
+                <Star size={18} color="#FFFFFF" />
+              </Pressable>
+              <Pressable
+                onPress={() => { haptic(); posthog?.capture("onboarding_rating_skipped"); setStep(13); }}
+                style={{ paddingVertical: 12 }}
+              >
+                <Text style={{ color: COLORS.textSecondary, textAlign: "center", fontWeight: "600" }}>Maybe Later</Text>
+              </Pressable>
+            </View>
           </View>
+        )}
 
-          <View className="w-full gap-3">
-            <Button
-              onPress={async () => {
-                posthog?.capture("onboarding_rating_accepted");
-                try {
-                  await StoreReview.requestReview();
-                } catch (e) {
-                  console.warn("StoreReview failed:", e);
-                }
-                setStep(11);
-              }}
-              className="w-full py-4 rounded-2xl"
-            >
-              <View className="flex-row items-center justify-center gap-2">
-                <Text className="text-primary-foreground font-bold text-base">Rate Us</Text>
-                <Star size={18} color="#ffffff" />
-              </View>
-            </Button>
-            <Pressable
-              onPress={() => {
-                posthog?.capture("onboarding_rating_skipped");
-                setStep(11);
-              }}
-              className="py-3"
-            >
-              <Text className="text-muted-foreground text-center font-medium">Maybe Later</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
-
-      {/* Step 11: Reminders */}
-      {step === 11 && (
-        <View className="gap-6 flex-1">
-          <TopBar />
-          <StepHeader
-            icon={Bell}
-            title="Enable reminders?"
-            subtitle="Gentle nudges to help you track consistently"
-          />
-
-          <View className="gap-4">
-            <Pressable
-              onPress={() => setRemindersEnabled((v) => !v)}
-              className={`flex-row items-center justify-between px-5 py-4 rounded-2xl border ${
-                remindersEnabled ? "bg-primary/5 border-primary/30" : "bg-card border-border"
-              }`}
-            >
-              <View className="gap-1 flex-1 mr-3">
-                <Text className="text-base font-semibold text-foreground">Daily reminders</Text>
-                <Text className="text-sm text-muted-foreground">
-                  Remind me to log meals & symptoms
-                </Text>
-              </View>
-              <View className={`w-12 h-7 rounded-full px-0.5 justify-center ${remindersEnabled ? "bg-primary" : "bg-muted"}`}>
-                <View
-                  className={`w-6 h-6 rounded-full bg-white ${
-                    remindersEnabled ? "self-end" : "self-start"
-                  }`}
-                />
-              </View>
-            </Pressable>
-
-            <Pressable
-              onPress={() => setEveningReminderEnabled((v) => !v)}
-              className={`flex-row items-center justify-between px-5 py-4 rounded-2xl border ${
-                eveningReminderEnabled ? "bg-primary/5 border-primary/30" : "bg-card border-border"
-              }`}
-            >
-              <View className="gap-1 flex-1 mr-3">
-                <Text className="text-base font-semibold text-foreground">Evening reminder</Text>
-                <Text className="text-sm text-muted-foreground">Avoid eating 2 hours before bed</Text>
-              </View>
-              <View className={`w-12 h-7 rounded-full px-0.5 justify-center ${eveningReminderEnabled ? "bg-primary" : "bg-muted"}`}>
-                <View
-                  className={`w-6 h-6 rounded-full bg-white ${
-                    eveningReminderEnabled ? "self-end" : "self-start"
-                  }`}
-                />
-              </View>
-            </Pressable>
-          </View>
-
-          <View className="bg-primary/5 border border-primary/20 rounded-2xl p-4">
-            <Text className="text-sm font-semibold text-foreground mb-1">
-              Your 7-day plan is ready
+        {/* Step 13: Reminders */}
+        {step === 13 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              Enable reminders?
             </Text>
-            <Text className="text-sm text-muted-foreground">
-              After setup, you'll get a personalized daily checklist to help you identify your triggers in just one week.
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 20 }}>
+              Gentle nudges to help you track consistently
             </Text>
-          </View>
 
-          <View className="flex-1" />
-          <Button
-            onPress={handleComplete}
-            disabled={isCompleting}
-            className="w-full py-4 rounded-2xl"
-          >
-            <Text className="text-primary-foreground font-bold text-base text-center">
-              {isCompleting ? "Setting up your plan..." : "Start My 7-Day Plan"}
-            </Text>
-          </Button>
-        </View>
-      )}
-    </Screen>
+            <View style={{ gap: 12 }}>
+              <Pressable
+                onPress={() => { haptic(); setRemindersEnabled((v) => !v); }}
+                style={{
+                  flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+                  paddingHorizontal: 20, paddingVertical: 16, borderRadius: 14,
+                  borderWidth: 1,
+                  backgroundColor: remindersEnabled ? "rgba(58,162,127,0.05)" : COLORS.card,
+                  borderColor: remindersEnabled ? "rgba(58,162,127,0.3)" : COLORS.border,
+                }}
+              >
+                <View style={{ gap: 4, flex: 1, marginRight: 12 }}>
+                  <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text }}>Daily reminders</Text>
+                  <Text style={{ fontSize: 13, color: COLORS.textSecondary }}>Remind me to log meals & symptoms</Text>
+                </View>
+                <View style={{
+                  width: 48, height: 28, borderRadius: 14, paddingHorizontal: 2,
+                  justifyContent: "center",
+                  backgroundColor: remindersEnabled ? COLORS.primary : COLORS.muted,
+                }}>
+                  <View style={{
+                    width: 24, height: 24, borderRadius: 12, backgroundColor: "#FFFFFF",
+                    alignSelf: remindersEnabled ? "flex-end" : "flex-start",
+                  }} />
+                </View>
+              </Pressable>
+
+              <Pressable
+                onPress={() => { haptic(); setEveningReminderEnabled((v) => !v); }}
+                style={{
+                  flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+                  paddingHorizontal: 20, paddingVertical: 16, borderRadius: 14,
+                  borderWidth: 1,
+                  backgroundColor: eveningReminderEnabled ? "rgba(58,162,127,0.05)" : COLORS.card,
+                  borderColor: eveningReminderEnabled ? "rgba(58,162,127,0.3)" : COLORS.border,
+                }}
+              >
+                <View style={{ gap: 4, flex: 1, marginRight: 12 }}>
+                  <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text }}>Evening reminder</Text>
+                  <Text style={{ fontSize: 13, color: COLORS.textSecondary }}>Avoid eating 2 hours before bed</Text>
+                </View>
+                <View style={{
+                  width: 48, height: 28, borderRadius: 14, paddingHorizontal: 2,
+                  justifyContent: "center",
+                  backgroundColor: eveningReminderEnabled ? COLORS.primary : COLORS.muted,
+                }}>
+                  <View style={{
+                    width: 24, height: 24, borderRadius: 12, backgroundColor: "#FFFFFF",
+                    alignSelf: eveningReminderEnabled ? "flex-end" : "flex-start",
+                  }} />
+                </View>
+              </Pressable>
+            </View>
+
+            <View style={{
+              backgroundColor: "rgba(58,162,127,0.05)", borderWidth: 1,
+              borderColor: "rgba(58,162,127,0.2)", borderRadius: 16,
+              padding: 16, marginTop: 24,
+            }}>
+              <Text style={{ fontSize: 14, fontWeight: "600", color: COLORS.text, marginBottom: 4 }}>
+                Your 7-day plan is ready
+              </Text>
+              <Text style={{ fontSize: 13, color: COLORS.textSecondary, lineHeight: 18 }}>
+                After setup, you'll get a personalized daily checklist to help you identify your triggers in just one week.
+              </Text>
+            </View>
+
+            <View style={{ flex: 1 }} />
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton onPress={goNext} disabled={false} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 14: Social Proof Interstitial */}
+        {step === 14 && (
+          <View style={{ flex: 1 }}>
+            <SocialProofStep />
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton onPress={goNext} disabled={false} />
+            </View>
+          </View>
+        )}
+      </View>
+    </SafeAreaView>
   );
 }
