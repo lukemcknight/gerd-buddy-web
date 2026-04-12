@@ -40,6 +40,11 @@ trigger-tracker-mobile/eas.json
 asc-api-key.json
 GoogleService-Info.plist
 google-services.json
+users.json
 
 # Build artifacts
 *.ipa
+
+# Skill/agent working files
+.superpowers/
+docs/superpowers/
