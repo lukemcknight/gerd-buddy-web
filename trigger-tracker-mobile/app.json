@@ -2,7 +2,7 @@
   "expo": {
     "name": "GERD Buddy",
     "slug": "trigger-tracker",
-    "version": "2.1.0",
+    "version": "3.3.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
