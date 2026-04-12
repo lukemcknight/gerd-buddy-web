@@ -1,17 +1,17 @@
 import { useCallback, useState } from "react";
 import { Text, View, Pressable } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { Utensils, Activity, Camera, Clock } from "lucide-react-native";
+import { Utensils, Activity, Clock } from "lucide-react-native";
 import Screen from "../components/Screen";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import TurtleBuddy from "../components/TurtleBuddy";
-import { getMeals, getSymptoms, getUser, getStreakInfo, updateBestStreak, STREAK_MILESTONES } from "../services/storage";
+import { getMeals, getSymptoms, getUser, getStreakInfo, updateBestStreak, getSymptomFreeStreak, STREAK_MILESTONES } from "../services/storage";
 import { promptForReviewOnEvent } from "../services/reviewPrompt";
 import { computeBuddyState } from "../utils/buddyState";
 
 export default function HomeScreen({ navigation }) {
-  const [stats, setStats] = useState({ meals: 0, symptoms: 0 });
+  const [stats, setStats] = useState({ meals: 0, symptoms: 0, symptomFreeStreak: 0 });
   const [recentMeals, setRecentMeals] = useState([]);
   const [recentSymptoms, setRecentSymptoms] = useState([]);
   const [buddyState, setBuddyState] = useState(null);
@@ -26,7 +26,7 @@ export default function HomeScreen({ navigation }) {
       const meals = await getMeals();
       const symptoms = await getSymptoms();
 
-      setStats({ meals: meals.length, symptoms: symptoms.length });
+      setStats({ meals: meals.length, symptoms: symptoms.length, symptomFreeStreak: getSymptomFreeStreak(symptoms) });
       setRecentMeals(meals.slice(-3).reverse());
       setRecentSymptoms(symptoms.slice(-3).reverse());
 
@@ -43,6 +43,7 @@ export default function HomeScreen({ navigation }) {
         currentStreak: streakInfo.currentStreak,
         bestStreak: streakInfo.bestStreak,
         loggedToday: streakInfo.loggedToday,
+        equippedAccessory: user?.equippedAccessory,
       }));
 
     } catch (error) {
@@ -98,7 +99,7 @@ export default function HomeScreen({ navigation }) {
         >
           <View className="items-center gap-2">
             <Utensils color="#ffffff" size={24} />
-            <Text className="text-white font-semibold">Log Meal</Text>
+            <Text className="text-white font-semibold text-xs text-center">Log Meal</Text>
           </View>
         </Button>
         <Button
@@ -108,18 +109,9 @@ export default function HomeScreen({ navigation }) {
         >
           <View className="items-center gap-2">
             <Activity color="#ffffff" size={24} />
-            <Text className="text-white font-semibold">Log Symptom</Text>
+            <Text className="text-white font-semibold text-xs text-center">Log Symptom</Text>
           </View>
         </Button>
-        <Pressable
-          className="flex-1 h-auto py-5 rounded-2xl bg-primary/10 items-center justify-center"
-          onPress={() => navigation.navigate("FoodScan")}
-        >
-          <View className="items-center gap-2">
-            <Camera size={24} color="#3aa27f" />
-            <Text className="text-primary font-semibold">Scan</Text>
-          </View>
-        </Pressable>
       </View>
 
       {/* Stats */}
@@ -133,6 +125,11 @@ export default function HomeScreen({ navigation }) {
           <Text className="text-xs text-muted-foreground mt-1">Symptoms</Text>
         </Card>
       </View>
+
+      <Card className="p-4 items-center">
+        <Text className="text-3xl font-bold text-primary">{stats.symptomFreeStreak}</Text>
+        <Text className="text-xs text-muted-foreground mt-1">Days Symptom-Free</Text>
+      </Card>
 
       {/* Recent Activity */}
       {hasData && (recentMeals.length > 0 || recentSymptoms.length > 0) && (

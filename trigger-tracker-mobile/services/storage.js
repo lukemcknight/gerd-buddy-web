@@ -347,6 +347,27 @@ export const getStreakInfo = (meals, user) => {
   };
 };
 
+export const getSymptomFreeStreak = (symptoms) => {
+  if (symptoms.length === 0) return 0;
+
+  const symptomDays = new Set();
+  for (const symptom of symptoms) {
+    symptomDays.add(dateKey(new Date(symptom.timestamp)));
+  }
+
+  const cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  let streak = 0;
+
+  while (!symptomDays.has(dateKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+    if (streak > 365) break;
+  }
+
+  return streak;
+};
+
 export const updateBestStreak = async (bestStreak) => {
   const user = await getUser();
   if (!user) return;
