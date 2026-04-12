@@ -112,7 +112,7 @@ export const getSpeechMessage = (mood) => {
 };
 
 // ── Full buddy state (call from HomeScreen) ───────────────────────────
-export const computeBuddyState = ({ totalMeals, currentStreak, bestStreak, loggedToday }) => {
+export const computeBuddyState = ({ totalMeals, currentStreak, bestStreak, loggedToday, equippedAccessory }) => {
   const daysSinceLastLog = loggedToday ? 0 : currentStreak === 0 ? 2 : 1;
   const mood = getMood({ loggedToday, currentStreak, daysSinceLastLog });
   const levelProgress = getLevelProgress(totalMeals);
@@ -130,5 +130,6 @@ export const computeBuddyState = ({ totalMeals, currentStreak, bestStreak, logge
     currentStreak,
     bestStreak,
     loggedToday,
+    equippedAccessory,
   };
 };

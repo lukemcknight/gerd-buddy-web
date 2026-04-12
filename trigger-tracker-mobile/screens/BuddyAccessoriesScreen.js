@@ -4,7 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Lock, Check, ChevronLeft } from "lucide-react-native";
 import Screen from "../components/Screen";
 import Card from "../components/Card";
-import { getMeals, getUser, getStreakInfo } from "../services/storage";
+import { getMeals, getUser, getStreakInfo, saveUser } from "../services/storage";
 import {
   ALL_ACCESSORIES,
   getEarnedAccessories,
@@ -29,20 +29,47 @@ const iconStar = require("../assets/icons/icon_star.png");
 export default function BuddyAccessoriesScreen({ navigation }) {
   const [totalMeals, setTotalMeals] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const [unlockAll, setUnlockAll] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const [selectedAccessory, setSelectedAccessory] = useState(null);
+  const [user, setUser] = useState(null);
 
   useFocusEffect(
     useCallback(() => {
       const load = async () => {
-        const [meals, user] = await Promise.all([getMeals(), getUser()]);
+        const [meals, u] = await Promise.all([getMeals(), getUser()]);
+        setUser(u);
         setTotalMeals(meals.length);
-        const streakInfo = getStreakInfo(meals, user);
+        setSelectedAccessory(u?.equippedAccessory || null);
+        const streakInfo = getStreakInfo(meals, u);
         setBestStreak(streakInfo.bestStreak);
       };
       load();
     }, [])
   );
 
-  const earned = getEarnedAccessories({ totalMeals, bestStreak });
+  const handleSelectAccessory = async (accessoryId) => {
+    const newSelection = accessoryId === selectedAccessory ? null : accessoryId;
+    setSelectedAccessory(newSelection);
+    if (user) {
+      const updated = { ...user, equippedAccessory: newSelection };
+      await saveUser(updated);
+      setUser(updated);
+    }
+  };
+
+  const handleTurtleTap = () => {
+    const next = tapCount + 1;
+    setTapCount(next);
+    if (next >= 5) {
+      setUnlockAll((prev) => !prev);
+      setTapCount(0);
+    }
+  };
+
+  const earned = unlockAll
+    ? ALL_ACCESSORIES
+    : getEarnedAccessories({ totalMeals, bestStreak });
   const earnedIds = new Set(earned.map((a) => a.id));
   const levelProgress = getLevelProgress(totalMeals);
 
@@ -61,11 +88,13 @@ export default function BuddyAccessoriesScreen({ navigation }) {
 
       {/* Buddy overview */}
       <Card className="p-5 items-center gap-3">
-        <Image
-          source={turtleHappy}
-          style={{ width: 160, height: 160 }}
-          resizeMode="contain"
-        />
+        <Pressable onPress={handleTurtleTap}>
+          <Image
+            source={turtleHappy}
+            style={{ width: 160, height: 160 }}
+            resizeMode="contain"
+          />
+        </Pressable>
         <View className="items-center gap-1">
           <View className="flex-row items-center gap-1.5">
             <Image source={iconStar} style={{ width: 36, height: 36 }} resizeMode="contain" />
@@ -98,11 +127,12 @@ export default function BuddyAccessoriesScreen({ navigation }) {
         <View className="gap-2">
           {ALL_ACCESSORIES.map((accessory) => {
             const isEarned = earnedIds.has(accessory.id);
-            return (
+            const isEquipped = selectedAccessory === accessory.id;
+            const card = (
               <Card
                 key={accessory.id}
                 className={`p-4 flex-row items-center gap-3 ${
-                  isEarned ? "border-primary/30" : "opacity-60"
+                  isEquipped ? "border-primary" : isEarned ? "border-primary/30" : "opacity-60"
                 }`}
               >
                 <View
@@ -127,18 +157,28 @@ export default function BuddyAccessoriesScreen({ navigation }) {
                     {accessory.label}
                   </Text>
                   <Text className="text-xs text-muted-foreground">
-                    {isEarned ? "Earned!" : accessory.requirement}
+                    {isEquipped ? "Equipped" : isEarned ? "Tap to equip" : accessory.requirement}
                   </Text>
                 </View>
-                {isEarned ? (
+                {isEquipped ? (
                   <View className="w-6 h-6 rounded-full bg-primary items-center justify-center">
                     <Check size={14} color="#ffffff" />
                   </View>
+                ) : isEarned ? (
+                  <View className="w-6 h-6 rounded-full bg-muted/50 items-center justify-center" />
                 ) : (
                   <Lock size={16} color="#9ca3af" />
                 )}
               </Card>
             );
+            if (isEarned) {
+              return (
+                <Pressable key={accessory.id} onPress={() => handleSelectAccessory(accessory.id)}>
+                  {card}
+                </Pressable>
+              );
+            }
+            return card;
           })}
         </View>
       </View>

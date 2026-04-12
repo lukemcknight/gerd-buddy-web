@@ -22,16 +22,40 @@ const turtleImages = {
   sad: require("../assets/mascot/turtle_sad.png"),
 };
 
-// Accessory images
-const accessoryImages = {
-  party_hat: require("../assets/accessories/party_hat.png"),
-  sunglasses: require("../assets/accessories/sunglasses.png"),
-  scarf: require("../assets/accessories/scarf.png"),
-  cape: require("../assets/accessories/cape.png"),
-  backpack: require("../assets/accessories/backpack.png"),
-  star_badge: require("../assets/accessories/star_badge.png"),
-  crown: require("../assets/accessories/crown.png"),
-  golden_glow: require("../assets/accessories/golden_glow.png"),
+// Accessory images and per-accessory layout (relative to 160x160 turtle container)
+const accessoryConfig = {
+  party_hat: {
+    source: require("../assets/accessories/party_hat.png"),
+    width: 84, height: 84, top: -13, left: 63, rotate: "-10deg"
+  },
+  sunglasses: {
+    source: require("../assets/accessories/sunglasses.png"),
+    width: 64, height: 32, top: 38, left: 72,
+  },
+  scarf: {
+    source: require("../assets/accessories/scarf.png"),
+    width: 56, height: 44, top: 62, left: 64,
+  },
+  cape: {
+    source: require("../assets/accessories/cape.png"),
+    width: 72, height: 72, top: 30, left: 4,
+  },
+  backpack: {
+    source: require("../assets/accessories/backpack.png"),
+    width: 80, height: 80, top: 16, left: 10, rotate: "23deg",
+  },
+  star_badge: {
+    source: require("../assets/accessories/star_badge.png"),
+    width: 40, height: 44, top: 60, left: 90,
+  },
+  crown: {
+    source: require("../assets/accessories/crown.png"),
+    width: 56, height: 42, top: -14, left: 72,
+  },
+  golden_glow: {
+    source: require("../assets/accessories/golden_glow.png"),
+    width: 180, height: 180, top: -10, left: -10,
+  },
 };
 
 // Scene background
@@ -44,6 +68,7 @@ export default function TurtleBuddy({ buddyState, onPress }) {
     earnedAccessories,
     message,
     currentStreak,
+    equippedAccessory,
   } = buddyState;
 
   // Sway animation (left-right like PillPets)
@@ -80,10 +105,12 @@ export default function TurtleBuddy({ buddyState, onPress }) {
   // Mood-based turtle image
   const turtleSource = turtleImages[mood.id] || turtleImages.content;
 
-  // Most recent accessory to display on the turtle
-  const latestAccessory = earnedAccessories.length > 0
-    ? earnedAccessories[earnedAccessories.length - 1]
-    : null;
+  // Show equipped accessory if set, otherwise most recently earned
+  const accConfig = equippedAccessory && accessoryConfig[equippedAccessory]
+    ? accessoryConfig[equippedAccessory]
+    : earnedAccessories.length > 0
+      ? accessoryConfig[earnedAccessories[earnedAccessories.length - 1].id]
+      : null;
 
   return (
     <View className="gap-3">
@@ -155,15 +182,16 @@ export default function TurtleBuddy({ buddyState, onPress }) {
                     style={{ width: 160, height: 160 }}
                     resizeMode="contain"
                   />
-                  {latestAccessory && accessoryImages[latestAccessory.id] && (
+                  {accConfig && (
                     <Image
-                      source={accessoryImages[latestAccessory.id]}
+                      source={accConfig.source}
                       style={{
-                        width: 48,
-                        height: 48,
+                        width: accConfig.width,
+                        height: accConfig.height,
                         position: "absolute",
-                        top: -8,
-                        right: -4,
+                        top: accConfig.top,
+                        left: accConfig.left,
+                        ...(accConfig.rotate ? { transform: [{ rotate: accConfig.rotate }] } : {}),
                       }}
                       resizeMode="contain"
                     />
