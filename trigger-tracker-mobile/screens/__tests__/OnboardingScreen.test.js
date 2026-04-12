@@ -18,25 +18,29 @@ describe('OnboardingScreen', () => {
   });
 
   describe('Total steps', () => {
-    it('defines totalSteps = 12', () => {
-      expect(source).toContain('totalSteps = 12');
+    it('defines TOTAL_STEPS = 16', () => {
+      expect(source).toContain('TOTAL_STEPS = 16');
     });
   });
 
   describe('Step ordering', () => {
     const steps = [
       { step: 0, label: 'Welcome' },
-      { step: 1, label: 'Condition Selection' },
-      { step: 2, label: 'Symptom Severity' },
+      { step: 1, label: 'Conditions' },
+      { step: 2, label: 'Severity' },
       { step: 3, label: 'Symptom Timing' },
-      { step: 4, label: 'Frequency' },
-      { step: 5, label: 'Top Symptoms' },
-      { step: 6, label: 'After Eating' },
-      { step: 7, label: 'Lying Down' },
-      { step: 8, label: 'Fear Foods' },
-      { step: 9, label: 'Meal Times + Meds' },
-      { step: 10, label: 'Rate Us' },
-      { step: 11, label: 'Reminders' },
+      { step: 4, label: 'Health Stats Interstitial' },
+      { step: 5, label: 'Symptom Frequency' },
+      { step: 6, label: 'Top Symptoms' },
+      { step: 7, label: 'After Eating' },
+      { step: 8, label: 'Value Prop Interstitial' },
+      { step: 9, label: 'Lying Down' },
+      { step: 10, label: 'Fear Foods' },
+      { step: 11, label: 'Meal Times + Meds' },
+      { step: 12, label: 'Rate Us' },
+      { step: 13, label: 'Reminders' },
+      { step: 14, label: 'Social Proof Interstitial' },
+      { step: 15, label: 'Loading' },
     ];
 
     steps.forEach(({ step, label }) => {
@@ -85,21 +89,17 @@ describe('OnboardingScreen', () => {
   });
 
   describe('Step progression', () => {
-    it('Step 9 advances to step 10 (setStep(10) after mealTimes)', () => {
-      expect(source).toContain('setStep(10)');
-    });
-
-    it('Step 10 advances to step 11 (setStep(11))', () => {
-      expect(source).toContain('setStep(11)');
+    it('Step 12 (Rate Us) advances to step 13 (setStep(13))', () => {
+      expect(source).toContain('setStep(13)');
     });
   });
 
   describe('Reminders step', () => {
-    it('step 11 contains "Enable reminders?"', () => {
+    it('step 13 contains "Enable reminders?"', () => {
       expect(source).toContain('Enable reminders?');
     });
 
-    it('step 11 calls handleComplete', () => {
+    it('step 13 calls handleComplete', () => {
       expect(source).toContain('handleComplete');
     });
   });
