@@ -129,6 +129,18 @@ describe('canUserScan', () => {
     );
   });
 
+  test('clears stale local flag if RevenueCat says inactive but local is true', async () => {
+    mockGetUser.mockResolvedValue({ id: 'u1', subscriptionActive: true, freeScanCount: 1 });
+    mockGetSubscriptionStatus.mockResolvedValue({ active: false });
+    const result = await canUserScan();
+    expect(result.allowed).toBe(true);
+    expect(result.reason).toBe('free_under_limit');
+    expect(result.entitlementState).toBe('free');
+    expect(mockSaveUser).toHaveBeenCalledWith(
+      expect.objectContaining({ subscriptionActive: false })
+    );
+  });
+
   test('returns flag_off_pro_only when feature flag is off', async () => {
     FEATURE_FLAGS.freemium_scanner_limit_v1 = false;
     mockGetUser.mockResolvedValue({ id: 'u1', freeScanCount: 0 });

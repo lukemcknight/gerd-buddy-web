@@ -61,9 +61,14 @@ export const canUserScan = async (): Promise<ScanGateResult> => {
     const status = await getSubscriptionStatus(user.id);
     isPro = status.active;
 
-    // Persist if RevenueCat says active but local doesn't agree
+    // Sync local flag with RevenueCat (authoritative). Without the
+    // inactive-sync, an expired subscription leaves the local flag
+    // permanently true, masking the user from re-prompts on the offline
+    // fallback path below.
     if (isPro && !user.subscriptionActive) {
       await saveUser({ ...user, subscriptionActive: true });
+    } else if (!isPro && user.subscriptionActive) {
+      await saveUser({ ...user, subscriptionActive: false });
     }
   } catch {
     // Offline / SDK error — fall back to local flag
