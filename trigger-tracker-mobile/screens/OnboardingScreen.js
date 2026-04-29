@@ -12,12 +12,15 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import * as StoreReview from "expo-store-review";
 import { usePostHog } from "posthog-react-native";
+import Purchases from "react-native-purchases";
 import { createUser } from "../services/storage";
 import { configureRevenueCat } from "../services/revenuecat";
 import { registerForPushNotifications, syncReminderNotifications } from "../services/notifications";
 import { showToast } from "../utils/feedback";
 import { generatePlan, getFearFoodOptions, MEAL_TIME_OPTIONS, MEDS_OPTIONS } from "../services/onboardingPlan";
 import { EVENTS } from "../services/analytics";
+import SignUpScreen from "./SignUpScreen";
+import { useAuth } from "../contexts/AuthContext";
 
 // -- Theme --
 
@@ -478,69 +481,6 @@ function ValuePropStep() {
   );
 }
 
-// -- Social Proof Step (step 14) --
-
-function SocialProofStep() {
-  const testimonials = [
-    {
-      name: "Rachel M.",
-      text: "I finally figured out that tomatoes were my #1 trigger. Haven't had heartburn in weeks.",
-      stars: 5,
-    },
-    {
-      name: "David K.",
-      text: "The meal scanning is a game changer. I used to just avoid everything. Now I know exactly what's safe for me.",
-      stars: 5,
-    },
-    {
-      name: "Ana S.",
-      text: "My gastritis flare-ups went from weekly to almost never. This app helped me understand my gut.",
-      stars: 5,
-    },
-  ];
-
-  return (
-    <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-      <View style={{ gap: 20 }}>
-        <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34 }}>
-          Join thousands{"\n"}finding relief
-        </Text>
-
-        <View style={{
-          backgroundColor: COLORS.card, borderRadius: 14, padding: 16,
-          flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12,
-          borderWidth: 1, borderColor: COLORS.border,
-        }}>
-          <View style={{ flexDirection: "row", gap: 3 }}>
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Star key={i} size={20} color={COLORS.gold} fill={COLORS.gold} />
-            ))}
-          </View>
-          <Text style={{ fontSize: 24, fontWeight: "900", color: COLORS.text }}>4.8</Text>
-          <Text style={{ fontSize: 14, color: COLORS.textSecondary }}>on the App Store</Text>
-        </View>
-
-        {testimonials.map((t) => (
-          <View key={t.name} style={{
-            backgroundColor: COLORS.card, borderRadius: 16, padding: 20, gap: 10,
-            borderWidth: 1, borderColor: COLORS.border,
-          }}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              <Text style={{ fontSize: 16, fontWeight: "700", color: COLORS.text }}>{t.name}</Text>
-              <View style={{ flexDirection: "row", gap: 2 }}>
-                {Array.from({ length: t.stars }).map((_, i) => (
-                  <Star key={i} size={14} color={COLORS.gold} fill={COLORS.gold} />
-                ))}
-              </View>
-            </View>
-            <Text style={{ fontSize: 15, color: COLORS.text, lineHeight: 22, opacity: 0.8 }}>{t.text}</Text>
-          </View>
-        ))}
-      </View>
-    </ScrollView>
-  );
-}
-
 // -- Loading Step (step 15) --
 
 function LoadingStep({ onComplete }) {
@@ -628,6 +568,7 @@ export default function OnboardingScreen({ navigation, route }) {
   const [isCompleting, setIsCompleting] = useState(false);
 
   const posthog = usePostHog();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     posthog?.screen("Onboarding");
@@ -642,6 +583,22 @@ export default function OnboardingScreen({ navigation, route }) {
     }
     if (step > 0) posthog?.capture("onboarding_step_completed", { step: step - 1 });
   }, [step]);
+
+  useEffect(() => {
+    if (step !== 14) return;
+    if (isAuthenticated && user?.email) {
+      Purchases.setEmail(user.email).catch((err) => {
+        console.warn("Failed to sync RevenueCat email:", err);
+      });
+      setStep(15);
+    }
+  }, [step, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (step !== 14) return;
+    if (isAuthenticated) return; // auto-skip handles this case; don't double-count
+    posthog?.capture(EVENTS.ONBOARDING_SIGNUP_SHOWN, { step_index: 14 });
+  }, [step, isAuthenticated]);
 
   // -- Toggle helpers --
 
@@ -789,7 +746,29 @@ export default function OnboardingScreen({ navigation, route }) {
     );
   }
 
-  // -- Steps 1-14 --
+  // Step 14: SignUp (skippable)
+  if (step === 14) {
+    return (
+      <SignUpScreen
+        navigation={navigation}
+        onSuccess={async ({ email }) => {
+          posthog?.capture(EVENTS.ONBOARDING_SIGNUP_COMPLETED, { step_index: 14 });
+          try {
+            await Purchases.setEmail(email);
+          } catch (err) {
+            console.warn("Failed to set RevenueCat email:", err);
+          }
+          setStep(15);
+        }}
+        onSkip={() => {
+          posthog?.capture(EVENTS.ONBOARDING_SIGNUP_SKIPPED, { step_index: 14 });
+          setStep(15);
+        }}
+      />
+    );
+  }
+
+  // -- Steps 1-13 --
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.bg }}>
       <View style={{ flex: 1, paddingHorizontal: 24 }}>
@@ -1215,15 +1194,6 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Step 14: Social Proof Interstitial */}
-        {step === 14 && (
-          <View style={{ flex: 1 }}>
-            <SocialProofStep />
-            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
-              <ContinueButton onPress={goNext} disabled={false} />
-            </View>
-          </View>
-        )}
       </View>
     </SafeAreaView>
   );
