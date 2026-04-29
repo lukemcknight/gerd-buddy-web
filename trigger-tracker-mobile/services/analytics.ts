@@ -61,6 +61,9 @@ export const EVENTS = {
   // Paywall
   PAYWALL_TRIGGERED: "paywall_triggered",
   PAYWALL_VIEWED: "paywall_viewed",
+  SUBSCRIPTION_ATTEMPT: "subscription_attempt",
+  SUBSCRIPTION_CANCELLED: "subscription_cancelled",
+  SUBSCRIPTION_FAILED: "subscription_failed",
   TRIAL_STARTED: "trial_started",
   PURCHASE_COMPLETED: "purchase_completed",
   PURCHASE_RESTORED: "purchase_restored",

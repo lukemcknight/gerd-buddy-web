@@ -39,11 +39,15 @@ const isExpoGo = Constants?.appOwnership === "expo";
 const bypassFlag = process.env.EXPO_PUBLIC_BYPASS_PAYWALL;
 const shouldBypassPaywall = isExpoGo || (__DEV__ && bypassFlag !== "false");
 
+const APP_STORE_RATING = 4.3;
+
 const benefits = [
-  "Scan any meal",
-  "Full trigger analysis with confidence scores",
-  "Detailed analytics & pattern reports",
-  "Share your pattern reports",
+  "Personal trigger confidence scores",
+  "14-day symptom + food heatmap",
+  "Doctor-ready PDF report for GI appointments",
+  "Scan any food or menu in 2 seconds",
+  "Safe-foods shortlist that learns as you log",
+  "Private by default — your data stays on your device",
 ];
 
 const cadenceLabel = (pkg: PurchasesPackage) => {
@@ -82,7 +86,7 @@ const hasFreeTrial = (pkg: PurchasesPackage | null) => {
 
 const trialCtaText = (pkg: PurchasesPackage | null) => {
   const intro = getIntroductoryPrice(pkg);
-  if (!intro) return "Try for 3 Days Free";
+  if (!intro) return "Try for 7 Days Free";
 
   const parsePeriod = () => {
     const iso = intro.period || "";
@@ -108,7 +112,7 @@ const trialCtaText = (pkg: PurchasesPackage | null) => {
   };
 
   const { units, unit } = parsePeriod();
-  if (!units || !unit) return "Try for 3 Days Free";
+  if (!units || !unit) return "Try for 7 Days Free";
 
   const singularUnit = unit.replace(/s$/, "");
   const capitalUnit = singularUnit.charAt(0).toUpperCase() + singularUnit.slice(1);
@@ -268,7 +272,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
     }
     if (!selectedPackage || isPurchasing) return;
     setIsPurchasing(true);
-    posthog?.capture("subscription_attempt", {
+    posthog?.capture(EVENTS.SUBSCRIPTION_ATTEMPT, {
       package_type: selectedPackage.packageType,
       price: selectedPackage.product?.priceString,
     });
@@ -312,11 +316,11 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
         err?.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR ||
         (err as any)?.userCancelled;
       if (cancelled) {
-        posthog?.capture("subscription_cancelled");
+        posthog?.capture(EVENTS.SUBSCRIPTION_CANCELLED);
         return;
       }
       const message = err?.message || "Purchase failed. Please try again.";
-      posthog?.capture("subscription_failed", { error: message });
+      posthog?.capture(EVENTS.SUBSCRIPTION_FAILED, { error: message });
       setStatusMessage(message);
       Alert.alert("Purchase issue", message);
     } finally {
@@ -360,7 +364,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
   };
 
   const primaryCtaText = isScannerLimit
-    ? "Start 3-Day Free Trial"
+    ? "Start 7-Day Free Trial"
     : hasFreeTrial(selectedPackage)
     ? trialCtaText(selectedPackage)
     : "Unlock Pro";
@@ -489,8 +493,8 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
           colors={["#3aa27f", "#2d8a6b"]}
           style={{
             width: screenWidth,
-            paddingTop: 60,
-            paddingBottom: 40,
+            paddingTop: 56,
+            paddingBottom: 24,
             alignItems: "center",
             borderBottomLeftRadius: 24,
             borderBottomRightRadius: 24,
@@ -524,8 +528,8 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
           {/* Scanner bracket corners with mascot */}
           <View
             style={{
-              width: 180,
-              height: 180,
+              width: 124,
+              height: 124,
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -536,12 +540,12 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
                 position: "absolute",
                 top: 0,
                 left: 0,
-                width: 40,
-                height: 40,
+                width: 28,
+                height: 28,
                 borderTopWidth: 3,
                 borderLeftWidth: 3,
                 borderColor: "#ffffff",
-                borderTopLeftRadius: 12,
+                borderTopLeftRadius: 10,
               }}
             />
             <View
@@ -549,12 +553,12 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
                 position: "absolute",
                 top: 0,
                 right: 0,
-                width: 40,
-                height: 40,
+                width: 28,
+                height: 28,
                 borderTopWidth: 3,
                 borderRightWidth: 3,
                 borderColor: "#ffffff",
-                borderTopRightRadius: 12,
+                borderTopRightRadius: 10,
               }}
             />
             <View
@@ -562,12 +566,12 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
                 position: "absolute",
                 bottom: 0,
                 left: 0,
-                width: 40,
-                height: 40,
+                width: 28,
+                height: 28,
                 borderBottomWidth: 3,
                 borderLeftWidth: 3,
                 borderColor: "#ffffff",
-                borderBottomLeftRadius: 12,
+                borderBottomLeftRadius: 10,
               }}
             />
             <View
@@ -575,48 +579,59 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
                 position: "absolute",
                 bottom: 0,
                 right: 0,
-                width: 40,
-                height: 40,
+                width: 28,
+                height: 28,
                 borderBottomWidth: 3,
                 borderRightWidth: 3,
                 borderColor: "#ffffff",
-                borderBottomRightRadius: 12,
+                borderBottomRightRadius: 10,
               }}
             />
 
             <Image
               source={turtle}
-              style={{ width: 120, height: 120 }}
+              style={{ width: 84, height: 84 }}
               resizeMode="contain"
             />
           </View>
         </LinearGradient>
 
         {/* Headline */}
-        <View style={{ paddingHorizontal: 24, paddingTop: 32, paddingBottom: 8 }}>
+        <View style={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 4 }}>
           {!isScannerLimit ? (
             <>
               <Text
                 className="text-2xl font-extrabold"
                 style={{
                   color: "#ffffff",
-                  fontSize: 32,
+                  fontSize: 28,
                   fontWeight: "800",
                   textAlign: "center",
-                  lineHeight: 38,
+                  lineHeight: 34,
                 }}
               >
-                Find your top triggers in 14 days.
+                Stop guessing what triggers your reflux.
               </Text>
               <Text
                 style={{
                   color: "#999999",
-                  fontSize: 15,
+                  fontSize: 14,
                   textAlign: "center",
-                  marginTop: 8,
+                  marginTop: 6,
                 }}
               >
-                Unlimited scanning, trigger analysis, and detailed reports
+                Try free for 7 days. Cancel anytime.
+              </Text>
+              <Text
+                style={{
+                  color: "#c9c9c9",
+                  fontSize: 13,
+                  textAlign: "center",
+                  marginTop: 10,
+                  letterSpacing: 0.2,
+                }}
+              >
+                ★★★★☆  {APP_STORE_RATING.toFixed(1)} on the App Store
               </Text>
             </>
           ) : (
@@ -625,20 +640,20 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
                 className="text-2xl font-extrabold"
                 style={{
                   color: "#ffffff",
-                  fontSize: 32,
+                  fontSize: 28,
                   fontWeight: "800",
                   textAlign: "center",
-                  lineHeight: 38,
+                  lineHeight: 34,
                 }}
               >
-                Try Pro free for 3 days
+                Try Pro free for 7 days
               </Text>
               <Text
                 style={{
                   color: "#999999",
-                  fontSize: 15,
+                  fontSize: 14,
                   textAlign: "center",
-                  marginTop: 8,
+                  marginTop: 6,
                 }}
               >
                 You've used your 3 free scans
@@ -648,7 +663,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
         </View>
 
         {/* Benefits */}
-        <View style={{ paddingHorizontal: 24, paddingTop: 16, gap: 14 }}>
+        <View style={{ paddingHorizontal: 24, paddingTop: 12, gap: 10 }}>
           {benefits.map((text) => (
             <View
               key={text}
@@ -656,43 +671,65 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
             >
               <View
                 style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: 13,
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
                   backgroundColor: "#3aa27f",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Check size={15} color="#ffffff" strokeWidth={3} />
+                <Check size={14} color="#ffffff" strokeWidth={3} />
               </View>
-              <Text style={{ color: "#ffffff", fontSize: 16, flex: 1 }}>{text}</Text>
+              <Text style={{ color: "#ffffff", fontSize: 15, flex: 1 }}>{text}</Text>
             </View>
           ))}
         </View>
 
-        {/* Free trial card */}
-        <View style={{ paddingHorizontal: 24, paddingTop: 28 }}>
-          <View
-            style={{
-              backgroundColor: "#2a2a2a",
-              borderRadius: 14,
-              paddingVertical: 16,
-              paddingHorizontal: 20,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#ffffff", fontSize: 18, fontWeight: "700" }}>
-              Get 3 Day Free Trial!
-            </Text>
-            <Text style={{ color: "#999999", fontSize: 13, marginTop: 4 }}>
-              Try Risk Free. Cancel Anytime.
-            </Text>
+        {/* Trial timeline — reframes the trial as safe/time-boxed */}
+        {hasFreeTrial(selectedPackage) ? (
+          <View style={{ paddingHorizontal: 24, paddingTop: 22, gap: 12 }}>
+            {[
+              { when: "Today", body: "Unlock everything. $0 charged." },
+              { when: "Day 5", body: "We'll remind you your trial is ending." },
+              {
+                when: "Day 7",
+                body: "Trial ends. Cancel in Settings before then and pay nothing.",
+              },
+            ].map((step) => (
+              <View
+                key={step.when}
+                style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}
+              >
+                <View
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    borderWidth: 1.5,
+                    borderColor: "#3aa27f",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: 1,
+                  }}
+                >
+                  <Check size={13} color="#3aa27f" strokeWidth={3} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "700" }}>
+                    {step.when}
+                  </Text>
+                  <Text style={{ color: "#999999", fontSize: 13, marginTop: 1 }}>
+                    {step.body}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
-        </View>
+        ) : null}
 
         {/* Plan selection */}
-        <View style={{ paddingHorizontal: 24, paddingTop: 20, gap: 14 }}>
+        <View style={{ paddingHorizontal: 24, paddingTop: 18, gap: 12 }}>
           {isLoading ? (
             <View style={{ alignItems: "center", paddingVertical: 20, gap: 8 }}>
               <ActivityIndicator size="small" color="#3aa27f" />
@@ -785,6 +822,18 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
         style={{ backgroundColor: "#000000" }}
       >
         <View style={{ paddingHorizontal: 24, paddingTop: 12, paddingBottom: 8 }}>
+          {hasFreeTrial(selectedPackage) ? (
+            <Text
+              style={{
+                color: "#9ca3af",
+                fontSize: 12,
+                textAlign: "center",
+                marginBottom: 10,
+              }}
+            >
+              $0 today · We'll remind you 2 days before the trial ends
+            </Text>
+          ) : null}
           <Pressable
             onPress={handlePurchase}
             disabled={!selectedPackage || isPurchasing || isRestoring || isLoading}

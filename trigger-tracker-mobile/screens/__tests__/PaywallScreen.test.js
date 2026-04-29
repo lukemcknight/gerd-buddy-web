@@ -21,46 +21,34 @@ describe('PaywallScreen - Pro messaging', () => {
   });
 
   describe('Headline', () => {
-    test('shows outcomes-based headline', () => {
-      expect(source).toContain('Find your top triggers in 14 days.');
+    test('shows pain-hook headline', () => {
+      expect(source).toContain('Stop guessing what triggers your reflux.');
     });
 
     test('headline is in the main heading element', () => {
       const headlineMatch = source.match(/text-2xl font-extrabold[^>]*>[^<]*/);
       expect(headlineMatch).toBeTruthy();
-      expect(headlineMatch[0]).toContain('Find your top triggers in 14 days.');
+      expect(headlineMatch[0]).toContain('Stop guessing what triggers your reflux.');
     });
   });
 
   describe('Subtitle', () => {
-    test('mentions trigger analysis', () => {
-      expect(source).toContain('trigger analysis');
-    });
-
-    test('mentions detailed reports', () => {
-      expect(source).toContain('detailed reports');
-    });
-
-    test('mentions scanning', () => {
-      expect(source).toContain('scanning');
+    test('mentions trial framing', () => {
+      expect(source).toContain('Try free for 7 days');
     });
   });
 
   describe('Benefits list', () => {
-    test('includes meal scanning benefit', () => {
-      expect(source).toContain('Scan any meal');
+    test('includes scanner benefit', () => {
+      expect(source).toContain('Scan any food or menu in 2 seconds');
     });
 
-    test('includes trigger analysis benefit', () => {
-      expect(source).toContain('Full trigger analysis with confidence scores');
+    test('includes trigger confidence benefit', () => {
+      expect(source).toContain('Personal trigger confidence scores');
     });
 
-    test('includes detailed analytics benefit', () => {
-      expect(source).toContain('Detailed analytics');
-    });
-
-    test('includes sharing benefit', () => {
-      expect(source).toContain('Share your pattern reports');
+    test('includes doctor-ready report benefit', () => {
+      expect(source).toContain('Doctor-ready PDF report for GI appointments');
     });
   });
 
@@ -75,8 +63,8 @@ describe('PaywallScreen - Pro messaging', () => {
   });
 
   describe('Scanner limit contextual messaging', () => {
-    test('has scanner_limit headline "Try Pro free for 3 days"', () => {
-      expect(source).toContain('Try Pro free for 3 days');
+    test('has scanner_limit headline "Try Pro free for 7 days"', () => {
+      expect(source).toContain('Try Pro free for 7 days');
     });
 
     test('has scanner_limit subtext about free scans', () => {
@@ -88,8 +76,8 @@ describe('PaywallScreen - Pro messaging', () => {
       expect(source).toContain('isScannerLimit');
     });
 
-    test('shows "Start 3-Day Free Trial" CTA for scanner limit', () => {
-      expect(source).toContain('Start 3-Day Free Trial');
+    test('shows "Start 7-Day Free Trial" CTA for scanner limit', () => {
+      expect(source).toContain('Start 7-Day Free Trial');
     });
   });
 
