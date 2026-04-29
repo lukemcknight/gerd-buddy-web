@@ -18,8 +18,8 @@ describe('OnboardingScreen', () => {
   });
 
   describe('Total steps', () => {
-    it('defines TOTAL_STEPS = 16', () => {
-      expect(source).toContain('TOTAL_STEPS = 16');
+    it('defines TOTAL_STEPS = 15', () => {
+      expect(source).toContain('TOTAL_STEPS = 15');
     });
   });
 
@@ -39,8 +39,7 @@ describe('OnboardingScreen', () => {
       { step: 11, label: 'Meal Times + Meds' },
       { step: 12, label: 'Rate Us' },
       { step: 13, label: 'Reminders' },
-      { step: 14, label: 'SignUp (skippable)' },
-      { step: 15, label: 'Loading' },
+      { step: 14, label: 'Loading' },
     ];
 
     steps.forEach(({ step, label }) => {
@@ -104,27 +103,17 @@ describe('OnboardingScreen', () => {
     });
   });
 
-  describe('SignUp step', () => {
-    it('renders SignUpScreen at step 14', () => {
-      expect(source).toContain('step === 14');
-      expect(source).toContain('<SignUpScreen');
+  describe('SignUp step removed', () => {
+    it('does not import SignUpScreen', () => {
+      expect(source).not.toContain('import SignUpScreen');
     });
 
-    it('passes onSuccess that advances to step 15', () => {
-      expect(source).toContain('ONBOARDING_SIGNUP_COMPLETED');
-      expect(source).toContain('setStep(15)');
+    it('does not import useAuth', () => {
+      expect(source).not.toContain("from \"../contexts/AuthContext\"");
     });
 
-    it('passes onSkip that advances to step 15', () => {
-      expect(source).toContain('ONBOARDING_SIGNUP_SKIPPED');
-    });
-
-    it('fires ONBOARDING_SIGNUP_SHOWN', () => {
-      expect(source).toContain('ONBOARDING_SIGNUP_SHOWN');
-    });
-
-    it('auto-advances when already authenticated', () => {
-      expect(source).toContain('isAuthenticated && user?.email');
+    it('does not render SignUpScreen', () => {
+      expect(source).not.toContain('<SignUpScreen');
     });
   });
 });

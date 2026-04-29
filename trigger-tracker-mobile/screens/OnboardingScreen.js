@@ -12,15 +12,12 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import * as StoreReview from "expo-store-review";
 import { usePostHog } from "posthog-react-native";
-import Purchases from "react-native-purchases";
 import { createUser } from "../services/storage";
 import { configureRevenueCat } from "../services/revenuecat";
 import { registerForPushNotifications, syncReminderNotifications } from "../services/notifications";
 import { showToast } from "../utils/feedback";
 import { generatePlan, getFearFoodOptions, MEAL_TIME_OPTIONS, MEDS_OPTIONS } from "../services/onboardingPlan";
 import { EVENTS } from "../services/analytics";
-import SignUpScreen from "./SignUpScreen";
-import { useAuth } from "../contexts/AuthContext";
 
 // -- Theme --
 
@@ -47,7 +44,7 @@ const mascotContent = require("../assets/mascot/turtle_content.png");
 const mascotSad = require("../assets/mascot/turtle_sad.png");
 const mascotDefault = require("../assets/mascot/turtle_shell_standing.png");
 
-const TOTAL_STEPS = 16; // steps 0-15
+const TOTAL_STEPS = 15; // steps 0-14
 
 // -- Quiz data --
 
@@ -568,7 +565,6 @@ export default function OnboardingScreen({ navigation, route }) {
   const [isCompleting, setIsCompleting] = useState(false);
 
   const posthog = usePostHog();
-  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     posthog?.screen("Onboarding");
@@ -583,22 +579,6 @@ export default function OnboardingScreen({ navigation, route }) {
     }
     if (step > 0) posthog?.capture("onboarding_step_completed", { step: step - 1 });
   }, [step]);
-
-  useEffect(() => {
-    if (step !== 14) return;
-    if (isAuthenticated && user?.email) {
-      Purchases.setEmail(user.email).catch((err) => {
-        console.warn("Failed to sync RevenueCat email:", err);
-      });
-      setStep(15);
-    }
-  }, [step, isAuthenticated, user?.email]);
-
-  useEffect(() => {
-    if (step !== 14) return;
-    if (isAuthenticated) return; // auto-skip handles this case; don't double-count
-    posthog?.capture(EVENTS.ONBOARDING_SIGNUP_SHOWN, { step_index: 14 });
-  }, [step, isAuthenticated]);
 
   // -- Toggle helpers --
 
@@ -733,8 +713,8 @@ export default function OnboardingScreen({ navigation, route }) {
     );
   }
 
-  // -- Step 15: Loading --
-  if (step === 15) {
+  // -- Step 14: Loading --
+  if (step === 14) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.bg }}>
         <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 8 }}>
@@ -743,31 +723,6 @@ export default function OnboardingScreen({ navigation, route }) {
         </View>
         <LoadingStep onComplete={handleComplete} />
       </SafeAreaView>
-    );
-  }
-
-  // Step 14: SignUp (skippable)
-  if (step === 14) {
-    if (isAuthenticated) {
-      return null;
-    }
-    return (
-      <SignUpScreen
-        navigation={navigation}
-        onSuccess={async ({ email }) => {
-          posthog?.capture(EVENTS.ONBOARDING_SIGNUP_COMPLETED, { step_index: 14 });
-          try {
-            await Purchases.setEmail(email);
-          } catch (err) {
-            console.warn("Failed to set RevenueCat email:", err);
-          }
-          setStep(15);
-        }}
-        onSkip={() => {
-          posthog?.capture(EVENTS.ONBOARDING_SIGNUP_SKIPPED, { step_index: 14 });
-          setStep(15);
-        }}
-      />
     );
   }
 

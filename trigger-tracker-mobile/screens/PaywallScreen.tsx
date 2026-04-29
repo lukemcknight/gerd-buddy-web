@@ -705,7 +705,10 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
           <View style={{ paddingHorizontal: 24, paddingTop: 22, gap: 12 }}>
             {[
               { when: "Today", body: "Unlock everything. $0 charged." },
-              { when: "Day 5", body: "We'll remind you your trial is ending." },
+              {
+                when: "Day 5",
+                body: "Track triggers and build your safe-foods list.",
+              },
               {
                 when: "Day 7",
                 body: "Trial ends. Cancel in Settings before then and pay nothing.",
@@ -845,7 +848,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
                 marginBottom: 10,
               }}
             >
-              $0 today · We'll remind you 2 days before the trial ends
+              $0 today · Cancel anytime in Settings
             </Text>
           ) : null}
           <Pressable
