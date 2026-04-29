@@ -592,7 +592,7 @@ export default function OnboardingScreen({ navigation, route }) {
       });
       setStep(15);
     }
-  }, [step, isAuthenticated, user]);
+  }, [step, isAuthenticated, user?.email]);
 
   useEffect(() => {
     if (step !== 14) return;
@@ -748,6 +748,9 @@ export default function OnboardingScreen({ navigation, route }) {
 
   // Step 14: SignUp (skippable)
   if (step === 14) {
+    if (isAuthenticated) {
+      return null;
+    }
     return (
       <SignUpScreen
         navigation={navigation}

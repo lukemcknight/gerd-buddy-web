@@ -124,7 +124,7 @@ describe('OnboardingScreen', () => {
     });
 
     it('auto-advances when already authenticated', () => {
-      expect(source).toContain('isAuthenticated');
+      expect(source).toContain('isAuthenticated && user?.email');
     });
   });
 });
