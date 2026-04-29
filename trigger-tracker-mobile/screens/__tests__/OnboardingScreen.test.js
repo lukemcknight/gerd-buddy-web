@@ -39,7 +39,7 @@ describe('OnboardingScreen', () => {
       { step: 11, label: 'Meal Times + Meds' },
       { step: 12, label: 'Rate Us' },
       { step: 13, label: 'Reminders' },
-      { step: 14, label: 'Social Proof Interstitial' },
+      { step: 14, label: 'SignUp (skippable)' },
       { step: 15, label: 'Loading' },
     ];
 
@@ -101,6 +101,30 @@ describe('OnboardingScreen', () => {
 
     it('step 13 calls handleComplete', () => {
       expect(source).toContain('handleComplete');
+    });
+  });
+
+  describe('SignUp step', () => {
+    it('renders SignUpScreen at step 14', () => {
+      expect(source).toContain('step === 14');
+      expect(source).toContain('<SignUpScreen');
+    });
+
+    it('passes onSuccess that advances to step 15', () => {
+      expect(source).toContain('ONBOARDING_SIGNUP_COMPLETED');
+      expect(source).toContain('setStep(15)');
+    });
+
+    it('passes onSkip that advances to step 15', () => {
+      expect(source).toContain('ONBOARDING_SIGNUP_SKIPPED');
+    });
+
+    it('fires ONBOARDING_SIGNUP_SHOWN', () => {
+      expect(source).toContain('ONBOARDING_SIGNUP_SHOWN');
+    });
+
+    it('auto-advances when already authenticated', () => {
+      expect(source).toContain('isAuthenticated && user?.email');
     });
   });
 });
