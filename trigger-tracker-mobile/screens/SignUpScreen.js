@@ -15,7 +15,7 @@ import Input from "../components/TextField";
 import { useAuth } from "../contexts/AuthContext";
 import { restoreTransactions } from "../services/revenuecat";
 
-export default function SignUpScreen({ navigation, onSkip }) {
+export default function SignUpScreen({ navigation, onSkip, onSuccess }) {
   const { signUp, error, clearError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,24 +52,27 @@ export default function SignUpScreen({ navigation, onSkip }) {
 
     setLoading(true);
     try {
-      await signUp(email.trim().toLowerCase(), password);
+      const trimmedEmail = email.trim().toLowerCase();
+      await signUp(trimmedEmail, password);
 
-      // Check if user already has an active subscription (e.g., started trial before creating account)
+      if (onSuccess) {
+        onSuccess({ email: trimmedEmail });
+        return;
+      }
+
       setStatusMessage("Checking subscription status...");
       try {
         const result = await restoreTransactions();
         if (result.active) {
-          // User has active subscription - go directly to main app
           navigation.replace("Main");
           return;
         }
       } catch (error) {
         console.warn("Subscription restore failed:", error);
-        // Fall through to paywall - user can retry restore there
       }
       navigation.replace("Paywall");
     } catch (err) {
-      // Error is already set in context
+      // Error already set in context
     } finally {
       setLoading(false);
     }
@@ -78,8 +81,8 @@ export default function SignUpScreen({ navigation, onSkip }) {
   const handleSkip = () => {
     if (onSkip) {
       onSkip();
+      return;
     }
-    // Navigate to Paywall after skipping signup
     navigation.replace("Paywall");
   };
 
