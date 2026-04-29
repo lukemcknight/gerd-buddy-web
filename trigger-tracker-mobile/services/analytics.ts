@@ -49,6 +49,9 @@ export const EVENTS = {
   ONBOARDING_PLAN_GENERATED: "onboarding_plan_generated",
   ONBOARDING_DAY_COMPLETED: "onboarding_day_completed",
   ONBOARDING_DAY7_SUMMARY_VIEWED: "onboarding_day7_summary_viewed",
+  ONBOARDING_SIGNUP_SHOWN: "onboarding_signup_shown",
+  ONBOARDING_SIGNUP_COMPLETED: "onboarding_signup_completed",
+  ONBOARDING_SIGNUP_SKIPPED: "onboarding_signup_skipped",
 
   // Scanner
   SCANNER_ATTEMPTED: "scanner_attempted",
