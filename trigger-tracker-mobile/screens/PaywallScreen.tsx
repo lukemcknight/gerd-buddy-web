@@ -41,6 +41,10 @@ const shouldBypassPaywall = isExpoGo || (__DEV__ && bypassFlag !== "false");
 
 const APP_STORE_RATING = 4.3;
 
+// Hide the close button for the first N ms so users see the offer before
+// being able to dismiss. Mirrors industry-standard trial-paywall pattern.
+const CLOSE_BUTTON_DELAY_MS = 5000;
+
 const benefits = [
   "Personal trigger confidence scores",
   "14-day symptom + food heatmap",
@@ -165,6 +169,7 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [canClose, setCanClose] = useState(shouldBypassPaywall);
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -177,6 +182,12 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
     });
     recordPaywallShown().catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (canClose) return;
+    const timer = setTimeout(() => setCanClose(true), CLOSE_BUTTON_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [canClose]);
 
   const bestValueId = useMemo(
     () => packages.find(isBestValue)?.identifier ?? null,
@@ -500,30 +511,33 @@ export default function PaywallScreen({ navigation, route }: PaywallScreenProps)
             borderBottomRightRadius: 24,
           }}
         >
-          {/* Close button */}
-          <Pressable
-            onPress={() =>
-              navigation.canGoBack()
-                ? navigation.goBack()
-                : navigation.replace("Main")
-            }
-            style={{
-              position: "absolute",
-              top: 56,
-              right: 20,
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              backgroundColor: "rgba(0,0,0,0.2)",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 10,
-            }}
-            accessibilityLabel="Close"
-            accessibilityRole="button"
-          >
-            <X size={18} color="#ffffff" />
-          </Pressable>
+          {/* Close button — hidden for the first CLOSE_BUTTON_DELAY_MS so
+              users read the offer before dismissing. */}
+          {canClose && (
+            <Pressable
+              onPress={() =>
+                navigation.canGoBack()
+                  ? navigation.goBack()
+                  : navigation.replace("Main")
+              }
+              style={{
+                position: "absolute",
+                top: 56,
+                right: 20,
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "rgba(0,0,0,0.2)",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 10,
+              }}
+              accessibilityLabel="Close"
+              accessibilityRole="button"
+            >
+              <X size={18} color="#ffffff" />
+            </Pressable>
+          )}
 
           {/* Scanner bracket corners with mascot */}
           <View

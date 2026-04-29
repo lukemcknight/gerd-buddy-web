@@ -81,6 +81,24 @@ describe('PaywallScreen - Pro messaging', () => {
     });
   });
 
+  describe('Delayed close button', () => {
+    test('declares CLOSE_BUTTON_DELAY_MS constant', () => {
+      expect(source).toMatch(/const CLOSE_BUTTON_DELAY_MS\s*=\s*\d+/);
+    });
+
+    test('close button render is gated on canClose state', () => {
+      expect(source).toMatch(/\{canClose && \(\s*<Pressable/);
+    });
+
+    test('canClose initializes from shouldBypassPaywall (dev/expo skip the delay)', () => {
+      expect(source).toContain('useState(shouldBypassPaywall)');
+    });
+
+    test('schedules setCanClose via setTimeout with the delay constant', () => {
+      expect(source).toMatch(/setTimeout\(\(\) => setCanClose\(true\), CLOSE_BUTTON_DELAY_MS\)/);
+    });
+  });
+
   describe('Analytics', () => {
     test('tracks paywall_viewed event', () => {
       expect(source).toContain('EVENTS.PAYWALL_VIEWED');
