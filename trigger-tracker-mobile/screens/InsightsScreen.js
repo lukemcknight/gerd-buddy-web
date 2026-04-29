@@ -5,7 +5,9 @@ import { AlertTriangle, ShieldCheck } from "lucide-react-native";
 import Screen from "../components/Screen";
 import TriggerBadge from "../components/TriggerBadge";
 import ProTeaser from "../components/ProTeaser";
+import SeverityChart from "../components/SeverityChart";
 import { calculateTriggers, calculateSafeFoods } from "../utils/triggerEngine";
+import { getWeeklySeverity } from "../utils/severityChart";
 import { getMeals, getSymptoms, getUser } from "../services/storage";
 import Card from "../components/Card";
 import { usePremiumStatus } from "../hooks/usePremiumStatus";
@@ -16,6 +18,7 @@ const turtleContent = require("../assets/mascot/turtle_content.png");
 export default function InsightsScreen({ navigation }) {
   const [triggers, setTriggers] = useState([]);
   const [safeFoods, setSafeFoods] = useState([]);
+  const [weeklySeverity, setWeeklySeverity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
   const { isPro, refreshStatus } = usePremiumStatus(userId);
@@ -29,6 +32,7 @@ export default function InsightsScreen({ navigation }) {
       if (user?.id) setUserId(user.id);
       setTriggers(calculateTriggers(meals, symptoms));
       setSafeFoods(calculateSafeFoods(meals, symptoms));
+      setWeeklySeverity(getWeeklySeverity(symptoms));
     } catch (error) {
       console.warn("Failed to load insights data", error);
     } finally {
@@ -70,8 +74,9 @@ export default function InsightsScreen({ navigation }) {
 
   return (
     <Screen contentClassName="gap-6">
+      <SeverityChart data={weeklySeverity} />
       {hasNoData ? (
-        <View className="items-center gap-4 pt-12">
+        <View className="items-center gap-4 pt-4">
           <Image source={turtleContent} style={{ width: 100, height: 100 }} resizeMode="contain" />
           <Text className="text-sm text-muted-foreground text-center">
             Keep logging — patterns will appear here.
