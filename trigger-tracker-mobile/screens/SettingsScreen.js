@@ -10,6 +10,7 @@ import Screen from "../components/Screen";
 import Button from "../components/Button";
 import Mascot from "../components/Mascot";
 import { clearAllData, getUser, saveUser } from "../services/storage";
+import { getSubscriptionStatus } from "../services/revenuecat";
 import { showToast } from "../utils/feedback";
 import {
   getPermissionStatus,
@@ -55,6 +56,7 @@ export default function SettingsScreen({ navigation }) {
     signOut,
   } = useAuth();
   const [user, setUser] = useState(null);
+  const [isPro, setIsPro] = useState(false);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
   const [notificationPermission, setNotificationPermission] = useState({
@@ -79,6 +81,12 @@ export default function SettingsScreen({ navigation }) {
       const eveningSetting =
         profile?.eveningReminderEnabled ?? profile?.remindersEnabled ?? true;
       setEveningReminderEnabled(eveningSetting);
+      try {
+        const status = await getSubscriptionStatus(profile?.id);
+        setIsPro(Boolean(status?.active));
+      } catch {
+        setIsPro(false);
+      }
     };
     load();
     refreshNotificationStatus();
@@ -321,6 +329,15 @@ export default function SettingsScreen({ navigation }) {
           label="Manage Subscription"
           onPress={() => navigation.navigate("CustomerCenter")}
         />
+        {isPro && (
+          <SettingsCard
+            icon={X}
+            iconColor="#c53030"
+            label="Cancel Subscription"
+            destructive
+            onPress={() => navigation.navigate("CancelSubscription")}
+          />
+        )}
       </View>
 
       {/* Help */}

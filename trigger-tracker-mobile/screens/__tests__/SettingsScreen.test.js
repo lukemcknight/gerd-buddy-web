@@ -98,6 +98,24 @@ describe('SettingsScreen', () => {
     it('contains Manage Subscription', () => {
       expect(source).toContain('Manage Subscription');
     });
+
+    it('contains Cancel Subscription entry that navigates to CancelSubscription', () => {
+      expect(source).toContain('Cancel Subscription');
+      expect(source).toContain('navigate("CancelSubscription")');
+    });
+
+    it('gates Cancel Subscription on isPro state', () => {
+      expect(source).toContain('isPro');
+      const cancelIdx = source.indexOf('Cancel Subscription');
+      const before = source.slice(Math.max(0, cancelIdx - 200), cancelIdx);
+      expect(before).toMatch(/isPro\s*&&/);
+    });
+
+    it('marks Cancel Subscription as destructive', () => {
+      const cancelIdx = source.indexOf('Cancel Subscription');
+      const slice = source.slice(cancelIdx, cancelIdx + 400);
+      expect(slice).toContain('destructive');
+    });
   });
 
   describe('Data section', () => {
