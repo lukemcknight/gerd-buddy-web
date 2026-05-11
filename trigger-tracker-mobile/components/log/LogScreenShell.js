@@ -37,7 +37,7 @@ export const LogScreenShell = ({
           {children}
         </ScrollView>
         {submitSlot ? (
-          <View className="px-5 pt-3 pb-5 border-t border-border bg-background">
+          <View className="px-5 pt-3 pb-10 border-t border-border bg-background">
             {submitSlot}
           </View>
         ) : null}
