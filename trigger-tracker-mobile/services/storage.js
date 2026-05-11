@@ -37,6 +37,22 @@ export const generateId = () =>
 
 export const getMeals = async () => readJson(STORAGE_KEYS.MEALS, []);
 
+export const getRecentMealSuggestions = (meals, limit = 10) => {
+  if (!Array.isArray(meals) || meals.length === 0) return [];
+  const recent = [...meals]
+    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+    .slice(0, 30);
+  const seen = new Map();
+  for (const m of recent) {
+    const raw = (m.text || "").trim();
+    if (!raw) continue;
+    const key = raw.toLowerCase().replace(/\s+/g, " ");
+    if (!seen.has(key)) seen.set(key, raw);
+    if (seen.size >= limit) break;
+  }
+  return Array.from(seen.values());
+};
+
 export const saveMeal = async (meal) => {
   const meals = await getMeals();
   const newMeal = {
