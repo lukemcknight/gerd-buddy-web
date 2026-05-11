@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
   MEALS: "acidtrack_meals",
   SYMPTOMS: "acidtrack_symptoms",
   USER: "acidtrack_user",
+  CUSTOM_FOODS: "acidtrack_custom_foods",
 };
 
 const TRIAL_LENGTH_MS = 3 * 24 * 60 * 60 * 1000;
@@ -36,6 +37,29 @@ export const generateId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 export const getMeals = async () => readJson(STORAGE_KEYS.MEALS, []);
+
+export const getCustomFoods = async () => {
+  const value = await readJson(STORAGE_KEYS.CUSTOM_FOODS, []);
+  return Array.isArray(value) ? value : [];
+};
+
+export const addCustomFood = async (label) => {
+  const trimmed = (label || "").trim();
+  if (!trimmed) return false;
+  const foods = await getCustomFoods();
+  const exists = foods.some(
+    (f) => f.toLowerCase() === trimmed.toLowerCase()
+  );
+  if (exists) return false;
+  await writeJson(STORAGE_KEYS.CUSTOM_FOODS, [trimmed, ...foods]);
+  return true;
+};
+
+export const removeCustomFood = async (label) => {
+  const foods = await getCustomFoods();
+  const next = foods.filter((f) => f !== label);
+  await writeJson(STORAGE_KEYS.CUSTOM_FOODS, next);
+};
 
 export const getRecentMealSuggestions = (meals, limit = 10) => {
   if (!Array.isArray(meals) || meals.length === 0) return [];

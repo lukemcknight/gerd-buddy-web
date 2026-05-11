@@ -40,4 +40,22 @@ describe('MealLibrarySheet', () => {
     expect(source).toContain('Pizza');
     expect(source).toContain('Water');
   });
+
+  test('has a Custom category for user-added foods', () => {
+    expect(source).toContain('"Custom"');
+  });
+
+  test('loads custom foods from storage on open', () => {
+    expect(source).toContain('getCustomFoods');
+  });
+
+  test('supports adding a new custom food', () => {
+    expect(source).toContain('addCustomFood');
+    expect(source).toContain('handleAddCustom');
+  });
+
+  test('supports removing a custom food', () => {
+    expect(source).toContain('removeCustomFood');
+    expect(source).toContain('handleRemoveCustom');
+  });
 });
