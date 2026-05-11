@@ -16,6 +16,7 @@ import LogSymptomScreen from "../screens/LogSymptomScreen";
 import FoodScanScreen from "../screens/FoodScanScreen";
 import PaywallScreen from "../screens/PaywallScreen.tsx";
 import CustomerCenterScreen from "../screens/CustomerCenterScreen";
+import CancelSubscriptionScreen from "../screens/CancelSubscriptionScreen";
 import SignUpScreen from "../screens/SignUpScreen";
 import LoginScreen from "../screens/LoginScreen";
 import BuddyAccessoriesScreen from "../screens/BuddyAccessoriesScreen";
@@ -219,6 +220,7 @@ export default function RootNavigator() {
       <Stack.Screen name="LogSymptom" component={LogSymptomScreen} />
       <Stack.Screen name="FoodScan" component={FoodScanScreen} />
       <Stack.Screen name="CustomerCenter" component={CustomerCenterScreen} />
+      <Stack.Screen name="CancelSubscription" component={CancelSubscriptionScreen} />
       <Stack.Screen name="OnboardingPlan" component={OnboardingPlanScreen} />
       <Stack.Screen name="OnboardingDay7Summary" component={OnboardingDay7SummaryScreen} />
       <Stack.Screen name="BuddyAccessories" component={BuddyAccessoriesScreen} />
