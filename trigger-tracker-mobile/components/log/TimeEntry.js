@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Clock, ChevronRight, Pencil } from "lucide-react-native";
 import { cn } from "../../utils/style";
+import { usePostHog } from "posthog-react-native";
 import TimePickerSheet from "./TimePickerSheet";
 
 const PRESETS = [
@@ -28,6 +29,7 @@ export const TimeEntry = ({
 }) => {
   const [editing, setEditing] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const posthog = usePostHog();
 
   const setNow = () => {
     onChange?.(new Date(), "now");
@@ -35,12 +37,17 @@ export const TimeEntry = ({
 
   const applyPreset = (preset) => {
     if (preset.id === "earlier") {
-      setSheetOpen(true);
+      openSheet();
       return;
     }
     const next = new Date();
     next.setMinutes(next.getMinutes() - preset.minutes);
     onChange?.(next, preset.id);
+  };
+
+  const openSheet = () => {
+    posthog?.capture("time_picker_opened");
+    setSheetOpen(true);
   };
 
   if (!editing) {
@@ -119,7 +126,7 @@ export const TimeEntry = ({
           );
         })}
         <Pressable
-          onPress={() => setSheetOpen(true)}
+          onPress={() => openSheet()}
           className={cn(
             "px-4 py-2 rounded-full flex-row items-center gap-1",
             presetId === "custom" ? "bg-primary" : "bg-card border border-border"

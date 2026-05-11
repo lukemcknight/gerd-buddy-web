@@ -34,4 +34,8 @@ describe('TimeEntry', () => {
   test('fires onChange with date and presetId', () => {
     expect(source).toContain('onChange?.(');
   });
+
+  test('captures time_picker_opened analytics event', () => {
+    expect(source).toContain('time_picker_opened');
+  });
 });
