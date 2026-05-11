@@ -1,48 +1,87 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Text, View, Pressable } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { Utensils, Clock, ArrowLeft, Sparkles } from "lucide-react-native";
+import { Utensils, Sparkles } from "lucide-react-native";
 import { usePostHog } from "posthog-react-native";
-import Screen from "../components/Screen";
-import Button from "../components/Button";
+import LogScreenShell from "../components/log/LogScreenShell";
+import ChipScroller from "../components/log/ChipScroller";
+import TimeEntry from "../components/log/TimeEntry";
+import SubmitFeedback from "../components/log/SubmitFeedback";
+import MealLibrarySheet from "../components/log/MealLibrarySheet";
 import { TextArea } from "../components/TextField";
 import {
-  saveMeal, getMeals, getUser,
-  getStreakInfo, updateBestStreak, STREAK_MILESTONES,
+  saveMeal,
+  getMeals,
+  getUser,
+  getStreakInfo,
+  updateBestStreak,
+  STREAK_MILESTONES,
+  getRecentMealSuggestions,
 } from "../services/storage";
 import { showToast } from "../utils/feedback";
 import { syncSmartNotifications } from "../services/notifications";
 
-const quickMeals = [
-  "Coffee",
-  "Pizza",
-  "Pasta with tomato sauce",
-  "Spicy food",
-  "Chocolate",
-  "Citrus fruit",
-  "Onions or garlic",
-  "Fried food",
-];
+const append = (current, addition) =>
+  current.trim() ? `${current.trim()}, ${addition}` : addition;
+
+const computeSource = ({ usedRecent, usedLibrary, hadFreeText }) => {
+  const sources = [];
+  if (usedRecent) sources.push("recent");
+  if (usedLibrary) sources.push("library");
+  if (hadFreeText) sources.push("freetext");
+  if (sources.length === 0) return "freetext";
+  if (sources.length === 1) return sources[0];
+  return "mixed";
+};
 
 export default function LogMealScreen({ navigation }) {
   const [mealText, setMealText] = useState("");
   const [mealTime, setMealTime] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
+  const [timePreset, setTimePreset] = useState("now");
+  const [recentMeals, setRecentMeals] = useState([]);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [usedRecent, setUsedRecent] = useState(false);
+  const [usedLibrary, setUsedLibrary] = useState(false);
+  const [typedManually, setTypedManually] = useState(false);
   const posthog = usePostHog();
 
   useEffect(() => {
     posthog?.screen("LogMeal");
+    getMeals().then((meals) => {
+      setRecentMeals(getRecentMealSuggestions(meals, 10));
+    });
   }, []);
 
-  const handleQuickAdd = (meal) => {
-    setMealText((prev) => (prev ? `${prev}, ${meal}` : meal));
-    posthog?.capture("quick_add_used", { meal });
+  const recentChips = useMemo(
+    () => recentMeals.map((label) => ({ id: label, label })),
+    [recentMeals]
+  );
+
+  const handleRecentPress = (label) => {
+    setMealText((prev) => append(prev, label));
+    setUsedRecent(true);
+    posthog?.capture("quick_add_used", { meal: label, source: "recent" });
+  };
+
+  const handleLibraryConfirm = (labels) => {
+    setLibraryOpen(false);
+    setMealText((prev) =>
+      labels.reduce((acc, label) => append(acc, label), prev)
+    );
+    setUsedLibrary(true);
+    labels.forEach((meal) =>
+      posthog?.capture("quick_add_used", { meal, source: "library" })
+    );
+  };
+
+  const handleTextChange = (next) => {
+    setMealText(next);
+    setTypedManually(true);
   };
 
   const handleSubmit = async () => {
     if (!mealText.trim()) {
       showToast("Please describe what you ate");
-      return;
+      throw new Error("empty_meal");
     }
     await saveMeal({ text: mealText.trim(), timestamp: mealTime.getTime() });
 
@@ -59,107 +98,102 @@ export default function LogMealScreen({ navigation }) {
       });
     }
 
+    const hadFreeText =
+      typedManually &&
+      // typing in addition to a chip is "mixed"; pure chip selection sets the
+      // text via append but typedManually stays false.
+      true;
+
     posthog?.capture("meal_logged", {
-      has_quick_add: mealText.includes(","),
+      has_quick_add: usedRecent || usedLibrary,
       text_length: mealText.trim().length,
       streak_length: streakInfo.currentStreak,
+      source: computeSource({ usedRecent, usedLibrary, hadFreeText }),
+      time_preset: timePreset,
     });
 
     const streakText =
       streakInfo.currentStreak > 1
         ? `${streakInfo.currentStreak}-day streak! `
         : streakInfo.currentStreak === 1
-          ? "Streak started! "
-          : "";
+        ? "Streak started! "
+        : "";
 
-    showToast(
-      "Meal logged!",
-      `${streakText}Keep tracking to discover your triggers.`
-    );
-    navigation.goBack();
+    showToast("Meal logged!", `${streakText}Keep tracking to discover your triggers.`);
     syncSmartNotifications().catch(() => {});
   };
 
   return (
-    <Screen contentClassName="gap-6">
-      <View className="flex-row items-center gap-3">
-        <Pressable onPress={() => navigation.goBack()} className="p-2 rounded-xl bg-muted/60">
-          <ArrowLeft size={18} color="#1f2a30" />
-        </Pressable>
-        <View className="flex-1">
-          <Text className="text-xl font-bold text-foreground">Log Meal</Text>
-          <Text className="text-sm text-muted-foreground">What did you eat?</Text>
-        </View>
+    <LogScreenShell
+      title="Log Meal"
+      subtitle="What did you eat?"
+      onBack={() => navigation.goBack()}
+      icon={
         <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center">
           <Utensils size={22} color="#3aa27f" />
         </View>
-      </View>
+      }
+      submitSlot={
+        <SubmitFeedback
+          variant="buddy"
+          label="Log Meal"
+          disabled={!mealText.trim()}
+          onSubmit={handleSubmit}
+          onComplete={() => navigation.goBack()}
+        />
+      }
+    >
+      {recentChips.length > 0 && (
+        <View className="gap-3">
+          <View className="flex-row items-center gap-2">
+            <Sparkles size={16} color="#5f6f74" />
+            <Text className="text-sm text-muted-foreground font-medium">
+              Recent meals
+            </Text>
+          </View>
+          <ChipScroller
+            chips={recentChips}
+            mode="action"
+            onPress={handleRecentPress}
+          />
+        </View>
+      )}
 
       <View className="gap-2">
-        <Text className="text-sm font-medium text-foreground">Describe your meal</Text>
+        <Text className="text-sm font-medium text-foreground">
+          Describe your meal
+        </Text>
         <TextArea
-          placeholder="e.g., Grilled chicken with rice and vegetables..."
+          placeholder="Tap a recent meal or describe what you ate"
           value={mealText}
-          onChangeText={setMealText}
+          onChangeText={handleTextChange}
+          className="min-h-[48px]"
         />
-      </View>
-
-      <View className="gap-3">
-        <View className="flex-row items-center gap-2">
-          <Sparkles size={16} color="#5f6f74" />
-          <Text className="text-sm text-muted-foreground font-medium">Quick add</Text>
-        </View>
-        <View className="flex-row flex-wrap gap-2">
-          {quickMeals.map((meal) => (
-            <Pressable
-              key={meal}
-              onPress={() => handleQuickAdd(meal)}
-              className="px-3 py-2 rounded-full bg-muted"
-            >
-              <Text className="text-sm text-foreground">{meal}</Text>
-            </Pressable>
-          ))}
-        </View>
-      </View>
-
-      <View className="gap-3">
-        <View className="flex-row items-center gap-2">
-          <Clock size={16} color="#5f6f74" />
-          <Text className="text-sm font-medium text-foreground">When did you eat?</Text>
-        </View>
         <Pressable
-          onPress={() => setShowPicker(true)}
-          className="w-full px-4 py-3 rounded-xl border border-border bg-card"
+          onPress={() => setLibraryOpen(true)}
+          className="self-start px-3 py-1.5 rounded-full bg-muted/60"
         >
-          <Text className="text-foreground">
-            {mealTime.toLocaleString(undefined, {
-              month: "short",
-              day: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-            })}
+          <Text className="text-sm font-semibold text-foreground">
+            🥗 Browse foods
           </Text>
         </Pressable>
-        {showPicker && (
-          <DateTimePicker
-            value={mealTime}
-            mode="datetime"
-            display="default"
-            onChange={(_, date) => {
-              setShowPicker(false);
-              if (date) setMealTime(date);
-            }}
-          />
-        )}
       </View>
 
-      <Button
-        onPress={handleSubmit}
-        disabled={!mealText.trim()}
-        className="w-full"
-      >
-        <Text className="text-primary-foreground font-semibold">Log Meal</Text>
-      </Button>
-    </Screen>
+      <TimeEntry
+        value={mealTime}
+        presetId={timePreset}
+        onChange={(date, preset) => {
+          setMealTime(date);
+          setTimePreset(preset);
+        }}
+        label="When did you eat?"
+      />
+
+      <MealLibrarySheet
+        visible={libraryOpen}
+        onCancel={() => setLibraryOpen(false)}
+        onConfirm={handleLibraryConfirm}
+      />
+    </LogScreenShell>
   );
 }
