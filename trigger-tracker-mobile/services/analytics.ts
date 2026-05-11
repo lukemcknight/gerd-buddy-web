@@ -64,6 +64,15 @@ export const EVENTS = {
   TRIAL_STARTED: "trial_started",
   PURCHASE_COMPLETED: "purchase_completed",
   PURCHASE_RESTORED: "purchase_restored",
+
+  // Cancellation flow
+  CANCEL_FLOW_STARTED: "cancel_flow_started",
+  CANCEL_REASON_SELECTED: "cancel_reason_selected",
+  RETENTION_OFFER_SHOWN: "retention_offer_shown",
+  RETENTION_OFFER_ACCEPTED: "retention_offer_accepted",
+  RETENTION_OFFER_DECLINED: "retention_offer_declined",
+  CANCEL_FLOW_DISMISSED: "cancel_flow_dismissed",
+  CANCEL_FLOW_COMPLETED: "cancel_flow_completed",
 } as const;
 
 export type AnalyticsProperties = {
