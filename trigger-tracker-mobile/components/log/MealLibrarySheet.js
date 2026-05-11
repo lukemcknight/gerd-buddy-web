@@ -3,7 +3,6 @@ import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-nativ
 import { Search, Plus, X } from "lucide-react-native";
 import { cn } from "../../utils/style";
 import Button from "../Button";
-import ChipScroller from "./ChipScroller";
 import {
   getCustomFoods,
   addCustomFood,
@@ -132,14 +131,44 @@ export const MealLibrarySheet = ({ visible, onCancel, onConfirm }) => {
         </View>
 
         {!search && (
-          <View className="mb-3">
-            <ChipScroller
-              chips={CATEGORIES.map((c) => ({ id: c, label: c }))}
-              mode="single"
-              selectedIds={[category]}
-              onToggle={(id) => setCategory(id)}
-            />
+          <View className="border-b border-border mb-4">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 4, paddingRight: 16 }}
+            >
+              {CATEGORIES.map((c) => {
+                const active = category === c;
+                return (
+                  <Pressable
+                    key={c}
+                    onPress={() => setCategory(c)}
+                    className={cn(
+                      "px-3 pt-1 pb-3 -mb-px border-b-2",
+                      active ? "border-accent" : "border-transparent"
+                    )}
+                  >
+                    <Text
+                      className={cn(
+                        "text-sm",
+                        active
+                          ? "font-bold text-foreground"
+                          : "font-medium text-muted-foreground"
+                      )}
+                    >
+                      {c}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
           </View>
+        )}
+
+        {!search && (
+          <Text className="text-[11px] font-bold text-muted-foreground uppercase tracking-wide mb-2 px-1">
+            {category === "Custom" ? "Your foods" : `${category} · ${items.length}`}
+          </Text>
         )}
 
         {showAddRow && (
