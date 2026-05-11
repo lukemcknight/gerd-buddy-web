@@ -42,3 +42,6 @@ eas.json
 # generated native folders
 /ios
 /android
+
+# git worktrees
+.worktrees/
