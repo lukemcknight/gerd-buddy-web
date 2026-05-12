@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@babel/plugin-transform-react-jsx": "^7.27.1",
+    "@quidone/react-native-wheel-picker": "^1.6.4",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
     "@react-navigation/bottom-tabs": "^7.8.12",
