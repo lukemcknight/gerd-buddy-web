@@ -141,8 +141,10 @@ describe('SettingsScreen', () => {
 
     it('gates Cancel Subscription on isPro state', () => {
       expect(source).toContain('isPro');
+      // The Subscription section is wrapped in `{isPro && (...)}`, so look
+      // back far enough to capture the section's enclosing conditional.
       const cancelIdx = source.indexOf('Cancel Subscription');
-      const before = source.slice(Math.max(0, cancelIdx - 200), cancelIdx);
+      const before = source.slice(Math.max(0, cancelIdx - 800), cancelIdx);
       expect(before).toMatch(/isPro\s*&&/);
     });
 
