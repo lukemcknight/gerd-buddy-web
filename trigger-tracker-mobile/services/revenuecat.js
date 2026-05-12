@@ -16,6 +16,13 @@ const RETENTION_OFFERING_ID =
   process.env.EXPO_PUBLIC_REVENUECAT_RETENTION_OFFERING_ID?.trim() ||
   "yearly_subscription_retention";
 
+// The actual App Store product the user is swapped into. The offering may
+// also include other packages (e.g., a monthly), so we match this product
+// by id rather than blindly picking the first package.
+const RETENTION_PRODUCT_ID =
+  process.env.EXPO_PUBLIC_REVENUECAT_RETENTION_PRODUCT_ID?.trim() ||
+  "yearly_subscription_retention";
+
 let configurePromise = null;
 let currentUserId = null;
 
@@ -98,14 +105,20 @@ export const purchasePackage = async (selectedPackage, userId) => {
   return parseStatus(customerInfo);
 };
 
-// Fetches the retention offering and runs a purchase against its first package.
-// Throws with code "RETENTION_OFFERING_NOT_FOUND" if the offering or its
-// packages are missing — the caller is expected to fall back gracefully.
+// Fetches the retention offering and runs a purchase against the package that
+// wraps RETENTION_PRODUCT_ID. The offering may also include other packages
+// (e.g., a monthly placeholder) so we match by product id, not position.
+// Throws with code "RETENTION_OFFERING_NOT_FOUND" if the offering can't be
+// resolved or doesn't contain the retention product — the caller is expected
+// to fall back gracefully.
 export const purchaseRetentionOffer = async (userId) => {
   await ensureConfigured(userId);
   const offerings = await Purchases.getOfferings();
   const offering = offerings?.all?.[RETENTION_OFFERING_ID];
-  const pkg = offering?.availablePackages?.[0];
+  const packages = offering?.availablePackages || [];
+  const pkg = packages.find(
+    (p) => p?.product?.identifier === RETENTION_PRODUCT_ID
+  );
   if (!pkg) {
     const err = new Error("retention_offering_not_found");
     err.code = "RETENTION_OFFERING_NOT_FOUND";
@@ -126,4 +139,5 @@ export const helpers = {
   ENTITLEMENT_ID,
   OFFERING_ID,
   RETENTION_OFFERING_ID,
+  RETENTION_PRODUCT_ID,
 };
