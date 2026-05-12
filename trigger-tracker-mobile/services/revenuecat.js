@@ -105,20 +105,33 @@ export const purchasePackage = async (selectedPackage, userId) => {
   return parseStatus(customerInfo);
 };
 
-// Fetches the retention offering and runs a purchase against the package that
-// wraps RETENTION_PRODUCT_ID. The offering may also include other packages
-// (e.g., a monthly placeholder) so we match by product id, not position.
-// Throws with code "RETENTION_OFFERING_NOT_FOUND" if the offering can't be
-// resolved or doesn't contain the retention product — the caller is expected
-// to fall back gracefully.
+// Locates the retention product across every available offering. RC offering
+// identifiers vary by dashboard ("Annual Retention", "yearly_subscription_retention",
+// etc.) so we try the configured identifier first, then fall back to scanning
+// all offerings for one that contains RETENTION_PRODUCT_ID. This keeps the
+// purchase resilient to dashboard renames as long as the product itself is
+// attached to some offering.
+const findRetentionPackage = (offerings) => {
+  const matchesProduct = (p) =>
+    p?.product?.identifier === RETENTION_PRODUCT_ID;
+  const direct = offerings?.all?.[RETENTION_OFFERING_ID];
+  const directMatch = (direct?.availablePackages || []).find(matchesProduct);
+  if (directMatch) return directMatch;
+  const all = Object.values(offerings?.all || {});
+  for (const offering of all) {
+    const pkg = (offering?.availablePackages || []).find(matchesProduct);
+    if (pkg) return pkg;
+  }
+  return null;
+};
+
+// Runs a purchase against the retention package. Throws with code
+// "RETENTION_OFFERING_NOT_FOUND" if the product isn't attached to any
+// offering — the caller is expected to fall back gracefully.
 export const purchaseRetentionOffer = async (userId) => {
   await ensureConfigured(userId);
   const offerings = await Purchases.getOfferings();
-  const offering = offerings?.all?.[RETENTION_OFFERING_ID];
-  const packages = offering?.availablePackages || [];
-  const pkg = packages.find(
-    (p) => p?.product?.identifier === RETENTION_PRODUCT_ID
-  );
+  const pkg = findRetentionPackage(offerings);
   if (!pkg) {
     const err = new Error("retention_offering_not_found");
     err.code = "RETENTION_OFFERING_NOT_FOUND";
