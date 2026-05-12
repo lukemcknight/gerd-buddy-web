@@ -2,11 +2,6 @@ import { Pressable, Text, View } from "react-native";
 import { ArrowLeft, Sparkles, ShieldCheck, TrendingDown } from "lucide-react-native";
 import Button from "../Button";
 
-// TODO(v2): wire `onAccept` to a real RevenueCat win-back offer or a separate
-// discounted product. For v1, the parent deep-links the user to App Store
-// subscription management so they can adjust there. Options when ready:
-//   1. RevenueCat Win-Back Offer (App Store Connect side, requires signed offer).
-//   2. A separate $29.99/year SKU that we purchase via Purchases.purchasePackage.
 const ValueRow = ({ Icon, title, body }) => (
   <View className="flex-row gap-3">
     <View className="w-9 h-9 rounded-xl items-center justify-center bg-primary/10">
@@ -21,6 +16,7 @@ const ValueRow = ({ Icon, title, body }) => (
 
 export const RetentionOfferStep = ({
   offerPriceLabel = "$29.99/year",
+  purchasing = false,
   onAccept,
   onDecline,
   onBack,
@@ -77,11 +73,16 @@ export const RetentionOfferStep = ({
       <View className="mt-auto gap-3">
         <Button
           onPress={onAccept}
+          disabled={purchasing}
           className="w-full py-4 rounded-2xl"
         >
-          Keep my subscription
+          {purchasing ? "Processing…" : "Keep my subscription"}
         </Button>
-        <Pressable onPress={onDecline} className="py-3 items-center">
+        <Pressable
+          onPress={onDecline}
+          disabled={purchasing}
+          className="py-3 items-center"
+        >
           <Text className="text-sm font-semibold text-muted-foreground underline">
             Continue to cancel
           </Text>

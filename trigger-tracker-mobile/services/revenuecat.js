@@ -9,6 +9,13 @@ const ENTITLEMENT_ID =
   process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID?.trim() || "pro";
 const OFFERING_ID = process.env.EXPO_PUBLIC_REVENUECAT_OFFERING_ID || "default";
 
+// Offering presented when a Pro subscriber accepts the cancellation-flow
+// retention offer. Override at build time with
+// EXPO_PUBLIC_REVENUECAT_RETENTION_OFFERING_ID if the dashboard id changes.
+const RETENTION_OFFERING_ID =
+  process.env.EXPO_PUBLIC_REVENUECAT_RETENTION_OFFERING_ID?.trim() ||
+  "yearly_subscription_retention";
+
 let configurePromise = null;
 let currentUserId = null;
 
@@ -91,6 +98,23 @@ export const purchasePackage = async (selectedPackage, userId) => {
   return parseStatus(customerInfo);
 };
 
+// Fetches the retention offering and runs a purchase against its first package.
+// Throws with code "RETENTION_OFFERING_NOT_FOUND" if the offering or its
+// packages are missing — the caller is expected to fall back gracefully.
+export const purchaseRetentionOffer = async (userId) => {
+  await ensureConfigured(userId);
+  const offerings = await Purchases.getOfferings();
+  const offering = offerings?.all?.[RETENTION_OFFERING_ID];
+  const pkg = offering?.availablePackages?.[0];
+  if (!pkg) {
+    const err = new Error("retention_offering_not_found");
+    err.code = "RETENTION_OFFERING_NOT_FOUND";
+    throw err;
+  }
+  const { customerInfo } = await Purchases.purchasePackage(pkg);
+  return parseStatus(customerInfo);
+};
+
 export const restoreTransactions = async (userId) => {
   await ensureConfigured(userId);
   const customerInfo = await Purchases.restorePurchases();
@@ -101,4 +125,5 @@ export const helpers = {
   isUserCancelled,
   ENTITLEMENT_ID,
   OFFERING_ID,
+  RETENTION_OFFERING_ID,
 };

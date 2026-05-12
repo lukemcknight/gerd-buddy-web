@@ -14,11 +14,17 @@ describe('RetentionOfferStep', () => {
     expect(source).toMatch(/export default RetentionOfferStep/);
   });
 
-  test('accepts offerPriceLabel, onAccept, onDecline, onBack', () => {
+  test('accepts offerPriceLabel, purchasing, onAccept, onDecline, onBack', () => {
     expect(source).toContain('offerPriceLabel');
+    expect(source).toContain('purchasing');
     expect(source).toContain('onAccept');
     expect(source).toContain('onDecline');
     expect(source).toContain('onBack');
+  });
+
+  test('shows a processing label and disables CTAs while purchasing', () => {
+    expect(source).toContain('Processing');
+    expect(source).toContain('disabled={purchasing}');
   });
 
   test('renders the offer headline anchor', () => {
@@ -31,10 +37,6 @@ describe('RetentionOfferStep', () => {
 
   test('renders secondary CTA "Continue to cancel"', () => {
     expect(source).toContain('Continue to cancel');
-  });
-
-  test('TODO marker for future win-back wiring', () => {
-    expect(source).toMatch(/TODO.*win-?back|TODO.*RevenueCat/i);
   });
 
   test('renders step indicator "Step 2 of 3"', () => {

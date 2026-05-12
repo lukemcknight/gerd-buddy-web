@@ -58,4 +58,17 @@ describe('CancelSubscriptionScreen', () => {
   test('reason survey runs BEFORE retention offer', () => {
     expect(source).toMatch(/useState\(\s*['"]reason['"]\s*\)/);
   });
+
+  test('calls purchaseRetentionOffer on offer accept', () => {
+    expect(source).toContain('purchaseRetentionOffer');
+  });
+
+  test('detects user-cancelled Apple sheet to stay on screen', () => {
+    expect(source).toContain('isUserCancelled');
+  });
+
+  test('tracks purchasing state and passes it to RetentionOfferStep', () => {
+    expect(source).toMatch(/setPurchasing/);
+    expect(source).toContain('purchasing={purchasing}');
+  });
 });

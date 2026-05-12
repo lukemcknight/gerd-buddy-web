@@ -6,12 +6,17 @@ import CancellationReasonStep from "../components/cancel/CancellationReasonStep"
 import RetentionOfferStep from "../components/cancel/RetentionOfferStep";
 import CancellationConfirmStep from "../components/cancel/CancellationConfirmStep";
 import { getUser } from "../services/storage";
-import { getSubscriptionStatus } from "../services/revenuecat";
+import {
+  getSubscriptionStatus,
+  purchaseRetentionOffer,
+  helpers as rcHelpers,
+} from "../services/revenuecat";
 import { EVENTS } from "../services/analytics";
 import {
   isOtherReason,
   reasonLabelFor,
 } from "../services/cancellationReasons";
+import { showToast } from "../utils/feedback";
 
 const FALLBACK_MANAGE_URL = "https://apps.apple.com/account/subscriptions";
 const RETENTION_OFFER_PRICE_LABEL = "$29.99/year";
@@ -22,6 +27,8 @@ export default function CancelSubscriptionScreen({ navigation }) {
   const [reasonId, setReasonId] = useState(null);
   const [otherText, setOtherText] = useState("");
   const [manageUrl, setManageUrl] = useState(FALLBACK_MANAGE_URL);
+  const [userId, setUserId] = useState(null);
+  const [purchasing, setPurchasing] = useState(false);
   const flowExitedRef = useRef(false);
   const offerShownRef = useRef(false);
 
@@ -30,6 +37,7 @@ export default function CancelSubscriptionScreen({ navigation }) {
     (async () => {
       try {
         const user = await getUser();
+        if (!cancelled) setUserId(user?.id ?? null);
         const status = await getSubscriptionStatus(user?.id);
         if (!cancelled && status?.managementURL) {
           setManageUrl(status.managementURL);
@@ -101,13 +109,26 @@ export default function CancelSubscriptionScreen({ navigation }) {
   }, [manageUrl]);
 
   const handleOfferAccept = useCallback(async () => {
+    if (purchasing) return;
+    setPurchasing(true);
     posthog?.capture(EVENTS.RETENTION_OFFER_ACCEPTED, { reason_id: reasonId });
-    // v1: the "accept offer" CTA also routes the user to App Store subs
-    // management so they can adjust there. Future: swap to RevenueCat
-    // Win-Back Offer or a discounted-product purchase flow.
-    await openAppStore();
-    exitFlow("retained");
-  }, [reasonId, posthog, openAppStore, exitFlow]);
+    try {
+      await purchaseRetentionOffer(userId);
+      exitFlow("retained");
+    } catch (err) {
+      if (rcHelpers.isUserCancelled(err)) {
+        // User dismissed Apple's confirm sheet — stay on the offer screen so
+        // they can try again or decline.
+        setPurchasing(false);
+        return;
+      }
+      // Real failure (offering missing in RC dashboard, network, etc.) — give
+      // the user a path forward via the App Store deep-link.
+      showToast("Couldn't apply offer", "Opening App Store instead.");
+      await openAppStore();
+      exitFlow("opened_app_store");
+    }
+  }, [purchasing, reasonId, userId, posthog, openAppStore, exitFlow]);
 
   const handleOfferDecline = useCallback(() => {
     posthog?.capture(EVENTS.RETENTION_OFFER_DECLINED, { reason_id: reasonId });
@@ -150,6 +171,7 @@ export default function CancelSubscriptionScreen({ navigation }) {
       {step === "offer" && (
         <RetentionOfferStep
           offerPriceLabel={RETENTION_OFFER_PRICE_LABEL}
+          purchasing={purchasing}
           onAccept={handleOfferAccept}
           onDecline={handleOfferDecline}
           onBack={handleBackFromOffer}
