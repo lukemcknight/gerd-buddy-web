@@ -10,6 +10,7 @@ import Screen from "../components/Screen";
 import Button from "../components/Button";
 import Mascot from "../components/Mascot";
 import { clearAllData, getUser, saveUser } from "../services/storage";
+import { getSubscriptionStatus } from "../services/revenuecat";
 import { showToast } from "../utils/feedback";
 import {
   getPermissionStatus,
@@ -56,6 +57,7 @@ export default function SettingsScreen({ navigation }) {
     signOut,
   } = useAuth();
   const [user, setUser] = useState(null);
+  const [isPro, setIsPro] = useState(false);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
   const [notificationPermission, setNotificationPermission] = useState({
@@ -67,7 +69,6 @@ export default function SettingsScreen({ navigation }) {
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
   const [isSendingFeedback, setIsSendingFeedback] = useState(false);
-  const [isPro, setIsPro] = useState(false);
 
   const refreshNotificationStatus = useCallback(async () => {
     const status = await getPermissionStatus();
@@ -82,6 +83,12 @@ export default function SettingsScreen({ navigation }) {
       const eveningSetting =
         profile?.eveningReminderEnabled ?? profile?.remindersEnabled ?? true;
       setEveningReminderEnabled(eveningSetting);
+      try {
+        const status = await getSubscriptionStatus(profile?.id);
+        setIsPro(Boolean(status?.active));
+      } catch {
+        setIsPro(false);
+      }
     };
     load();
     refreshNotificationStatus();
@@ -349,6 +356,13 @@ export default function SettingsScreen({ navigation }) {
             icon={CreditCard}
             label="Manage Subscription"
             onPress={() => navigation.navigate("CustomerCenter")}
+          />
+          <SettingsCard
+            icon={X}
+            iconColor="#c53030"
+            label="Cancel Subscription"
+            destructive
+            onPress={() => navigation.navigate("CancelSubscription")}
           />
         </View>
       )}
