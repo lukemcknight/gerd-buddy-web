@@ -3,13 +3,14 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Alert, Linking, Platform, Pressable, Text, TextInput, View, Switch } from "react-native";
 import {
   Bell, Trash2, Info, ChevronRight, LogOut, Moon, CreditCard, FileText, Shield,
-  User, Mail, Heart, MessageSquare, Send, X,
+  User, Mail, Heart, MessageSquare, Send, X, Sparkles,
 } from "lucide-react-native";
 import { useAuth } from "../contexts/AuthContext";
 import Screen from "../components/Screen";
 import Button from "../components/Button";
 import Mascot from "../components/Mascot";
 import { clearAllData, getUser, saveUser } from "../services/storage";
+import { loadDemoData } from "../services/demoData";
 import { getSubscriptionStatus } from "../services/revenuecat";
 import { showToast } from "../utils/feedback";
 import {
@@ -172,6 +173,16 @@ export default function SettingsScreen({ navigation }) {
       });
       syncSmartNotifications().catch(() => { });
       showToast(enabled ? "Evening reminder enabled" : "Evening reminder disabled");
+    }
+  };
+
+  const handleLoadDemoData = async () => {
+    try {
+      const { mealCount, symptomCount } = await loadDemoData();
+      showToast("Demo data loaded", `${mealCount} meals · ${symptomCount} symptoms`);
+    } catch (err) {
+      console.warn("Failed to load demo data", err);
+      showToast("Failed to load demo data");
     }
   };
 
@@ -465,6 +476,21 @@ export default function SettingsScreen({ navigation }) {
       {/* Data */}
       <View className="gap-3 mt-2">
         <Text className="text-lg font-bold text-foreground">Data</Text>
+        {__DEV__ && (
+          <SettingsCard
+            icon={Sparkles}
+            iconColor="#3aa27f"
+            label="Load demo data"
+            subtitle="Populates app with sample data for screenshots"
+            onPress={() =>
+              confirmAction(
+                "Load demo data?",
+                "This adds 14 days of sample meals and symptoms on top of your existing data.",
+                handleLoadDemoData
+              )
+            }
+          />
+        )}
         <SettingsCard
           icon={Trash2}
           iconColor="#c53030"
