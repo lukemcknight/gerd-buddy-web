@@ -1,4 +1,4 @@
-import { clearLogs, saveMeal, saveSymptom } from "./storage";
+import { activateSubscription, clearLogs, saveMeal, saveSymptom } from "./storage";
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const ONE_DAY_MS = 24 * ONE_HOUR_MS;
@@ -162,6 +162,11 @@ export const loadDemoData = async () => {
   for (const symptom of symptoms) {
     await saveSymptom(symptom);
   }
+
+  // Flip the local Pro flag so Pro-gated UI (full trigger list, doctor PDF
+  // export, etc.) renders in screenshots. usePremiumStatus.js honors this
+  // local flag in __DEV__ builds.
+  await activateSubscription();
 
   return { mealCount: meals.length, symptomCount: symptoms.length };
 };

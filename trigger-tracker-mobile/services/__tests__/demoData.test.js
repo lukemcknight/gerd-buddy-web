@@ -42,7 +42,13 @@ jest.mock("../revenuecat", () => ({
 
 const AsyncStorage = require("@react-native-async-storage/async-storage");
 const { loadDemoData } = require("../demoData");
-const { getMeals, getSymptoms, getSymptomFreeStreak } = require("../storage");
+const {
+  createUser,
+  getMeals,
+  getSymptoms,
+  getSymptomFreeStreak,
+  getUser,
+} = require("../storage");
 
 beforeEach(() => {
   AsyncStorage.__reset();
@@ -102,6 +108,13 @@ describe("loadDemoData", () => {
     await loadDemoData();
     const symptoms = await getSymptoms();
     expect(getSymptomFreeStreak(symptoms)).toBe(3);
+  });
+
+  test("flips the local subscriptionActive flag so Pro UI renders in screenshots", async () => {
+    await createUser({ topSymptoms: ["heartburn"] });
+    await loadDemoData();
+    const user = await getUser();
+    expect(user.subscriptionActive).toBe(true);
   });
 
   test("replaces existing logs instead of stacking on repeat calls", async () => {
