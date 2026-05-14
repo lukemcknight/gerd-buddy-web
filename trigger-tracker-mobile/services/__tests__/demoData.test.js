@@ -39,7 +39,7 @@ jest.mock("../revenuecat", () => ({
 
 const AsyncStorage = require("@react-native-async-storage/async-storage");
 const { loadDemoData } = require("../demoData");
-const { getMeals, getSymptoms } = require("../storage");
+const { getMeals, getSymptoms, getSymptomFreeStreak } = require("../storage");
 
 beforeEach(() => {
   AsyncStorage.__reset();
@@ -93,5 +93,11 @@ describe("loadDemoData", () => {
     );
 
     expect(coffeeFollowedByHeartburn.length).toBeGreaterThanOrEqual(7);
+  });
+
+  test("yields a 3-day symptom-free streak (drives the Home metric)", async () => {
+    await loadDemoData();
+    const symptoms = await getSymptoms();
+    expect(getSymptomFreeStreak(symptoms)).toBe(3);
   });
 });

@@ -88,8 +88,10 @@ const buildMealEntries = (now) => {
 const buildSymptomEntries = (now) => {
   const entries = [];
 
-  // Heartburn after coffee on ~7 of the coffee days, ~90min later.
-  const coffeeFollowedByHeartburn = [-13, -11, -10, -8, -6, -4, -1];
+  // Heartburn after coffee on 7 of the coffee days, ~90min later.
+  // Days -2, -1, and 0 are intentionally symptom-free so the "Days
+  // Symptom-Free" streak on Home reads as 3.
+  const coffeeFollowedByHeartburn = [-13, -11, -10, -8, -6, -5, -4];
   for (const day of coffeeFollowedByHeartburn) {
     entries.push({
       severity: 3,
@@ -97,15 +99,9 @@ const buildSymptomEntries = (now) => {
       timestamp: at(now, day, 9, 15),
     });
   }
-  // One stronger heartburn after today's iced coffee scan.
-  entries.push({
-    severity: 4,
-    symptomTypes: ["heartburn"],
-    timestamp: at(now, 0, 9, 30),
-    notes: "after lunch",
-  });
 
-  // Symptoms after each tomato meal (~90min later).
+  // Symptoms after the two earlier tomato meals (day -2's tomato pasta
+  // is left without a follow-up to keep the 3-day symptom-free streak).
   entries.push({
     severity: 3,
     symptomTypes: ["heartburn", "regurgitation"],
@@ -117,10 +113,13 @@ const buildSymptomEntries = (now) => {
     timestamp: at(now, -7, 21, 30),
     notes: "woke me up",
   });
+
+  // The most recent symptom — caps the symptom-free streak at 3 days.
+  // Logged after the day -3 glass of red wine.
   entries.push({
     severity: 3,
-    symptomTypes: ["regurgitation"],
-    timestamp: at(now, -2, 21, 15),
+    symptomTypes: ["heartburn"],
+    timestamp: at(now, -3, 21, 30),
   });
 
   // Symptom after one chocolate, one wine.
@@ -135,16 +134,12 @@ const buildSymptomEntries = (now) => {
     timestamp: at(now, -9, 22, 0),
   });
 
-  // Symptoms after the two late-night meals.
+  // Symptom after the earlier late-night meal (day -1's late-night ramen
+  // is left without a follow-up to keep the symptom-free streak at 3).
   entries.push({
     severity: 4,
     symptomTypes: ["heartburn"],
     timestamp: at(now, -6, 23, 45),
-  });
-  entries.push({
-    severity: 3,
-    symptomTypes: ["heartburn", "regurgitation"],
-    timestamp: at(now, -1, 23, 30),
   });
 
   return entries;
