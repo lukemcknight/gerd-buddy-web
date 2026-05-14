@@ -55,4 +55,43 @@ describe("loadDemoData", () => {
     expect(summary.mealCount).toBeGreaterThan(0);
     expect(summary.symptomCount).toBeGreaterThan(0);
   });
+
+  test("writes meals and symptoms to storage matching the returned counts", async () => {
+    const summary = await loadDemoData();
+    const meals = await getMeals();
+    const symptoms = await getSymptoms();
+    expect(meals).toHaveLength(summary.mealCount);
+    expect(symptoms).toHaveLength(summary.symptomCount);
+  });
+
+  test("includes the today scan-result meal with trafficLight + reasonTags", async () => {
+    await loadDemoData();
+    const meals = await getMeals();
+    const scan = meals.find((m) => m.source === "scan");
+    expect(scan).toBeDefined();
+    expect(scan.trafficLight).toBe("amber");
+    expect(scan.label).toBe("Caution");
+    expect(scan.reasonTags).toEqual(["caffeine", "acidic"]);
+  });
+
+  test("contains the coffee→heartburn pattern (≥7 coffee meals followed by heartburn within 90min)", async () => {
+    await loadDemoData();
+    const meals = await getMeals();
+    const symptoms = await getSymptoms();
+
+    const NINETY_MIN = 90 * 60 * 1000;
+    const coffeeMeals = meals.filter((m) => /coffee/i.test(m.text));
+    const heartburnSymptoms = symptoms.filter((s) =>
+      (s.symptomTypes || []).includes("heartburn")
+    );
+
+    const coffeeFollowedByHeartburn = coffeeMeals.filter((meal) =>
+      heartburnSymptoms.some((sym) => {
+        const delta = sym.timestamp - meal.timestamp;
+        return delta > 0 && delta <= NINETY_MIN;
+      })
+    );
+
+    expect(coffeeFollowedByHeartburn.length).toBeGreaterThanOrEqual(7);
+  });
 });
