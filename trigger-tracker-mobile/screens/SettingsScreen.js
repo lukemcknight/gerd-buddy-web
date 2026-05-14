@@ -485,7 +485,7 @@ export default function SettingsScreen({ navigation }) {
             onPress={() =>
               confirmAction(
                 "Load demo data?",
-                "This adds 14 days of sample meals and symptoms on top of your existing data.",
+                "This replaces your logged meals and symptoms with 14 days of sample data.",
                 handleLoadDemoData
               )
             }

@@ -1,4 +1,4 @@
-import { saveMeal, saveSymptom } from "./storage";
+import { clearLogs, saveMeal, saveSymptom } from "./storage";
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const ONE_DAY_MS = 24 * ONE_HOUR_MS;
@@ -148,6 +148,9 @@ const buildSymptomEntries = (now) => {
 // ---- Public API -------------------------------------------------------------
 
 export const loadDemoData = async () => {
+  // Replace, don't stack — repeat taps should yield the same dataset.
+  await clearLogs();
+
   const now = Date.now();
 
   const meals = buildMealEntries(now);

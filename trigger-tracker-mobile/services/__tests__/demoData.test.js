@@ -14,7 +14,10 @@ jest.mock("@react-native-async-storage/async-storage", () => {
       delete store[key];
       return Promise.resolve();
     }),
-    multiRemove: jest.fn(() => Promise.resolve()),
+    multiRemove: jest.fn((keys) => {
+      for (const key of keys) delete store[key];
+      return Promise.resolve();
+    }),
   };
 });
 
@@ -99,5 +102,16 @@ describe("loadDemoData", () => {
     await loadDemoData();
     const symptoms = await getSymptoms();
     expect(getSymptomFreeStreak(symptoms)).toBe(3);
+  });
+
+  test("replaces existing logs instead of stacking on repeat calls", async () => {
+    const first = await loadDemoData();
+    const second = await loadDemoData();
+    const meals = await getMeals();
+    const symptoms = await getSymptoms();
+    expect(meals).toHaveLength(second.mealCount);
+    expect(symptoms).toHaveLength(second.symptomCount);
+    expect(second.mealCount).toBe(first.mealCount);
+    expect(second.symptomCount).toBe(first.symptomCount);
   });
 });

@@ -138,12 +138,16 @@ export const createUser = async (...args) => {
   const {
     conditions = ["gerd"],
     topSymptoms = [],
-    symptomTiming = [],
     symptomFrequency = null,
-    symptomAfterEating = null,
-    worseLyingDown = null,
     remindersEnabled = true,
     eveningReminderEnabled = false,
+    // Demographics (new in v2 of onboarding)
+    age = null,
+    gender = null,
+    heightCm = null,
+    weightKg = null,
+    heightUnitPreference = "imperial",
+    gerdDuration = null,
     // Triage fields
     severity = "moderate",
     fearFoods = [],
@@ -158,12 +162,16 @@ export const createUser = async (...args) => {
     conditions,
     symptoms: topSymptoms,
     topSymptoms,
-    symptomTiming,
     symptomFrequency,
-    symptomAfterEating,
-    worseLyingDown,
     remindersEnabled,
     eveningReminderEnabled,
+    // Demographics
+    age,
+    gender,
+    heightCm,
+    weightKg,
+    heightUnitPreference,
+    gerdDuration,
     // Triage fields
     severity,
     fearFoods,
@@ -305,6 +313,12 @@ export const clearAllData = async () => {
     "gerdbuddy_onboarding_plan",
     "gerdbuddy_seen_accessories",
   ]);
+};
+
+// Wipes logged meals + symptoms but preserves the user record. Used by
+// the dev "Load demo data" flow so reloading replaces instead of stacking.
+export const clearLogs = async () => {
+  await AsyncStorage.multiRemove([STORAGE_KEYS.MEALS, STORAGE_KEYS.SYMPTOMS]);
 };
 
 // ── Buddy accessory tracking ──────────────────────────────────────────
