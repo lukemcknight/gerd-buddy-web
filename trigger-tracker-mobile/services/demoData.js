@@ -20,8 +20,9 @@ const at = (now, dayOffset, hour, minute = 0) => {
 const buildMealEntries = (now) => {
   const entries = [];
 
-  // Trigger pattern (HIGH): coffee on 10 of the last 14 mornings (skip days -3 and -9
-  // and -12 and -13 to leave gaps that look natural).
+  // Trigger pattern (HIGH): coffee on 10 of the last 14 mornings.
+  // The 4 skipped days (-9, -3, -1, 0) leave natural-looking gaps; today's
+  // (-0) coffee slot is filled by the "Iced coffee" scan-result meal below.
   const coffeeDays = [-13, -12, -11, -10, -8, -7, -6, -5, -4, -2, -1, 0].slice(0, 10);
   for (const day of coffeeDays) {
     entries.push({
