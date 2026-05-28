@@ -83,14 +83,18 @@ describe('ScanResultsScreen', () => {
   });
 
   describe('Paywall bypass', () => {
-    test('respects Expo Go ownership for bypass', () => {
-      expect(source).toContain('appOwnership');
-      expect(source).toContain('expo');
+    test('uses the centralized dev paywall bypass helper', () => {
+      expect(source).toContain('shouldBypassPaywall');
+      expect(source).toContain('../utils/devMode');
     });
 
-    test('respects __DEV__ + EXPO_PUBLIC_BYPASS_PAYWALL flag', () => {
-      expect(source).toContain('__DEV__');
-      expect(source).toContain('EXPO_PUBLIC_BYPASS_PAYWALL');
+    test('dev helper respects __DEV__ + EXPO_PUBLIC_BYPASS_PAYWALL flag', () => {
+      const helper = require('fs').readFileSync(
+        require('path').join(__dirname, '..', '..', 'utils', 'devMode.js'),
+        'utf8'
+      );
+      expect(helper).toContain('__DEV__');
+      expect(helper).toContain('EXPO_PUBLIC_BYPASS_PAYWALL');
     });
 
     test('skips increment when entitlementState is pro', () => {

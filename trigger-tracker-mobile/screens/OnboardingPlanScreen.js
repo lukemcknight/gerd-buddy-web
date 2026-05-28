@@ -17,9 +17,9 @@ import { EVENTS } from "../services/analytics";
 
 // ── Quick triage for existing users ──────────────────────────────────
 const SEVERITY_OPTIONS = [
-  { id: "light", label: "Light — occasional discomfort" },
-  { id: "moderate", label: "Moderate — affects my daily life" },
-  { id: "severe", label: "Severe — constant struggle" },
+  { id: "light", label: "Light, occasional discomfort" },
+  { id: "moderate", label: "Moderate, affects my daily life" },
+  { id: "severe", label: "Severe, constant struggle" },
 ];
 
 function QuickTriageSetup({ onComplete }) {
@@ -276,7 +276,7 @@ export default function OnboardingPlanScreen({ navigation }) {
           </Text>
         </View>
         <View className="flex-row items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-full">
-          <Calendar size={14} color="#3aa27f" />
+          <Calendar size={14} color="#154212" />
           <Text className="text-sm font-semibold text-primary">
             {plan.completedDays.length}/7 days
           </Text>
@@ -326,7 +326,7 @@ export default function OnboardingPlanScreen({ navigation }) {
       <Card className="p-5 border-primary/40">
         <View className="flex-row items-center gap-3 mb-2">
           <View className="w-10 h-10 rounded-xl bg-primary/15 items-center justify-center">
-            <Target size={20} color="#3aa27f" />
+            <Target size={20} color="#154212" />
           </View>
           <View className="flex-1">
             <Text className="text-xs font-medium text-primary uppercase tracking-wide">
@@ -363,7 +363,7 @@ export default function OnboardingPlanScreen({ navigation }) {
             }`}
           >
             {task.completed ? (
-              <CheckCircle size={22} color="#3aa27f" />
+              <CheckCircle size={22} color="#154212" />
             ) : (
               <Circle size={22} color="#9ca3af" />
             )}
@@ -383,7 +383,7 @@ export default function OnboardingPlanScreen({ navigation }) {
       {/* Day complete celebration */}
       {completedCount === totalCount && totalCount > 0 && (
         <Card className="p-5 bg-primary/10 border-primary/40 items-center gap-3">
-          <Award size={32} color="#3aa27f" />
+          <Award size={32} color="#154212" />
           <Text className="text-lg font-bold text-foreground text-center">
             Day {currentDay} complete!
           </Text>

@@ -4,7 +4,7 @@ import { cn } from "../utils/style";
 export const Card = ({ className, children, ...props }) => (
   <View
     className={cn(
-      "bg-card border border-border rounded-2xl shadow-sm",
+      "bg-card border border-border rounded-xl",
       className
     )}
     {...props}

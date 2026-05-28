@@ -81,6 +81,53 @@ describe('triggerEngine', () => {
       expect(foods).toContain('coffee');
     });
 
+    test('binds cooking modifier + single food into one trigger', () => {
+      // Regression: "grilled" and "chicken" used to be split into two triggers
+      const foods = extractFoods('grilled chicken');
+      expect(foods).toContain('grilled chicken');
+      expect(foods).not.toContain('grilled');
+      expect(foods).not.toContain('chicken');
+    });
+
+    test('binds cooking modifier + multi-word food into one trigger', () => {
+      const foods = extractFoods('grilled chicken breast');
+      expect(foods).toContain('grilled chicken breast');
+      expect(foods).not.toContain('grilled');
+      expect(foods).not.toContain('chicken breast');
+      expect(foods).not.toContain('chicken');
+    });
+
+    test('handles multiple modifier+food groups in one meal', () => {
+      const foods = extractFoods('grilled chicken breast and green beans');
+      expect(foods).toContain('grilled chicken breast');
+      expect(foods).toContain('green beans');
+      expect(foods).not.toContain('green');
+      expect(foods).not.toContain('beans');
+    });
+
+    test('handles common breakfast modifiers (scrambled, fried)', () => {
+      const scrambled = extractFoods('scrambled eggs and toast');
+      expect(scrambled).toContain('scrambled eggs');
+      expect(scrambled).toContain('toast');
+
+      const friedEgg = extractFoods('fried egg on sourdough bread');
+      expect(friedEgg).toContain('fried egg');
+      expect(friedEgg).toContain('sourdough bread');
+    });
+
+    test('drops orphan modifiers with no following food', () => {
+      // "salmon grilled" (unusual word order) should not emit a "grilled" trigger
+      const foods = extractFoods('salmon grilled');
+      expect(foods).toContain('salmon');
+      expect(foods).not.toContain('grilled');
+    });
+
+    test('handles iced coffee / iced latte as bound phrases', () => {
+      const iced = extractFoods('iced coffee for breakfast');
+      expect(iced).toContain('iced coffee');
+      expect(iced).not.toContain('iced');
+    });
+
     test('removes special characters', () => {
       const foods = extractFoods('chicken! rice? pasta...');
       expect(foods).toContain('chicken');

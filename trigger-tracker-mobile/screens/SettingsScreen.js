@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { Alert, Linking, Platform, Pressable, Text, TextInput, View, Switch } from "react-native";
+import { Alert, Linking, Platform, Pressable, StyleSheet, Text, TextInput, View, Switch } from "react-native";
 import {
   Bell, Trash2, Info, ChevronRight, LogOut, Moon, CreditCard, FileText, Shield,
   User, Mail, Heart, MessageSquare, Send, X, Sparkles,
@@ -8,7 +8,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import Screen from "../components/Screen";
 import Button from "../components/Button";
-import Mascot from "../components/Mascot";
+import BrandMark from "../components/BrandMark";
 import { clearAllData, getUser, saveUser } from "../services/storage";
 import { loadDemoData } from "../services/demoData";
 import { getSubscriptionStatus } from "../services/revenuecat";
@@ -24,29 +24,145 @@ import { getEntitlementState } from "../services/paywallTrigger";
 
 const APP_VERSION = "2.0.0";
 
-const SettingsCard = ({ icon: Icon, iconColor = "#3aa27f", label, subtitle, onPress, right, destructive, children }) => {
+const COLORS = {
+  primary: "#154212",
+  primaryDark: "#0d3a2b",
+  primaryLight: "#ecf5e9",
+  accent: "#9e4132",
+  accentLight: "#fff3ef",
+  background: "#fcf9f8",
+  card: "#ffffff",
+  text: "#1b1c1c",
+  textSecondary: "#72796e",
+  border: "#e5e2d9",
+  muted: "#f0eded",
+  outline: "#c2c9bb",
+  warning: "#774400",
+  warningBorder: "#f4ddbd",
+  warningLight: "#fff5e8",
+  destructive: "#9e4132",
+  destructiveLight: "#fff3ef",
+  white: "#ffffff",
+};
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: COLORS.card,
+    borderColor: COLORS.border,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  settingsCard: {
+    alignItems: "center",
+    backgroundColor: COLORS.card,
+    borderColor: COLORS.border,
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+  },
+  iconWell: {
+    alignItems: "center",
+    borderRadius: 10,
+    height: 40,
+    justifyContent: "center",
+    marginRight: 12,
+    width: 40,
+  },
+  pressed: {
+    opacity: 0.82,
+    transform: [{ scale: 0.99 }],
+  },
+  profilePanel: {
+    alignItems: "center",
+    backgroundColor: COLORS.card,
+    borderColor: COLORS.border,
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: "row",
+    padding: 16,
+  },
+  logoPlate: {
+    alignItems: "center",
+    backgroundColor: COLORS.primaryLight,
+    borderColor: COLORS.border,
+    borderRadius: 18,
+    borderWidth: 1,
+    height: 58,
+    justifyContent: "center",
+    marginRight: 14,
+    width: 58,
+  },
+  statusPill: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  upgradeBanner: {
+    alignItems: "center",
+    backgroundColor: COLORS.primaryDark,
+    borderRadius: 18,
+    flexDirection: "row",
+    padding: 18,
+  },
+  upgradeBadge: {
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.13)",
+    borderColor: "rgba(255, 255, 255, 0.18)",
+    borderRadius: 14,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: "center",
+    marginRight: 14,
+    width: 44,
+  },
+});
+
+const SettingsCard = ({ icon: Icon, iconColor = COLORS.primary, iconBackgroundColor, label, subtitle, onPress, right, destructive, children }) => {
+  const tone = destructive ? COLORS.destructive : iconColor;
+  const wellColor = destructive
+    ? COLORS.destructiveLight
+    : iconBackgroundColor || COLORS.primaryLight;
+
   const content = (
-    <View className="bg-card rounded-2xl px-4 py-4 flex-row items-center">
-      <View className="w-10 h-10 rounded-xl items-center justify-center mr-3 bg-muted/50">
-        <Icon size={20} color={iconColor} />
+    <View style={styles.settingsCard}>
+      <View style={[styles.iconWell, { backgroundColor: wellColor }]}>
+        <Icon size={20} color={tone} />
       </View>
       <View className="flex-1">
-        <Text className={`text-base font-semibold ${destructive ? "text-destructive" : "text-foreground"}`}>
+        <Text
+          className="text-base font-semibold"
+          style={{ color: destructive ? COLORS.destructive : COLORS.text }}
+        >
           {label}
         </Text>
         {subtitle && (
-          <Text className="text-sm text-muted-foreground mt-0.5" numberOfLines={1}>
+          <Text
+            className="text-sm mt-0.5"
+            numberOfLines={1}
+            style={{ color: COLORS.textSecondary }}
+          >
             {subtitle}
           </Text>
         )}
       </View>
-      {right || (onPress && <ChevronRight size={20} color="#c4c4c0" />)}
+      {right || (onPress && <ChevronRight size={20} color={COLORS.textSecondary} />)}
     </View>
   );
   if (children) {
-    return <View className="bg-card rounded-2xl px-4 py-4">{children}</View>;
+    return <View style={[styles.card, { padding: 16 }]}>{children}</View>;
   }
-  if (onPress) return <Pressable onPress={onPress}>{content}</Pressable>;
+  if (onPress) {
+    return (
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => pressed && styles.pressed}
+      >
+        {content}
+      </Pressable>
+    );
+  }
   return content;
 };
 
@@ -233,46 +349,73 @@ export default function SettingsScreen({ navigation }) {
     }
   };
 
+  const profileName = isAuthenticated
+    ? authUser?.email?.split("@")[0]
+    : "Local profile";
+  const profileSubtitle = isAuthenticated
+    ? authUser?.email
+    : "Evidence and reminders stay on this device";
+
   return (
-    <Screen contentClassName="gap-4 pb-8">
+    <Screen contentClassName="gap-5 pb-8">
       {/* Profile header */}
-      <View className="items-center py-4 gap-3">
-        <Mascot size="small" />
-        <View className="items-center">
-          <Text className="text-xl font-bold text-foreground">
-            {isAuthenticated ? authUser?.email?.split("@")[0] : "Buddy"}
+      <View style={styles.profilePanel}>
+        <View style={styles.logoPlate}>
+          <BrandMark variant="dark" size={42} />
+        </View>
+        <View className="flex-1">
+          <Text
+            className="text-xl font-bold"
+            style={{ color: COLORS.primaryDark }}
+          >
+            GERDBuddy
           </Text>
-          {isAuthenticated && (
-            <Text className="text-sm text-muted-foreground">{authUser?.email}</Text>
-          )}
+          <Text className="text-sm font-semibold mt-0.5" style={{ color: COLORS.text }}>
+            {profileName}
+          </Text>
+          <Text className="text-xs mt-0.5" numberOfLines={1} style={{ color: COLORS.textSecondary }}>
+            {profileSubtitle}
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.statusPill,
+            { backgroundColor: isPro ? COLORS.primaryLight : COLORS.muted },
+          ]}
+        >
+          <Text
+            className="text-xs font-bold uppercase"
+            style={{ color: isPro ? COLORS.primary : COLORS.textSecondary }}
+          >
+            {isPro ? "Pro" : "Free"}
+          </Text>
         </View>
       </View>
 
       {/* Upgrade to Pro banner */}
       {!isPro && (
-        <Pressable onPress={() => navigation.navigate("Paywall", { trigger_source: "settings" })}>
-          <View className="bg-primary rounded-2xl px-5 py-4 flex-row items-center justify-between overflow-hidden">
-            <View className="flex-1 z-10">
+        <Pressable
+          onPress={() => navigation.navigate("Paywall", { trigger_source: "settings" })}
+          style={({ pressed }) => pressed && styles.pressed}
+        >
+          <View style={styles.upgradeBanner}>
+            <View style={styles.upgradeBadge}>
+              <CreditCard size={22} color={COLORS.white} />
+            </View>
+            <View className="flex-1">
               <Text className="text-white text-lg font-bold">Upgrade to Pro</Text>
               <Text className="text-white/80 text-sm mt-0.5">
-                Unlimited tracking, full trigger analysis, and more.
+                Unlimited scans, trigger confidence, and doctor-ready reports.
               </Text>
             </View>
-            <View
-              className="absolute right-0 top-0 bottom-0 opacity-10"
-              style={{ width: 120 }}
-            >
-              <View className="absolute -right-4 -top-4 w-28 h-28 rounded-full bg-white" />
-              <View className="absolute right-6 top-8 w-20 h-20 rounded-full bg-white" />
-            </View>
-            <ChevronRight size={22} color="#ffffff" className="z-10" />
+            <ChevronRight size={22} color={COLORS.white} />
           </View>
         </Pressable>
       )}
 
       {/* Notifications */}
-      <View className="gap-3 mt-2">
-        <Text className="text-lg font-bold text-foreground">Notifications</Text>
+      <View className="gap-3">
+        <Text className="text-lg font-bold" style={{ color: COLORS.text }}>Notifications</Text>
         <SettingsCard
           icon={Bell}
           label="Daily Reminders"
@@ -281,40 +424,54 @@ export default function SettingsScreen({ navigation }) {
             <Switch
               value={remindersEnabled}
               onValueChange={handleRemindersToggle}
-              trackColor={{ true: "#3aa27f" }}
+              trackColor={{ false: COLORS.outline, true: COLORS.primary }}
+              thumbColor={COLORS.white}
             />
           }
         />
         <SettingsCard
           icon={Moon}
-          iconColor="#5f6f74"
+          iconColor={COLORS.textSecondary}
+          iconBackgroundColor={COLORS.muted}
           label="Evening Reminder"
           subtitle="Avoid eating 2 hours before bed"
           right={
             <Switch
               value={eveningReminderEnabled}
               onValueChange={handleEveningReminderToggle}
-              trackColor={{ true: "#3aa27f" }}
+              trackColor={{ false: COLORS.outline, true: COLORS.primary }}
+              thumbColor={COLORS.white}
             />
           }
         />
         {!notificationPermission.granted && !notificationPermission.provisional && (
-          <View className="bg-amber-50 rounded-2xl px-4 py-4 gap-3 border border-amber-200">
+          <View
+            className="rounded-xl px-4 py-4 gap-3 border"
+            style={{
+              backgroundColor: COLORS.warningLight,
+              borderColor: COLORS.warningBorder,
+            }}
+          >
             <View className="flex-row items-center gap-2">
-              <Info size={18} color="#b45309" />
-              <Text className="font-semibold text-amber-900">Notifications are off</Text>
+              <Info size={18} color={COLORS.warning} />
+              <Text className="font-semibold" style={{ color: COLORS.warning }}>
+                Notifications are off
+              </Text>
             </View>
-            <Text className="text-sm text-amber-900">
+            <Text className="text-sm" style={{ color: COLORS.warning }}>
               {Platform.OS === "ios"
                 ? "Tap below, then tap Notifications and turn on Allow Notifications."
                 : "Tap below to enable notifications in system settings."}
             </Text>
             <Button
               variant="outline"
-              className="w-full border-amber-300"
+              className="w-full"
+              style={{ borderColor: COLORS.warningBorder }}
               onPress={openNotificationSettings}
             >
-              <Text className="text-foreground font-semibold">Open Settings</Text>
+              <Text className="font-semibold" style={{ color: COLORS.text }}>
+                Open Settings
+              </Text>
             </Button>
           </View>
         )}
@@ -322,8 +479,8 @@ export default function SettingsScreen({ navigation }) {
 
       {/* Account */}
       {isFirebaseConfigured && (
-        <View className="gap-3 mt-2">
-          <Text className="text-lg font-bold text-foreground">Account</Text>
+        <View className="gap-3">
+          <Text className="text-lg font-bold" style={{ color: COLORS.text }}>Account</Text>
           {isAuthenticated ? (
             <>
               <SettingsCard
@@ -333,7 +490,8 @@ export default function SettingsScreen({ navigation }) {
               />
               <SettingsCard
                 icon={LogOut}
-                iconColor="#5f6f74"
+                iconColor={COLORS.textSecondary}
+                iconBackgroundColor={COLORS.muted}
                 label="Sign Out"
                 onPress={() =>
                   confirmAction("Sign out?", "You can sign back in anytime.", handleSignOut)
@@ -350,7 +508,8 @@ export default function SettingsScreen({ navigation }) {
               />
               <SettingsCard
                 icon={Mail}
-                iconColor="#5f6f74"
+                iconColor={COLORS.textSecondary}
+                iconBackgroundColor={COLORS.muted}
                 label="Sign In"
                 onPress={() => navigation.navigate("Login")}
               />
@@ -361,8 +520,8 @@ export default function SettingsScreen({ navigation }) {
 
       {/* Subscription */}
       {isPro && (
-        <View className="gap-3 mt-2">
-          <Text className="text-lg font-bold text-foreground">Subscription</Text>
+        <View className="gap-3">
+          <Text className="text-lg font-bold" style={{ color: COLORS.text }}>Subscription</Text>
           <SettingsCard
             icon={CreditCard}
             label="Manage Subscription"
@@ -370,7 +529,6 @@ export default function SettingsScreen({ navigation }) {
           />
           <SettingsCard
             icon={X}
-            iconColor="#c53030"
             label="Cancel Subscription"
             destructive
             onPress={() => navigation.navigate("CancelSubscription")}
@@ -379,8 +537,8 @@ export default function SettingsScreen({ navigation }) {
       )}
 
       {/* Help */}
-      <View className="gap-3 mt-2">
-        <Text className="text-lg font-bold text-foreground">Help</Text>
+      <View className="gap-3">
+        <Text className="text-lg font-bold" style={{ color: COLORS.text }}>Help</Text>
         <SettingsCard
           icon={Info}
           label="How It Works"
@@ -402,28 +560,40 @@ export default function SettingsScreen({ navigation }) {
           }
         />
         {showFeedbackForm ? (
-          <View className="bg-card rounded-2xl px-4 py-4 gap-3">
+          <View style={[styles.card, { padding: 16 }]} className="gap-3">
             <View className="flex-row items-center justify-between">
-              <Text className="text-base font-semibold text-foreground">Send Feedback</Text>
+              <Text className="text-base font-semibold" style={{ color: COLORS.text }}>
+                Send Feedback
+              </Text>
               <Pressable
                 onPress={() => { setShowFeedbackForm(false); setFeedbackText(""); }}
-                className="w-8 h-8 items-center justify-center rounded-full bg-muted/40"
+                className="w-8 h-8 items-center justify-center rounded-full"
+                style={({ pressed }) => [
+                  { backgroundColor: COLORS.muted },
+                  pressed && styles.pressed,
+                ]}
               >
-                <X size={16} color="#5f6f74" />
+                <X size={16} color={COLORS.textSecondary} />
               </Pressable>
             </View>
-            <Text className="text-sm text-muted-foreground">
+            <Text className="text-sm" style={{ color: COLORS.textSecondary }}>
               Bug reports, feature ideas, or just saying hi — I read every message.
             </Text>
             <TextInput
               value={feedbackText}
               onChangeText={setFeedbackText}
               placeholder="What's on your mind?"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={COLORS.textSecondary}
               multiline
               numberOfLines={4}
               textAlignVertical="top"
-              className="rounded-xl p-3 text-foreground min-h-[100px] bg-background"
+              className="rounded-xl p-3 min-h-[100px]"
+              style={{
+                backgroundColor: COLORS.background,
+                borderColor: COLORS.border,
+                borderWidth: 1,
+                color: COLORS.text,
+              }}
             />
             <Button
               onPress={handleSendFeedback}
@@ -431,7 +601,7 @@ export default function SettingsScreen({ navigation }) {
               className="w-full"
             >
               <View className="flex-row items-center justify-center gap-2">
-                <Send size={16} color="#ffffff" />
+                <Send size={16} color={COLORS.white} />
                 <Text className="text-primary-foreground font-semibold">
                   {isSendingFeedback ? "Opening email..." : "Send Feedback"}
                 </Text>
@@ -449,8 +619,8 @@ export default function SettingsScreen({ navigation }) {
       </View>
 
       {/* Legal */}
-      <View className="gap-3 mt-2">
-        <Text className="text-lg font-bold text-foreground">Legal</Text>
+      <View className="gap-3">
+        <Text className="text-lg font-bold" style={{ color: COLORS.text }}>Legal</Text>
         <SettingsCard
           icon={Shield}
           label="Privacy Policy"
@@ -464,22 +634,24 @@ export default function SettingsScreen({ navigation }) {
       </View>
 
       {/* Disclaimer */}
-      <View className="bg-amber-50/70 rounded-2xl px-4 py-4 mt-2">
-        <Text className="text-sm text-foreground font-semibold">
+      <View
+        className="rounded-xl px-4 py-4 border"
+        style={{ backgroundColor: COLORS.warningLight, borderColor: COLORS.warningBorder }}
+      >
+        <Text className="text-sm font-semibold" style={{ color: COLORS.text }}>
           This app is not medical advice
         </Text>
-        <Text className="text-xs text-muted-foreground leading-relaxed mt-1">
+        <Text className="text-xs leading-relaxed mt-1" style={{ color: COLORS.textSecondary }}>
           GERDBuddy is a personal tracking tool. It helps you spot patterns in your own data — it does not diagnose, treat, or cure any condition. Always talk to your doctor before making changes to your diet or treatment plan.
         </Text>
       </View>
 
       {/* Data */}
-      <View className="gap-3 mt-2">
-        <Text className="text-lg font-bold text-foreground">Data</Text>
+      <View className="gap-3">
+        <Text className="text-lg font-bold" style={{ color: COLORS.text }}>Data</Text>
         {__DEV__ && (
           <SettingsCard
             icon={Sparkles}
-            iconColor="#3aa27f"
             label="Load demo data"
             subtitle="Populates app with sample data for screenshots"
             onPress={() =>
@@ -493,7 +665,6 @@ export default function SettingsScreen({ navigation }) {
         )}
         <SettingsCard
           icon={Trash2}
-          iconColor="#c53030"
           label="Clear All Data"
           destructive
           onPress={() =>
@@ -506,7 +677,8 @@ export default function SettingsScreen({ navigation }) {
         />
         <SettingsCard
           icon={LogOut}
-          iconColor="#5f6f74"
+          iconColor={COLORS.textSecondary}
+          iconBackgroundColor={COLORS.muted}
           label="Start Over"
           onPress={() =>
             confirmAction(
@@ -520,8 +692,12 @@ export default function SettingsScreen({ navigation }) {
 
       {/* Version */}
       <View className="items-center gap-1 pt-4 pb-2">
-        <Text className="text-xs text-muted-foreground/50">GERDBuddy v{APP_VERSION}</Text>
-        <Text className="text-xs text-muted-foreground/50">Built by someone who gets it</Text>
+        <Text className="text-xs" style={{ color: COLORS.textSecondary }}>
+          GERDBuddy v{APP_VERSION}
+        </Text>
+        <Text className="text-xs" style={{ color: COLORS.textSecondary }}>
+          Built by someone who gets it
+        </Text>
       </View>
     </Screen>
   );

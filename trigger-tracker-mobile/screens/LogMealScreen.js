@@ -130,12 +130,11 @@ export default function LogMealScreen({ navigation }) {
       onBack={() => navigation.goBack()}
       icon={
         <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center">
-          <Utensils size={22} color="#3aa27f" />
+          <Utensils size={22} color="#154212" />
         </View>
       }
       submitSlot={
         <SubmitFeedback
-          variant="buddy"
           label="Log Meal"
           disabled={!mealText.trim()}
           onSubmit={handleSubmit}

@@ -73,7 +73,7 @@ export default function CustomerCenterScreen({ navigation }) {
       )}
       {!ready && !error && !isExpoGo && (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="small" color="#3aa27f" />
+          <ActivityIndicator size="small" color="#154212" />
           <Text className="mt-3 text-muted-foreground">Loading Customer Center...</Text>
         </View>
       )}

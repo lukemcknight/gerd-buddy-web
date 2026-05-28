@@ -5,7 +5,7 @@ import { usePostHog } from "posthog-react-native";
 import Screen from "../components/Screen";
 import Card from "../components/Card";
 import Button from "../components/Button";
-import Mascot from "../components/Mascot";
+import BrandMark from "../components/BrandMark";
 import { getDay7Summary } from "../services/onboardingPlan";
 import { EVENTS } from "../services/analytics";
 import { promptForReviewOnEvent } from "../services/reviewPrompt";
@@ -67,7 +67,7 @@ export default function OnboardingDay7SummaryScreen({ navigation }) {
     <Screen contentClassName="gap-6">
       {/* Header */}
       <View className="items-center gap-4 pt-4">
-        <Mascot size="medium" />
+        <BrandMark variant="dark" size={96} />
         <View className="items-center gap-2">
           <Text className="text-3xl font-extrabold text-foreground">
             Week 1 Complete!
@@ -103,7 +103,7 @@ export default function OnboardingDay7SummaryScreen({ navigation }) {
       {/* Patterns */}
       <Card className="p-5">
         <View className="flex-row items-center gap-2 mb-3">
-          <TrendingUp size={18} color="#3aa27f" />
+          <TrendingUp size={18} color="#154212" />
           <Text className="text-base font-semibold text-foreground">
             Early Patterns
           </Text>
@@ -123,7 +123,7 @@ export default function OnboardingDay7SummaryScreen({ navigation }) {
       {/* Recommended Next Step */}
       <Card className="p-5 bg-primary/5 border-primary/20">
         <View className="flex-row items-center gap-2 mb-2">
-          <Target size={18} color="#3aa27f" />
+          <Target size={18} color="#154212" />
           <Text className="text-base font-semibold text-foreground">
             Recommended Next Step
           </Text>

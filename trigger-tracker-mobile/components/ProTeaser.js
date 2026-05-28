@@ -9,7 +9,7 @@ export const ProTeaser = ({ title, description }) => {
   return (
     <View className="p-4 rounded-xl border bg-primary/5 border-primary/20">
       <View className="flex-row items-center gap-2 mb-1">
-        <Sparkles size={16} color="#3aa27f" />
+        <Sparkles size={16} color="#154212" />
         <Text className="font-semibold text-foreground">{title}</Text>
       </View>
       <Text className="text-sm text-muted-foreground mb-3">{description}</Text>

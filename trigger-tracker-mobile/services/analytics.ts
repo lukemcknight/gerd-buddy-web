@@ -64,12 +64,23 @@ export const EVENTS = {
   // Paywall
   PAYWALL_TRIGGERED: "paywall_triggered",
   PAYWALL_VIEWED: "paywall_viewed",
+  PRE_PAYWALL_PLAN_VIEWED: "pre_paywall_plan_viewed",
+  PRE_PAYWALL_TRY_FREE_VIEWED: "pre_paywall_try_free_viewed",
+  PRE_PAYWALL_TIMELINE_VIEWED: "pre_paywall_timeline_viewed",
+  PRE_PAYWALL_CAROUSEL_SLIDE_VIEWED: "pre_paywall_carousel_slide_viewed",
   SUBSCRIPTION_ATTEMPT: "subscription_attempt",
   SUBSCRIPTION_CANCELLED: "subscription_cancelled",
   SUBSCRIPTION_FAILED: "subscription_failed",
   TRIAL_STARTED: "trial_started",
   PURCHASE_COMPLETED: "purchase_completed",
   PURCHASE_RESTORED: "purchase_restored",
+
+  // Visit Prep + AI Chat
+  VISIT_PREP_GENERATED: "visit_prep_generated",
+  VISIT_PREP_SHARED: "visit_prep_shared",
+  AI_CHAT_OPENED: "ai_chat_opened",
+  AI_CHAT_MESSAGE_SENT: "ai_chat_message_sent",
+  AI_CHAT_QUOTA_REACHED: "ai_chat_quota_reached",
 
   // Cancellation flow
   CANCEL_FLOW_STARTED: "cancel_flow_started",

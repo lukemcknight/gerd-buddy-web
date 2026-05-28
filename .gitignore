@@ -45,6 +45,11 @@ users.json
 # Build artifacts
 *.ipa
 
+# Financials / spreadsheets — never commit
+*.xlsx
+*.xls
+*.numbers
+
 # Skill/agent working files
 .superpowers/
 docs/superpowers/

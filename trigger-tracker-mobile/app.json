@@ -2,7 +2,7 @@
   "expo": {
     "name": "GERD Buddy",
     "slug": "trigger-tracker",
-    "version": "3.3.0",
+    "version": "4.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#fcf9f8"
     },
     "ios": {
       "supportsTablet": true,
@@ -27,7 +27,7 @@
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0d3a2b"
       },
       "edgeToEdgeEnabled": true
     },

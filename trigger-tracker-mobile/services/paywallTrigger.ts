@@ -1,5 +1,6 @@
 import { getUser, getMeals, getSymptoms, getScanCount7d, getDaysSinceStart } from "./storage";
 import { getOnboardingPlan, getCurrentPlanDay } from "./onboardingPlan";
+import { shouldBypassPaywall } from "../utils/devMode";
 
 // ── Feature flags (defaults; override via remote config if available) ──
 
@@ -35,6 +36,10 @@ export const shouldShowPaywall = async (
   try {
     const user = await getUser();
     if (!user) return { show: false, source, reason: "no_user" };
+
+    if (shouldBypassPaywall) {
+      return { show: false, source, reason: "dev_bypass" };
+    }
 
     // Already subscribed — never show
     if (user.subscriptionActive) {
@@ -127,6 +132,7 @@ export const ENTITLEMENTS = {
 export const getEntitlementState = async (): Promise<"free" | "pro" | "trial"> => {
   const user = await getUser();
   if (!user) return "free";
+  if (shouldBypassPaywall) return "pro";
   if (user.subscriptionActive) return "pro";
   // Check trial
   const now = Date.now();

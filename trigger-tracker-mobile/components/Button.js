@@ -2,7 +2,7 @@ import { Pressable, Text } from "react-native";
 import { cn } from "../utils/style";
 
 const base =
-  "flex-row items-center justify-center rounded-xl px-4 py-3 active:opacity-90";
+  "flex-row items-center justify-center rounded-full px-4 py-3 active:opacity-90";
 
 const variants = {
   primary: "bg-primary",

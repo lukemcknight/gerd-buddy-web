@@ -26,12 +26,12 @@ describe("mapToTrafficLight", () => {
 });
 
 describe("extractReasonTags", () => {
-  it("extracts tags from reasons text", () => {
+  it("extracts tags from detected food names for high-risk meals", () => {
     const result = {
       score: 4,
       label: "High",
       confidence: 0.8,
-      detectedFoods: [],
+      detectedFoods: ["fried chicken", "spicy buffalo sauce", "creamy ranch"],
       reasons: ["This meal contains high-fat content and spicy ingredients"],
       suggestions: ["Try grilled instead of fried"],
       saferSwaps: [],
@@ -43,12 +43,12 @@ describe("extractReasonTags", () => {
     expect(tags).toContain("fried");
   });
 
-  it("detects caffeine", () => {
+  it("detects caffeine from detected food names", () => {
     const result = {
       score: 3,
       label: "Moderate",
       confidence: 0.7,
-      detectedFoods: [],
+      detectedFoods: ["coffee"],
       reasons: ["Contains caffeine from coffee"],
       suggestions: [],
       saferSwaps: [],
@@ -56,6 +56,24 @@ describe("extractReasonTags", () => {
 
     const tags = extractReasonTags(result);
     expect(tags).toContain("caffeine");
+  });
+
+  it("does not extract trigger tags when the AI rated the food as safe", () => {
+    // Regression: AI says "non-acidic vegetables are well-tolerated" for grilled
+    // chicken + green beans. Naive keyword matcher used to extract "acidic"
+    // from the negated reasoning text, contradicting the safe verdict.
+    const result = {
+      score: 1,
+      label: "Low",
+      confidence: 0.9,
+      detectedFoods: ["grilled chicken breast", "green beans"],
+      reasons: ["Lean protein and non-acidic vegetables are well-tolerated"],
+      suggestions: ["Avoid pairing with spicy or high-fat sauces"],
+      saferSwaps: [],
+    };
+
+    const tags = extractReasonTags(result);
+    expect(tags).toEqual([]);
   });
 
   it("detects personal triggers", () => {

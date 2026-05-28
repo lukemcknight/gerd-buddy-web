@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { InputAccessoryView, Keyboard, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ArrowLeft, ArrowRight, Check, X, Star, Heart, Shield, TrendingUp,
   Clock, CalendarDays, Activity, Utensils, Moon, Bell, Pill, AlertTriangle,
-  Flame, Zap, Scan,
+  Flame, Zap, Scan, FileText,
 } from "lucide-react-native";
 import Animated, {
   useSharedValue, useAnimatedStyle, withTiming, FadeInDown,
@@ -12,46 +12,42 @@ import Animated, {
 import * as Haptics from "expo-haptics";
 import * as StoreReview from "expo-store-review";
 import { usePostHog } from "posthog-react-native";
-import { createUser } from "../services/storage";
+import { createUser, saveUser } from "../services/storage";
 import { configureRevenueCat } from "../services/revenuecat";
 import { registerForPushNotifications, syncReminderNotifications } from "../services/notifications";
 import { showToast } from "../utils/feedback";
 import { generatePlan, getFearFoodOptions, MEAL_TIME_OPTIONS, MEDS_OPTIONS } from "../services/onboardingPlan";
 import { EVENTS } from "../services/analytics";
+import { isNewPaywallFunnelEnabled } from "../services/featureFlags";
+import { shouldBypassPaywall } from "../utils/devMode";
+import BrandMark from "../components/BrandMark";
 
 // -- Theme --
 
 const COLORS = {
-  primary: "#3aa27f",
-  primaryLight: "#e6f4ef",
-  primaryDark: "#2d8a6b",
-  accent: "#f07c52",
-  accentLight: "#ffe7dc",
-  bg: "#f6fbf8",
+  primary: "#154212",
+  primaryLight: "#ecf5e9",
+  primaryDark: "#0d3a2b",
+  accent: "#9e4132",
+  accentLight: "#fff3ef",
+  bg: "#fcf9f8",
   card: "#ffffff",
-  text: "#1f2a30",
-  textSecondary: "#5f6f74",
-  border: "#e1e8e3",
-  muted: "#edf2ee",
-  danger: "#c44040",
-  dangerLight: "#FEE2E2",
-  gold: "#D4A439",
+  text: "#1b1c1c",
+  textSecondary: "#72796e",
+  border: "#e5e2d9",
+  muted: "#f0eded",
+  danger: "#9e4132",
+  dangerLight: "#fff3ef",
+  gold: "#b87518",
+  goldLight: "#fff5e8",
+  outline: "#c2c9bb",
+  ink: "#303030",
 };
 
-const mascotExcited = require("../assets/mascot/turtle_excited.png");
-const mascotHappy = require("../assets/mascot/turtle_happy.png");
-const mascotContent = require("../assets/mascot/turtle_content.png");
-const mascotSad = require("../assets/mascot/turtle_sad.png");
-const mascotDefault = require("../assets/mascot/turtle_shell_standing.png");
-
-const TOTAL_STEPS = 15; // steps 0-14
+const TOTAL_STEPS = 16; // steps 0-15
+const KEYBOARD_DONE_ID = "onboarding-numeric-done";
 
 // -- Quiz data --
-
-const conditionOptions = [
-  { id: "gerd", label: "Acid Reflux / GERD" },
-  { id: "gastritis", label: "Gastritis" },
-];
 
 const severityOptions = [
   { id: "light", label: "Light", description: "Occasional discomfort, manageable" },
@@ -59,11 +55,29 @@ const severityOptions = [
   { id: "severe", label: "Severe", description: "Frequent, intense symptoms" },
 ];
 
-const symptomTimingOptions = [
-  { id: "morning", label: "Morning" },
-  { id: "afternoon", label: "Afternoon" },
-  { id: "evening", label: "Evening" },
-  { id: "night", label: "Night / while sleeping" },
+const genderOptions = [
+  { id: "male", label: "Male" },
+  { id: "female", label: "Female" },
+  { id: "other", label: "Other" },
+];
+
+const ageOptions = [
+  { id: "under_18", label: "Under 18" },
+  { id: "18_24", label: "18-24" },
+  { id: "25_29", label: "25-29" },
+  { id: "30_34", label: "30-34" },
+  { id: "35_44", label: "35-44" },
+  { id: "45_54", label: "45-54" },
+  { id: "55_64", label: "55-64" },
+  { id: "65_plus", label: "65+" },
+];
+
+const gerdDurationOptions = [
+  { id: "less_6m", label: "Less than 6 months" },
+  { id: "6_12m", label: "6-12 months" },
+  { id: "1_2y", label: "1-2 years" },
+  { id: "2_5y", label: "2-5 years" },
+  { id: "5_plus_y", label: "5+ years" },
 ];
 
 const symptomFrequencyOptions = [
@@ -91,6 +105,14 @@ const gastritisSymptomOptions = [
   { id: "indigestion", label: "Indigestion / burning" },
 ];
 
+const goalOptions = [
+  { id: "identify_triggers", label: "Identify my trigger foods" },
+  { id: "reduce_symptoms", label: "Reduce daily symptoms" },
+  { id: "sleep_better", label: "Sleep without heartburn" },
+  { id: "eat_without_fear", label: "Eat without fear" },
+  { id: "off_medication", label: "Stop relying on medication" },
+];
+
 const bothSymptomOptions = [
   { id: "heartburn", label: "Heartburn" },
   { id: "stomach_pain", label: "Stomach pain / cramping" },
@@ -100,19 +122,6 @@ const bothSymptomOptions = [
   { id: "sour_taste", label: "Sour taste" },
   { id: "throat_irritation", label: "Throat irritation / cough" },
   { id: "loss_of_appetite", label: "Loss of appetite" },
-];
-
-const afterEatingOptions = [
-  { id: "within_30", label: "Yes, within 30 minutes" },
-  { id: "within_2h", label: "Yes, within 1-2 hours" },
-  { id: "after_3h", label: "Mostly later (3+ hours)" },
-  { id: "not_sure", label: "Not sure" },
-];
-
-const lyingDownOptions = [
-  { id: "yes", label: "Yes" },
-  { id: "no", label: "No" },
-  { id: "sometimes", label: "Sometimes" },
 ];
 
 const haptic = () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -131,8 +140,8 @@ function ProgressBar({ step }) {
   }));
 
   return (
-    <View style={{ height: 4, borderRadius: 2, backgroundColor: COLORS.border, flex: 1, marginLeft: 12 }}>
-      <Animated.View style={[{ height: 4, borderRadius: 2, backgroundColor: COLORS.primary }, barStyle]} />
+    <View style={{ height: 5, borderRadius: 999, backgroundColor: COLORS.border, flex: 1, marginLeft: 12, overflow: "hidden" }}>
+      <Animated.View style={[{ height: 5, borderRadius: 999, backgroundColor: COLORS.primary }, barStyle]} />
     </View>
   );
 }
@@ -144,8 +153,8 @@ function OptionCard({ label, description, selected, onPress, showCheck, icon: Ic
     <Pressable
       onPress={() => { haptic(); onPress(); }}
       style={{
-        backgroundColor: selected ? COLORS.primary : COLORS.card,
-        borderRadius: 14,
+        backgroundColor: selected ? COLORS.primaryLight : COLORS.card,
+        borderRadius: 12,
         paddingVertical: 16,
         paddingHorizontal: 20,
         flexDirection: "row",
@@ -153,30 +162,48 @@ function OptionCard({ label, description, selected, onPress, showCheck, icon: Ic
         justifyContent: "space-between",
         borderWidth: 1,
         borderColor: selected ? COLORS.primary : COLORS.border,
+        shadowColor: selected ? COLORS.primaryDark : "transparent",
+        shadowOpacity: selected ? 0.08 : 0,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 3 },
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 14, flex: 1 }}>
         {Icon && (
           <View style={{
             width: 36, height: 36, borderRadius: 10,
-            backgroundColor: selected ? "rgba(255,255,255,0.2)" : COLORS.primaryLight,
+            backgroundColor: selected ? COLORS.card : COLORS.primaryLight,
             alignItems: "center", justifyContent: "center",
           }}>
-            <Icon size={18} color={selected ? "#FFFFFF" : COLORS.primary} />
+            <Icon size={18} color={COLORS.primary} />
           </View>
         )}
         <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: "600", color: selected ? "#FFFFFF" : COLORS.text }}>
+          <Text style={{ fontSize: 16, fontWeight: "700", color: COLORS.text }}>
             {label}
           </Text>
           {description && (
-            <Text style={{ fontSize: 13, color: selected ? "rgba(255,255,255,0.7)" : COLORS.textSecondary, marginTop: 2 }}>
+            <Text style={{ fontSize: 13, color: COLORS.textSecondary, marginTop: 2, lineHeight: 18 }}>
               {description}
             </Text>
           )}
         </View>
       </View>
-      {showCheck && selected && <Check size={18} color="#FFFFFF" strokeWidth={3} />}
+      {selected && (
+        <View
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            backgroundColor: COLORS.primary,
+            alignItems: "center",
+            justifyContent: "center",
+            marginLeft: 10,
+          }}
+        >
+          <Check size={14} color="#ffffff" strokeWidth={3} />
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -190,14 +217,16 @@ function ContinueButton({ onPress, disabled, label = "Continue" }) {
       disabled={disabled}
       style={{
         backgroundColor: disabled ? COLORS.muted : COLORS.primary,
-        borderRadius: 16,
-        paddingVertical: 18,
+        borderRadius: 999,
+        minHeight: 56,
+        paddingVertical: 16,
         alignItems: "center",
+        justifyContent: "center",
         shadowColor: disabled ? "transparent" : COLORS.primary,
-        shadowOpacity: disabled ? 0 : 0.3,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 4 },
-        elevation: disabled ? 0 : 4,
+        shadowOpacity: disabled ? 0 : 0.16,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 5 },
+        elevation: disabled ? 0 : 3,
       }}
     >
       <Text style={{ fontSize: 17, fontWeight: "700", color: disabled ? COLORS.textSecondary : "#FFFFFF" }}>
@@ -212,7 +241,7 @@ function ContinueButton({ onPress, disabled, label = "Continue" }) {
 function StatCard({ value, label, color = COLORS.primary }) {
   return (
     <View style={{
-      flex: 1, backgroundColor: COLORS.card, borderRadius: 16, padding: 16,
+      flex: 1, backgroundColor: COLORS.card, borderRadius: 12, padding: 16,
       alignItems: "center", gap: 4, borderWidth: 1, borderColor: COLORS.border,
     }}>
       <Text style={{ fontSize: 28, fontWeight: "900", color }}>{value}</Text>
@@ -230,8 +259,10 @@ function BackButton({ onPress }) {
     <Pressable
       onPress={() => { haptic(); onPress(); }}
       style={{
-        width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.muted,
+        width: 40, height: 40, borderRadius: 20, backgroundColor: COLORS.card,
         alignItems: "center", justifyContent: "center",
+        borderWidth: 1,
+        borderColor: COLORS.border,
       }}
     >
       <ArrowLeft size={20} color={COLORS.text} />
@@ -245,15 +276,21 @@ function WelcomeStep({ onStart }) {
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }}>
       <View style={{
-        width: 220, height: 220, borderRadius: 110,
-        backgroundColor: COLORS.primaryLight,
+        width: 204, height: 204, borderRadius: 102,
+        backgroundColor: COLORS.card,
+        borderWidth: 1,
+        borderColor: COLORS.border,
         alignItems: "center", justifyContent: "center", marginBottom: 32,
+        shadowColor: COLORS.primaryDark,
+        shadowOpacity: 0.08,
+        shadowRadius: 18,
+        shadowOffset: { width: 0, height: 8 },
       }}>
-        <Image source={mascotDefault} style={{ width: 160, height: 160 }} resizeMode="contain" />
+        <BrandMark variant="dark" size={146} />
       </View>
 
       <Text style={{
-        fontSize: 34, fontWeight: "900", color: COLORS.text,
+        fontSize: 36, fontWeight: "900", color: COLORS.primary,
         textAlign: "center", letterSpacing: -0.5, lineHeight: 40,
       }}>
         GERDBuddy
@@ -262,7 +299,7 @@ function WelcomeStep({ onStart }) {
         fontSize: 16, color: COLORS.textSecondary,
         textAlign: "center", marginTop: 12, lineHeight: 22,
       }}>
-        Your calm companion for{"\n"}acid reflux & gastritis
+        Build reflux trigger evidence{"\n"}from meals and symptoms
       </Text>
 
       <View style={{ width: "100%", marginTop: 48, gap: 12 }}>
@@ -270,27 +307,43 @@ function WelcomeStep({ onStart }) {
           fontSize: 14, color: COLORS.textSecondary,
           textAlign: "center", lineHeight: 20, marginBottom: 8,
         }}>
-          Answer a few quick questions (~60 seconds){"\n"}and we'll build your personalized 7-day plan.
+          Answer a few quick questions (~60 seconds){"\n"}and we'll prepare your trigger plan.
         </Text>
         <Pressable
           onPress={() => { haptic(); onStart(); }}
           style={{
-            backgroundColor: COLORS.primary, borderRadius: 16,
-            paddingVertical: 20, alignItems: "center",
+            backgroundColor: COLORS.primary, borderRadius: 999,
+            minHeight: 58,
+            paddingVertical: 18, alignItems: "center",
             flexDirection: "row", justifyContent: "center", gap: 10,
-            shadowColor: COLORS.primary, shadowOpacity: 0.35,
-            shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 6,
+            shadowColor: COLORS.primary, shadowOpacity: 0.18,
+            shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 4,
           }}
         >
           <Text style={{ fontSize: 18, fontWeight: "700", color: "#FFFFFF" }}>Get Started</Text>
           <ArrowRight size={20} color="#FFFFFF" />
         </Pressable>
-        <Text style={{
-          fontSize: 12, color: COLORS.textSecondary,
-          textAlign: "center", marginTop: 4, opacity: 0.6,
-        }}>
-          Educational purposes only. Not medical advice.
-        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 18,
+            marginTop: 4,
+          }}
+        >
+          <Pressable
+            onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/terms")}
+            hitSlop={8}
+          >
+            <Text style={{ color: COLORS.textSecondary, fontSize: 12 }}>Terms</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => Linking.openURL("https://gerd-buddy-web.vercel.app/privacy")}
+            hitSlop={8}
+          >
+            <Text style={{ color: COLORS.textSecondary, fontSize: 12 }}>Privacy</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -317,7 +370,7 @@ function HealthStatsStep() {
         </View>
 
         <View style={{
-          backgroundColor: COLORS.card, borderRadius: 16, padding: 20, gap: 16,
+          backgroundColor: COLORS.card, borderRadius: 14, padding: 20, gap: 16,
           borderWidth: 1, borderColor: COLORS.border,
         }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -357,9 +410,9 @@ function HealthStatsStep() {
           <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
             <View style={{
               width: 40, height: 40, borderRadius: 12,
-              backgroundColor: "#FFF3E0", alignItems: "center", justifyContent: "center",
+              backgroundColor: COLORS.goldLight, alignItems: "center", justifyContent: "center",
             }}>
-              <Zap size={20} color="#E65100" />
+              <Zap size={20} color={COLORS.gold} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 15, fontWeight: "700", color: COLORS.text }}>Long-Term Healing</Text>
@@ -370,15 +423,6 @@ function HealthStatsStep() {
           </View>
         </View>
 
-        <View style={{
-          backgroundColor: COLORS.primaryLight, borderRadius: 16, padding: 20,
-          flexDirection: "row", alignItems: "center", gap: 14,
-        }}>
-          <Image source={mascotContent} style={{ width: 48, height: 48 }} resizeMode="contain" />
-          <Text style={{ fontSize: 14, color: COLORS.text, flex: 1, fontWeight: "500", lineHeight: 20 }}>
-            GERDBuddy helps you identify your unique triggers and build a personalized healing plan.
-          </Text>
-        </View>
       </View>
     </ScrollView>
   );
@@ -396,8 +440,8 @@ function ValuePropStep() {
   const withItems = [
     "Scan meals and track triggers instantly",
     "Identify your personal trigger patterns",
-    "Get actionable insights after every meal",
-    "Build a diet that works for you",
+    "Ask an AI that knows YOUR data",
+    "Walk into your GI visit with answers",
   ];
 
   return (
@@ -408,17 +452,25 @@ function ValuePropStep() {
         </Text>
 
         <View style={{
-          backgroundColor: COLORS.card, borderRadius: 20, padding: 20, gap: 20,
+          backgroundColor: COLORS.card, borderRadius: 14, padding: 20, gap: 20,
           borderWidth: 1, borderColor: COLORS.border,
         }}>
           <View style={{ flexDirection: "row", gap: 12 }}>
             {/* Without GerdBuddy */}
             <View style={{ flex: 1, gap: 12 }}>
               <View style={{ alignItems: "center" }}>
-                <Image source={mascotSad} style={{ width: 48, height: 48 }} resizeMode="contain" />
+                <View style={{
+                  width: 48, height: 48, borderRadius: 12,
+                  backgroundColor: "#fff3ef", borderWidth: 1, borderColor: "#ffd4c9",
+                  alignItems: "center", justifyContent: "center",
+                }}>
+                  <Activity size={24} color="#9e4132" strokeWidth={2} />
+                </View>
               </View>
               <View style={{
                 backgroundColor: COLORS.dangerLight, borderRadius: 10,
+                borderWidth: 1,
+                borderColor: "#ffd4c9",
                 paddingVertical: 8, alignItems: "center",
               }}>
                 <Text style={{ fontSize: 13, fontWeight: "700", color: COLORS.danger }}>Without GERDBuddy</Text>
@@ -440,10 +492,18 @@ function ValuePropStep() {
             {/* With GerdBuddy */}
             <View style={{ flex: 1, gap: 12 }}>
               <View style={{ alignItems: "center" }}>
-                <Image source={mascotExcited} style={{ width: 48, height: 48 }} resizeMode="contain" />
+                <View style={{
+                  width: 48, height: 48, borderRadius: 12,
+                  backgroundColor: "#ecf5e9", borderWidth: 1, borderColor: "#cfdcca",
+                  alignItems: "center", justifyContent: "center",
+                }}>
+                  <FileText size={24} color="#154212" strokeWidth={2} />
+                </View>
               </View>
               <View style={{
                 backgroundColor: COLORS.primaryLight, borderRadius: 10,
+                borderWidth: 1,
+                borderColor: "#cfdcca",
                 paddingVertical: 8, alignItems: "center",
               }}>
                 <Text style={{ fontSize: 13, fontWeight: "700", color: COLORS.primary }}>With GERDBuddy</Text>
@@ -506,17 +566,23 @@ function LoadingStep({ onComplete }) {
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center", gap: 40 }}>
       <View style={{
         width: 160, height: 160, borderRadius: 80,
-        backgroundColor: COLORS.primaryLight,
+        backgroundColor: COLORS.card,
+        borderWidth: 1,
+        borderColor: COLORS.border,
         alignItems: "center", justifyContent: "center",
+        shadowColor: COLORS.primaryDark,
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+        shadowOffset: { width: 0, height: 8 },
       }}>
-        <Image source={mascotHappy} style={{ width: 110, height: 110 }} resizeMode="contain" />
+        <BrandMark variant="dark" size={112} />
       </View>
 
       <Text style={{
-        fontSize: 28, fontWeight: "900", color: COLORS.text,
+        fontSize: 28, fontWeight: "900", color: COLORS.primary,
         textAlign: "center", lineHeight: 34,
       }}>
-        Setting up your{"\n"}healing profile...
+        Setting up your{"\n"}trigger evidence...
       </Text>
 
       <View style={{ gap: 16, width: "100%", paddingHorizontal: 32 }}>
@@ -531,10 +597,12 @@ function LoadingStep({ onComplete }) {
           >
             <View style={{
               width: 36, height: 36, borderRadius: 10,
-              backgroundColor: COLORS.primary,
+              backgroundColor: COLORS.primaryLight,
               alignItems: "center", justifyContent: "center",
+              borderWidth: 1,
+              borderColor: "#cfdcca",
             }}>
-              <item.icon size={18} color="#FFFFFF" />
+              <item.icon size={18} color={COLORS.primary} />
             </View>
             <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text }}>{item.label}</Text>
           </Animated.View>
@@ -548,18 +616,44 @@ function LoadingStep({ onComplete }) {
 
 export default function OnboardingScreen({ navigation, route }) {
   const [step, setStep] = useState(0);
-  const [conditions, setConditions] = useState([]);
+  // Keyboard visibility — used to show a floating Done pill on the
+  // height/weight step so users on Android (no InputAccessoryView) and any
+  // iOS user who doesn't notice the accessory bar have a visible way out.
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+  // Gate the Continue button on the Rate Us step (12) for 5 seconds so
+  // users have a beat to interact with the Apple system rating sheet
+  // before being able to skip past it.
+  const [canContinueRating, setCanContinueRating] = useState(false);
+  const [age, setAge] = useState(null);
+  const [gender, setGender] = useState(null);
+  const [heightUnit, setHeightUnit] = useState("imperial");
+  const [heightFeet, setHeightFeet] = useState("");
+  const [heightInches, setHeightInches] = useState("");
+  const [heightCm, setHeightCm] = useState("");
+  const [weightLbs, setWeightLbs] = useState("");
+  const [weightKg, setWeightKg] = useState("");
+  const [gerdDuration, setGerdDuration] = useState(null);
+  // Conditions step was removed from the quiz; defaulted to GERD which is the
+  // app's positioning. Downstream code (getSymptomOptions, createUser,
+  // generatePlan) already handles single-condition arrays correctly.
+  const [conditions] = useState(["gerd"]);
   const [severity, setSeverity] = useState(null);
-  const [symptomTiming, setSymptomTiming] = useState([]);
   const [symptomFrequency, setSymptomFrequency] = useState(null);
   const [topSymptoms, setTopSymptoms] = useState([]);
-  const [symptomAfterEating, setSymptomAfterEating] = useState(null);
-  const [worseLyingDown, setWorseLyingDown] = useState(null);
   const [fearFoods, setFearFoods] = useState([]);
   const [customFearFood, setCustomFearFood] = useState("");
   const [customFearFoods, setCustomFearFoods] = useState([]);
   const [mealTimes, setMealTimes] = useState([]);
   const [medsStatus, setMedsStatus] = useState(null);
+  const [goal, setGoal] = useState(null);
   const [remindersEnabled, setRemindersEnabled] = useState(true);
   const [eveningReminderEnabled, setEveningReminderEnabled] = useState(true);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -572,10 +666,14 @@ export default function OnboardingScreen({ navigation, route }) {
   }, []);
 
   useEffect(() => {
-    if (step === 1) posthog?.capture(EVENTS.ONBOARDING_TRIAGE_STARTED);
+    if (step === 5) posthog?.capture(EVENTS.ONBOARDING_TRIAGE_STARTED);
     if (step === 12) {
       posthog?.capture("onboarding_rating_prompted");
       StoreReview.requestReview().catch(() => {});
+      setCanContinueRating(false);
+      const timer = setTimeout(() => setCanContinueRating(true), 4000);
+      if (step > 0) posthog?.capture("onboarding_step_completed", { step: step - 1 });
+      return () => clearTimeout(timer);
     }
     if (step > 0) posthog?.capture("onboarding_step_completed", { step: step - 1 });
   }, [step]);
@@ -628,13 +726,30 @@ export default function OnboardingScreen({ navigation, route }) {
     setIsCompleting(true);
     try {
       const reminderSettings = await normalizeReminderSettings();
+
+      const heightCmNormalized =
+        heightUnit === "imperial"
+          ? Math.round(
+              (parseInt(heightFeet || "0", 10) * 12 + parseInt(heightInches || "0", 10)) * 2.54
+            ) || null
+          : parseInt(heightCm || "0", 10) || null;
+      const weightKgNormalized =
+        heightUnit === "imperial"
+          ? Math.round(parseInt(weightLbs || "0", 10) * 0.453592) || null
+          : parseInt(weightKg || "0", 10) || null;
+
+      const goalLabel = goal ? (goalOptions.find((o) => o.id === goal)?.label ?? null) : null;
+
       const user = await createUser({
         conditions: conditions.length > 0 ? conditions : ["gerd"],
         topSymptoms,
-        symptomTiming,
         symptomFrequency,
-        symptomAfterEating,
-        worseLyingDown,
+        age,
+        gender,
+        heightCm: heightCmNormalized,
+        weightKg: weightKgNormalized,
+        heightUnitPreference: heightUnit,
+        gerdDuration,
         remindersEnabled: reminderSettings.remindersEnabled,
         eveningReminderEnabled: reminderSettings.eveningReminderEnabled,
         severity: severity || "moderate",
@@ -642,6 +757,8 @@ export default function OnboardingScreen({ navigation, route }) {
         customFearFoods,
         mealTimes,
         medsStatus: medsStatus || "none",
+        goal,
+        goalLabel,
       });
 
       await syncReminderNotifications({
@@ -649,9 +766,13 @@ export default function OnboardingScreen({ navigation, route }) {
         eveningReminderEnabled: reminderSettings.eveningReminderEnabled,
       }).catch((err) => console.warn("Sync reminders failed:", err));
 
-      await configureRevenueCat(user.id).catch((err) =>
-        console.warn("RevenueCat setup failed:", err)
-      );
+      if (shouldBypassPaywall) {
+        await saveUser({ ...user, subscriptionActive: true });
+      } else {
+        await configureRevenueCat(user.id).catch((err) =>
+          console.warn("RevenueCat setup failed:", err)
+        );
+      }
 
       const plan = await generatePlan({
         conditions: conditions.length > 0 ? conditions : ["gerd"],
@@ -670,6 +791,11 @@ export default function OnboardingScreen({ navigation, route }) {
         symptom_frequency: symptomFrequency,
         top_symptoms_count: topSymptoms.length,
         reminders_enabled: reminderSettings.remindersEnabled,
+        age_bracket: age,
+        gender,
+        gerd_duration: gerdDuration,
+        height_cm: heightCmNormalized,
+        weight_kg: weightKgNormalized,
       });
       posthog?.capture(EVENTS.ONBOARDING_PLAN_GENERATED, {
         severity_level: severity,
@@ -685,9 +811,18 @@ export default function OnboardingScreen({ navigation, route }) {
         top_symptoms: topSymptoms,
         severity_level: severity,
         meds_status: medsStatus,
+        age_bracket: age,
+        gender,
+        gerd_duration: gerdDuration,
       });
 
-      navigation.replace("Paywall");
+      if (shouldBypassPaywall) {
+        navigation.replace("Main");
+      } else if (isNewPaywallFunnelEnabled()) {
+        navigation.replace("PrePaywallPlan");
+      } else {
+        navigation.replace("Paywall");
+      }
     } catch (error) {
       console.warn("Onboarding completion failed:", error);
       showToast("Something went wrong", "Please try again.");
@@ -713,8 +848,8 @@ export default function OnboardingScreen({ navigation, route }) {
     );
   }
 
-  // -- Step 14: Loading --
-  if (step === 14) {
+  // -- Step 15: Loading --
+  if (step === 15) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.bg }}>
         <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingTop: 8 }}>
@@ -736,30 +871,277 @@ export default function OnboardingScreen({ navigation, route }) {
           <ProgressBar step={step} />
         </View>
 
-        {/* Step 1: Conditions */}
+        {/* Step 1: Age */}
         {step === 1 && (
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
-              What are you dealing with?
+              How old are you?
             </Text>
-            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>Select all that apply</Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>
+              This is used to make your custom plan more accurate.
+            </Text>
             <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
-              {conditionOptions.map((opt) => (
+              {ageOptions.map((opt) => (
                 <OptionCard
                   key={opt.id} label={opt.label}
-                  selected={conditions.includes(opt.id)} showCheck
-                  onPress={() => toggle(setConditions, opt.id)}
+                  selected={age === opt.id}
+                  onPress={() => setAge(opt.id)}
                 />
               ))}
             </ScrollView>
             <View style={{ paddingBottom: 16, paddingTop: 8 }}>
-              <ContinueButton disabled={conditions.length === 0} onPress={goNext} />
+              <ContinueButton disabled={!age} onPress={goNext} />
             </View>
           </View>
         )}
 
-        {/* Step 2: Severity */}
+        {/* Step 2: Gender */}
         {step === 2 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              What's your gender?
+            </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>
+              This is used to make your custom plan more accurate.
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {genderOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={gender === opt.id}
+                  onPress={() => setGender(opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={!gender} onPress={goNext} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 3: Height & Weight */}
+        {step === 3 && (
+          <Pressable onPress={Keyboard.dismiss} style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              Height & Weight
+            </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 20 }}>
+              This is used to make your custom plan more accurate.
+            </Text>
+
+            {/* Imperial/Metric toggle */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignSelf: "center",
+                backgroundColor: COLORS.muted,
+                borderRadius: 999,
+                padding: 4,
+                marginBottom: 32,
+              }}
+            >
+              {["imperial", "metric"].map((unit) => {
+                const active = heightUnit === unit;
+                return (
+                  <Pressable
+                    key={unit}
+                    onPress={() => { haptic(); setHeightUnit(unit); }}
+                    style={{
+                      paddingVertical: 8,
+                      paddingHorizontal: 24,
+                      borderRadius: 999,
+                      backgroundColor: active ? COLORS.card : "transparent",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 15,
+                        fontWeight: "700",
+                        color: active ? COLORS.text : COLORS.textSecondary,
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      {unit}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            {/* Inputs */}
+            <View style={{ flexDirection: "row", gap: 16, justifyContent: "center" }}>
+              {heightUnit === "imperial" ? (
+                <>
+                  <View style={{ flex: 1, alignItems: "center" }}>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.text, marginBottom: 8 }}>
+                      Height
+                    </Text>
+                    <View style={{ flexDirection: "row", gap: 8 }}>
+                      <View style={{ flex: 1 }}>
+                        <TextInput
+                          value={heightFeet}
+                          onChangeText={(t) => setHeightFeet(t.replace(/[^0-9]/g, "").slice(0, 1))}
+                          placeholder="ft"
+                          placeholderTextColor={COLORS.textSecondary}
+                          keyboardType="number-pad"
+                          inputAccessoryViewID={Platform.OS === "ios" ? KEYBOARD_DONE_ID : undefined}
+                          maxLength={1}
+                          style={{
+                            borderWidth: 1, borderColor: COLORS.border, borderRadius: 12,
+                            paddingVertical: 14, paddingHorizontal: 12,
+                            color: COLORS.text, backgroundColor: COLORS.card, fontSize: 18,
+                            textAlign: "center", fontWeight: "700",
+                          }}
+                        />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <TextInput
+                          value={heightInches}
+                          onChangeText={(t) => setHeightInches(t.replace(/[^0-9]/g, "").slice(0, 2))}
+                          placeholder="in"
+                          placeholderTextColor={COLORS.textSecondary}
+                          keyboardType="number-pad"
+                          inputAccessoryViewID={Platform.OS === "ios" ? KEYBOARD_DONE_ID : undefined}
+                          maxLength={2}
+                          style={{
+                            borderWidth: 1, borderColor: COLORS.border, borderRadius: 12,
+                            paddingVertical: 14, paddingHorizontal: 12,
+                            color: COLORS.text, backgroundColor: COLORS.card, fontSize: 18,
+                            textAlign: "center", fontWeight: "700",
+                          }}
+                        />
+                      </View>
+                    </View>
+                  </View>
+                  <View style={{ flex: 1, alignItems: "center" }}>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.text, marginBottom: 8 }}>
+                      Weight
+                    </Text>
+                    <TextInput
+                      value={weightLbs}
+                      onChangeText={(t) => setWeightLbs(t.replace(/[^0-9]/g, "").slice(0, 3))}
+                      placeholder="lbs"
+                      placeholderTextColor={COLORS.textSecondary}
+                      keyboardType="number-pad"
+                      inputAccessoryViewID={Platform.OS === "ios" ? KEYBOARD_DONE_ID : undefined}
+                      maxLength={3}
+                      style={{
+                        borderWidth: 1, borderColor: COLORS.border, borderRadius: 12,
+                        paddingVertical: 14, paddingHorizontal: 12,
+                        color: COLORS.text, backgroundColor: COLORS.card, fontSize: 18,
+                        textAlign: "center", fontWeight: "700",
+                        width: "100%",
+                      }}
+                    />
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={{ flex: 1, alignItems: "center" }}>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.text, marginBottom: 8 }}>
+                      Height
+                    </Text>
+                    <TextInput
+                      value={heightCm}
+                      onChangeText={(t) => setHeightCm(t.replace(/[^0-9]/g, "").slice(0, 3))}
+                      placeholder="cm"
+                      placeholderTextColor={COLORS.textSecondary}
+                      keyboardType="number-pad"
+                      inputAccessoryViewID={Platform.OS === "ios" ? KEYBOARD_DONE_ID : undefined}
+                      maxLength={3}
+                      style={{
+                        borderWidth: 1, borderColor: COLORS.border, borderRadius: 12,
+                        paddingVertical: 14, paddingHorizontal: 12,
+                        color: COLORS.text, backgroundColor: COLORS.card, fontSize: 18,
+                        textAlign: "center", fontWeight: "700",
+                        width: "100%",
+                      }}
+                    />
+                  </View>
+                  <View style={{ flex: 1, alignItems: "center" }}>
+                    <Text style={{ fontSize: 14, fontWeight: "700", color: COLORS.text, marginBottom: 8 }}>
+                      Weight
+                    </Text>
+                    <TextInput
+                      value={weightKg}
+                      onChangeText={(t) => setWeightKg(t.replace(/[^0-9]/g, "").slice(0, 3))}
+                      placeholder="kg"
+                      placeholderTextColor={COLORS.textSecondary}
+                      keyboardType="number-pad"
+                      inputAccessoryViewID={Platform.OS === "ios" ? KEYBOARD_DONE_ID : undefined}
+                      maxLength={3}
+                      style={{
+                        borderWidth: 1, borderColor: COLORS.border, borderRadius: 12,
+                        paddingVertical: 14, paddingHorizontal: 12,
+                        color: COLORS.text, backgroundColor: COLORS.card, fontSize: 18,
+                        textAlign: "center", fontWeight: "700",
+                        width: "100%",
+                      }}
+                    />
+                  </View>
+                </>
+              )}
+            </View>
+
+            {keyboardVisible ? (
+              <View style={{ alignItems: "center", marginTop: 18 }}>
+                <Pressable
+                  onPress={Keyboard.dismiss}
+                  hitSlop={8}
+                  accessibilityLabel="Dismiss keyboard"
+                  accessibilityRole="button"
+                  style={{
+                    paddingHorizontal: 22,
+                    paddingVertical: 10,
+                    borderRadius: 999,
+                    backgroundColor: COLORS.primary,
+                  }}
+                >
+                  <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "800" }}>
+                    Done
+                  </Text>
+                </Pressable>
+              </View>
+            ) : null}
+
+            <View style={{ flex: 1 }} />
+
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton
+                disabled={
+                  heightUnit === "imperial"
+                    ? !heightFeet || !weightLbs
+                    : !heightCm || !weightKg
+                }
+                onPress={goNext}
+              />
+            </View>
+          </Pressable>
+        )}
+
+        {/* Step 4: Reflux Duration */}
+        {step === 4 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              How long have you struggled with reflux/GERD?
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {gerdDurationOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={gerdDuration === opt.id}
+                  onPress={() => setGerdDuration(opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton disabled={!gerdDuration} onPress={goNext} />
+            </View>
+          </View>
+        )}
+
+        {/* Step 5: Severity */}
+        {step === 5 && (
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
               How severe are your symptoms?
@@ -780,30 +1162,8 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Step 3: Symptom Timing */}
-        {step === 3 && (
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
-              When do you usually experience symptoms?
-            </Text>
-            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>Select all that apply</Text>
-            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
-              {symptomTimingOptions.map((opt) => (
-                <OptionCard
-                  key={opt.id} label={opt.label}
-                  selected={symptomTiming.includes(opt.id)} showCheck
-                  onPress={() => toggle(setSymptomTiming, opt.id)}
-                />
-              ))}
-            </ScrollView>
-            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
-              <ContinueButton disabled={symptomTiming.length === 0} onPress={goNext} />
-            </View>
-          </View>
-        )}
-
-        {/* Step 4: Health Stats Interstitial */}
-        {step === 4 && (
+        {/* Step 6: Health Stats Interstitial */}
+        {step === 6 && (
           <View style={{ flex: 1 }}>
             <HealthStatsStep />
             <View style={{ paddingBottom: 16, paddingTop: 8 }}>
@@ -812,8 +1172,8 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Step 5: Symptom Frequency */}
-        {step === 5 && (
+        {/* Step 7: Symptom Frequency */}
+        {step === 7 && (
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
               How often do you experience symptoms?
@@ -834,8 +1194,8 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Step 6: Top Symptoms */}
-        {step === 6 && (
+        {/* Step 8: Top Symptoms */}
+        {step === 8 && (
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
               Which symptoms do you experience most?
@@ -856,54 +1216,12 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Step 7: After Eating */}
-        {step === 7 && (
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
-              Do symptoms usually happen after eating?
-            </Text>
-            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
-              {afterEatingOptions.map((opt) => (
-                <OptionCard
-                  key={opt.id} label={opt.label}
-                  selected={symptomAfterEating === opt.id}
-                  onPress={() => setSymptomAfterEating(opt.id)}
-                />
-              ))}
-            </ScrollView>
-            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
-              <ContinueButton disabled={!symptomAfterEating} onPress={goNext} />
-            </View>
-          </View>
-        )}
-
-        {/* Step 8: Value Prop Interstitial */}
-        {step === 8 && (
+        {/* Step 9: Value Prop Interstitial */}
+        {step === 9 && (
           <View style={{ flex: 1 }}>
             <ValuePropStep />
             <View style={{ paddingBottom: 16, paddingTop: 8 }}>
               <ContinueButton onPress={goNext} disabled={false} />
-            </View>
-          </View>
-        )}
-
-        {/* Step 9: Lying Down */}
-        {step === 9 && (
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
-              Are symptoms worse when lying down?
-            </Text>
-            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
-              {lyingDownOptions.map((opt) => (
-                <OptionCard
-                  key={opt.id} label={opt.label}
-                  selected={worseLyingDown === opt.id}
-                  onPress={() => setWorseLyingDown(opt.id)}
-                />
-              ))}
-            </ScrollView>
-            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
-              <ContinueButton disabled={!worseLyingDown} onPress={goNext} />
             </View>
           </View>
         )}
@@ -963,7 +1281,7 @@ export default function OnboardingScreen({ navigation, route }) {
                         style={{
                           flexDirection: "row", alignItems: "center", gap: 6,
                           backgroundColor: COLORS.accentLight, borderWidth: 1,
-                          borderColor: "rgba(240,124,82,0.3)", borderRadius: 20,
+                          borderColor: "#ffd4c9", borderRadius: 20,
                           paddingHorizontal: 12, paddingVertical: 6,
                         }}
                       >
@@ -1021,55 +1339,95 @@ export default function OnboardingScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Step 12: Rate Us */}
+        {/* Step 12: Rate Us — Apple's system rating sheet auto-fires
+            on mount via the step-12 useEffect above. We just provide
+            visual context (5 big stars) and a Continue that's gated
+            for 5s so users have time to interact with the sheet. */}
         {step === 12 && (
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-            <View style={{
-              width: 220, height: 220, borderRadius: 110,
-              backgroundColor: COLORS.primaryLight,
-              alignItems: "center", justifyContent: "center", marginBottom: 32,
-            }}>
-              <Image source={mascotHappy} style={{ width: 160, height: 160 }} resizeMode="contain" />
-            </View>
-
-            <Star size={28} color={COLORS.primary} />
-            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, textAlign: "center", marginTop: 12 }}>
-              Enjoying GERDBuddy?
-            </Text>
-            <Text style={{ fontSize: 16, color: COLORS.textSecondary, textAlign: "center", marginTop: 8 }}>
-              Your feedback helps others find relief too
-            </Text>
-
-            <View style={{ width: "100%", gap: 12, marginTop: 40 }}>
-              <Pressable
-                onPress={async () => {
-                  haptic();
-                  posthog?.capture("onboarding_rating_accepted");
-                  try { await StoreReview.requestReview(); } catch (e) { console.warn("StoreReview failed:", e); }
-                  setStep(13);
-                }}
+          <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+              <View
                 style={{
-                  backgroundColor: COLORS.primary, borderRadius: 16, paddingVertical: 18,
-                  alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8,
-                  shadowColor: COLORS.primary, shadowOpacity: 0.3, shadowRadius: 8,
-                  shadowOffset: { width: 0, height: 4 }, elevation: 4,
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  gap: 8,
+                  marginBottom: 24,
                 }}
               >
-                <Text style={{ fontSize: 17, fontWeight: "700", color: "#FFFFFF" }}>Rate Us</Text>
-                <Star size={18} color="#FFFFFF" />
-              </Pressable>
-              <Pressable
-                onPress={() => { haptic(); posthog?.capture("onboarding_rating_skipped"); setStep(13); }}
-                style={{ paddingVertical: 12 }}
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <Star
+                    key={i}
+                    size={56}
+                    color={COLORS.gold}
+                    fill={COLORS.gold}
+                    strokeWidth={0}
+                  />
+                ))}
+              </View>
+              <Text
+                style={{
+                  fontSize: 28,
+                  fontWeight: "800",
+                  color: COLORS.text,
+                  textAlign: "center",
+                }}
               >
-                <Text style={{ color: COLORS.textSecondary, textAlign: "center", fontWeight: "600" }}>Maybe Later</Text>
-              </Pressable>
+                Enjoying GERDBuddy?
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: COLORS.textSecondary,
+                  textAlign: "center",
+                  marginTop: 8,
+                  paddingHorizontal: 24,
+                }}
+              >
+                Your feedback helps others find relief too.
+              </Text>
+            </View>
+            <ContinueButton
+              disabled={!canContinueRating}
+              onPress={() => {
+                posthog?.capture("onboarding_rating_continued");
+                setStep(13);
+              }}
+            />
+          </View>
+        )}
+
+        {/* Step 13: Goal */}
+        {step === 13 && (
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
+              What is your goal?
+            </Text>
+            <Text style={{ fontSize: 15, color: COLORS.textSecondary, marginBottom: 8 }}>
+              We'll personalize your plan around this.
+            </Text>
+            <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginTop: 20 }} contentContainerStyle={{ gap: 10, paddingBottom: 16 }}>
+              {goalOptions.map((opt) => (
+                <OptionCard
+                  key={opt.id} label={opt.label}
+                  selected={goal === opt.id}
+                  onPress={() => setGoal(opt.id)}
+                />
+              ))}
+            </ScrollView>
+            <View style={{ paddingBottom: 16, paddingTop: 8 }}>
+              <ContinueButton
+                disabled={!goal}
+                onPress={() => {
+                  posthog?.capture("onboarding_goal_set", { goal });
+                  setStep(14);
+                }}
+              />
             </View>
           </View>
         )}
 
-        {/* Step 13: Reminders */}
-        {step === 13 && (
+        {/* Step 14: Reminders */}
+        {step === 14 && (
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 28, fontWeight: "800", color: COLORS.text, lineHeight: 34, marginBottom: 8 }}>
               Enable reminders?
@@ -1085,8 +1443,8 @@ export default function OnboardingScreen({ navigation, route }) {
                   flexDirection: "row", alignItems: "center", justifyContent: "space-between",
                   paddingHorizontal: 20, paddingVertical: 16, borderRadius: 14,
                   borderWidth: 1,
-                  backgroundColor: remindersEnabled ? "rgba(58,162,127,0.05)" : COLORS.card,
-                  borderColor: remindersEnabled ? "rgba(58,162,127,0.3)" : COLORS.border,
+                  backgroundColor: remindersEnabled ? COLORS.primaryLight : COLORS.card,
+                  borderColor: remindersEnabled ? "#cfdcca" : COLORS.border,
                 }}
               >
                 <View style={{ gap: 4, flex: 1, marginRight: 12 }}>
@@ -1111,8 +1469,8 @@ export default function OnboardingScreen({ navigation, route }) {
                   flexDirection: "row", alignItems: "center", justifyContent: "space-between",
                   paddingHorizontal: 20, paddingVertical: 16, borderRadius: 14,
                   borderWidth: 1,
-                  backgroundColor: eveningReminderEnabled ? "rgba(58,162,127,0.05)" : COLORS.card,
-                  borderColor: eveningReminderEnabled ? "rgba(58,162,127,0.3)" : COLORS.border,
+                  backgroundColor: eveningReminderEnabled ? COLORS.primaryLight : COLORS.card,
+                  borderColor: eveningReminderEnabled ? "#cfdcca" : COLORS.border,
                 }}
               >
                 <View style={{ gap: 4, flex: 1, marginRight: 12 }}>
@@ -1133,15 +1491,15 @@ export default function OnboardingScreen({ navigation, route }) {
             </View>
 
             <View style={{
-              backgroundColor: "rgba(58,162,127,0.05)", borderWidth: 1,
-              borderColor: "rgba(58,162,127,0.2)", borderRadius: 16,
+              backgroundColor: COLORS.primaryLight, borderWidth: 1,
+              borderColor: "#cfdcca", borderRadius: 16,
               padding: 16, marginTop: 24,
             }}>
               <Text style={{ fontSize: 14, fontWeight: "600", color: COLORS.text, marginBottom: 4 }}>
-                Your 7-day plan is ready
+                Your evidence plan is ready
               </Text>
               <Text style={{ fontSize: 13, color: COLORS.textSecondary, lineHeight: 18 }}>
-                After setup, you'll get a personalized daily checklist to help you identify your triggers in just one week.
+                After setup, GERDBuddy will turn your meals, symptoms, and timing into clearer trigger patterns.
               </Text>
             </View>
 
@@ -1153,6 +1511,32 @@ export default function OnboardingScreen({ navigation, route }) {
         )}
 
       </View>
+
+      {/* InputAccessoryView rendered persistently at screen root (not inside
+          the step 3 conditional) so iOS keeps the Done bar bound to every
+          numeric input on step 3. When nested inside the step block it only
+          attaches to the first focused input. */}
+      {Platform.OS === "ios" && (
+        <InputAccessoryView nativeID={KEYBOARD_DONE_ID}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-end",
+              backgroundColor: COLORS.muted,
+              borderTopWidth: 1,
+              borderTopColor: COLORS.border,
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+            }}
+          >
+            <Pressable onPress={Keyboard.dismiss} hitSlop={8}>
+              <Text style={{ color: COLORS.primary, fontSize: 17, fontWeight: "600" }}>
+                Done
+              </Text>
+            </Pressable>
+          </View>
+        </InputAccessoryView>
+      )}
     </SafeAreaView>
   );
 }

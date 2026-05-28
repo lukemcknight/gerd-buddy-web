@@ -27,19 +27,35 @@ const MULTI_WORD_FOODS = [
   "sour cream", "cream cheese", "cottage cheese", "blue cheese", "goat cheese",
   "almond milk", "oat milk", "soy milk", "coconut milk",
   "orange juice", "apple juice", "grape juice", "cranberry juice",
-  "green tea", "black tea", "iced tea", "hot chocolate",
-  "french fries", "hash browns", "mashed potatoes", "baked potato",
+  "green tea", "black tea", "iced tea", "hot chocolate", "iced coffee", "iced latte",
+  "french fries", "hash browns", "mashed potatoes", "baked potato", "sweet potato",
   "fried rice", "brown rice", "white rice", "wild rice",
   "whole wheat", "white bread", "sourdough bread", "garlic bread",
   "red wine", "white wine", "beer", "sparkling water",
-  "bell pepper", "hot pepper", "chili pepper", "black pepper",
+  "bell pepper", "bell peppers", "hot pepper", "chili pepper", "black pepper",
   "red onion", "green onion", "white onion",
+  "green beans", "brussels sprouts", "cherry tomatoes", "soy sauce",
+  "hot sauce", "barbecue sauce", "buffalo sauce", "marinara sauce", "spaghetti sauce",
   "ground beef", "chicken breast", "pork chop", "bacon bits",
+  "scrambled eggs", "fried egg", "fried eggs", "boiled egg", "boiled eggs", "poached egg",
+  "hot dog", "mac and cheese", "fish and chips",
   "dark chocolate", "milk chocolate", "white chocolate",
   "energy drink", "sports drink", "soft drink",
   "fast food", "fried food", "spicy food", "fatty food",
   "citrus fruit", "dried fruit",
 ];
+
+// Adjectives that modify a following food word but aren't useful as triggers
+// on their own. When we see one of these immediately before a food (single or
+// multi-word), we bind them together: "grilled chicken" -> "grilled chicken",
+// not ["grilled", "chicken"]. An orphan modifier (no following food) is
+// dropped entirely.
+const COOKING_MODIFIERS = new Set([
+  "grilled", "baked", "fried", "roasted", "steamed", "boiled", "smoked",
+  "poached", "broiled", "sauteed", "sautéed", "raw", "cooked",
+  "scrambled", "mashed", "charred", "seared", "blackened",
+  "iced", "hot", "cold",
+]);
 
 // Food categories with their typical digestion/reaction time windows (in hours)
 const FOOD_TIME_WINDOWS = {
@@ -76,30 +92,99 @@ const getTimeWindowForFood = (food) => {
   return { minHours: FOOD_TIME_WINDOWS.medium.minHours, maxHours: FOOD_TIME_WINDOWS.medium.maxHours };
 };
 
-// Extract foods from text, including multi-word phrases
+// Extract foods from text. Walks tokens left-to-right and at each position
+// prefers the LONGEST valid phrase:
+//   1. A multi-word food (e.g. "chicken breast", "ice cream")
+//   2. A cooking modifier + multi-word food (e.g. "grilled chicken breast")
+//   3. A cooking modifier + single food word (e.g. "grilled chicken")
+//   4. A single food word
+// This prevents "grilled chicken" from being split into ["grilled", "chicken"]
+// while still letting "chicken and rice" emit two separate triggers.
 const extractFoods = (text) => {
   if (!text) return [];
 
-  let normalizedText = text.toLowerCase().replace(/[^a-z\s]/g, " ");
-  const foods = [];
+  // Strip apostrophes inside words first, then collapse non-letter chars to
+  // spaces. Keeps "won't" from becoming "won" + "t".
+  const normalizedText = text
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z\s]/g, " ");
+  const tokens = normalizedText.split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return [];
 
-  // First, find and extract multi-word foods
+  // Index multi-word phrases by their first token for quick lookup; sort each
+  // bucket by length DESC so longest matches win.
+  const multiWordByFirst = new Map();
   for (const phrase of MULTI_WORD_FOODS) {
-    if (normalizedText.includes(phrase)) {
-      foods.push(phrase);
-      // Remove the phrase to avoid double-counting individual words
-      normalizedText = normalizedText.replace(new RegExp(phrase, "g"), " ");
-    }
+    const first = phrase.split(" ")[0];
+    if (!multiWordByFirst.has(first)) multiWordByFirst.set(first, []);
+    multiWordByFirst.get(first).push(phrase);
+  }
+  for (const bucket of multiWordByFirst.values()) {
+    bucket.sort((a, b) => b.length - a.length);
   }
 
-  // Then extract remaining single words
-  const words = normalizedText
-    .split(/\s+/)
-    .filter((word) => word.length > 2 && !STOPWORDS.has(word));
+  const matchMultiWordAt = (startIdx) => {
+    const first = tokens[startIdx];
+    const candidates = multiWordByFirst.get(first) || [];
+    for (const phrase of candidates) {
+      const words = phrase.split(" ");
+      if (startIdx + words.length > tokens.length) continue;
+      const slice = tokens.slice(startIdx, startIdx + words.length).join(" ");
+      if (slice === phrase) return { phrase, length: words.length };
+    }
+    return null;
+  };
 
-  foods.push(...words);
+  const isPushable = (tok) =>
+    tok && tok.length > 2 && !STOPWORDS.has(tok) && !COOKING_MODIFIERS.has(tok);
 
-  return [...new Set(foods)]; // Remove duplicates
+  const foods = [];
+  let i = 0;
+  while (i < tokens.length) {
+    const token = tokens[i];
+
+    // Skip stopwords and 1-2 char noise immediately.
+    if (STOPWORDS.has(token) || token.length <= 2) {
+      i += 1;
+      continue;
+    }
+
+    // 1. Direct multi-word match at this position (greedy / longest).
+    const directMatch = matchMultiWordAt(i);
+    if (directMatch) {
+      foods.push(directMatch.phrase);
+      i += directMatch.length;
+      continue;
+    }
+
+    // 2. Cooking modifier: try to bind it to the next food (multi-word or
+    //    single). Drop the modifier entirely if nothing follows.
+    if (COOKING_MODIFIERS.has(token)) {
+      if (i + 1 < tokens.length) {
+        const nextMulti = matchMultiWordAt(i + 1);
+        if (nextMulti) {
+          foods.push(`${token} ${nextMulti.phrase}`);
+          i += 1 + nextMulti.length;
+          continue;
+        }
+        if (isPushable(tokens[i + 1])) {
+          foods.push(`${token} ${tokens[i + 1]}`);
+          i += 2;
+          continue;
+        }
+      }
+      // Orphan modifier — not a useful trigger on its own, skip silently.
+      i += 1;
+      continue;
+    }
+
+    // 3. Single food word.
+    foods.push(token);
+    i += 1;
+  }
+
+  return [...new Set(foods)];
 };
 
 // Legacy tokenize function for backwards compatibility

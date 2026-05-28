@@ -7,8 +7,8 @@ describe('SettingsScreen', () => {
   });
 
   describe('Imports', () => {
-    it('imports Mascot component', () => {
-      expect(source).toContain('import Mascot');
+    it('imports BrandMark component', () => {
+      expect(source).toContain('import BrandMark');
     });
 
     it('imports getEntitlementState from paywallTrigger', () => {
@@ -18,12 +18,12 @@ describe('SettingsScreen', () => {
   });
 
   describe('Profile header', () => {
-    it('contains default username "Buddy"', () => {
-      expect(source).toContain('"Buddy"');
+    it('contains local profile fallback', () => {
+      expect(source).toContain('"Local profile"');
     });
 
-    it('uses Mascot component', () => {
-      expect(source).toContain('<Mascot');
+    it('uses BrandMark component', () => {
+      expect(source).toContain('<BrandMark');
     });
   });
 
@@ -33,7 +33,7 @@ describe('SettingsScreen', () => {
     });
 
     it('contains upgrade description', () => {
-      expect(source).toContain('Unlimited tracking, full trigger analysis, and more.');
+      expect(source).toContain('Unlimited scans, trigger confidence, and doctor-ready reports.');
     });
 
     it('navigates to Paywall with trigger_source settings', () => {

@@ -1,12 +1,28 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSubscriptionStatus } from "../services/revenuecat";
 import { getUser, saveUser } from "../services/storage";
+import { shouldBypassPaywall } from "../utils/devMode";
 
 // RevenueCat is the authoritative source of truth in production. The local
 // `subscriptionActive` flag is treated as a cache that we sync from RC, and
 // only used as a fallback when RC is unreachable (offline) or in __DEV__
 // builds (screenshot/demo mode).
 export const resolvePremiumStatus = async (userId) => {
+  if (shouldBypassPaywall) return true;
+
+  // __DEV__ demo path: if the local `subscriptionActive` flag is already true,
+  // trust it without a RC roundtrip. This keeps `usePremiumStatus` consistent
+  // with `getEntitlementState` (used by Settings), so the "Load demo data" Pro
+  // grant propagates to every screen instead of only the local-only ones.
+  if (__DEV__) {
+    try {
+      const localUser = await getUser();
+      if (localUser?.subscriptionActive) return true;
+    } catch {
+      // fall through to RC path
+    }
+  }
+
   try {
     const status = await getSubscriptionStatus(userId);
     if (status.active) {

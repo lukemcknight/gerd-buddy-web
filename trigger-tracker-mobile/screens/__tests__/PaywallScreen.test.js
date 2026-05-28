@@ -1,11 +1,10 @@
 /**
- * Tests for PaywallScreen messaging updates
+ * Tests for PaywallScreen messaging + structure.
  *
- * Key behavior tested:
- * - Headline reads "Find your top reflux triggers in 14 days." (outcomes-based)
- * - Subtitle mentions trigger analysis, detailed reports, and scanning
- * - Benefits list covers scanner, triggers, analytics, sharing
- * - CTA fallback text is "Unlock Pro" (not "Unlock Meal Scanner")
+ * These tests source-grep the file rather than rendering the screen
+ * because the screen depends on RevenueCat / SafeArea / navigation
+ * which aren't worth standing up in jsdom. They're guard rails against
+ * regressing key copy and behavior, not full integration tests.
  */
 
 describe('PaywallScreen - Pro messaging', () => {
@@ -21,34 +20,27 @@ describe('PaywallScreen - Pro messaging', () => {
   });
 
   describe('Headline', () => {
-    test('shows pain-hook headline', () => {
-      expect(source).toContain('Stop guessing what triggers your reflux.');
+    test('default headline matches the new layout', () => {
+      expect(source).toContain('Build your doctor-ready trigger report.');
     });
 
-    test('headline is in the main heading element', () => {
-      const headlineMatch = source.match(/text-2xl font-extrabold[^>]*>[^<]*/);
-      expect(headlineMatch).toBeTruthy();
-      expect(headlineMatch[0]).toContain('Stop guessing what triggers your reflux.');
-    });
-  });
-
-  describe('Subtitle', () => {
-    test('mentions trial framing', () => {
-      expect(source).toContain('Try free for 7 days');
+    test('does not hardcode a stale 7-day trial length', () => {
+      // Local trial config in storage.js is 3 days; "7 days" is stale copy.
+      expect(source).not.toMatch(/7[- ]day/i);
     });
   });
 
   describe('Benefits list', () => {
-    test('includes scanner benefit', () => {
-      expect(source).toContain('Scan any food or menu in 2 seconds');
+    test('includes scan benefit (new copy)', () => {
+      expect(source).toContain('Scan meals into evidence');
     });
 
-    test('includes trigger confidence benefit', () => {
-      expect(source).toContain('Personal trigger confidence scores');
+    test('includes AI Q&A benefit (flagship)', () => {
+      expect(source).toContain('Ask GERDBuddy AI');
     });
 
-    test('includes doctor-ready report benefit', () => {
-      expect(source).toContain('Doctor-ready PDF report for GI appointments');
+    test('includes doctor visit-prep benefit', () => {
+      expect(source).toContain('Doctor-ready GI visit prep');
     });
   });
 
@@ -60,11 +52,15 @@ describe('PaywallScreen - Pro messaging', () => {
     test('does not use old "Unlock Meal Scanner" fallback', () => {
       expect(source).not.toContain('"Unlock Meal Scanner"');
     });
+
+    test('trial CTA copy is in the file', () => {
+      expect(source).toContain('Start your 3-day trial');
+    });
   });
 
   describe('Scanner limit contextual messaging', () => {
-    test('has scanner_limit headline "Try Pro free for 7 days"', () => {
-      expect(source).toContain('Try Pro free for 7 days');
+    test('has scanner_limit headline pointing at Pro scans', () => {
+      expect(source).toContain('Keep scanning with Pro');
     });
 
     test('has scanner_limit subtext about free scans', () => {
@@ -76,8 +72,8 @@ describe('PaywallScreen - Pro messaging', () => {
       expect(source).toContain('isScannerLimit');
     });
 
-    test('shows "Start 7-Day Free Trial" CTA for scanner limit', () => {
-      expect(source).toContain('Start 7-Day Free Trial');
+    test('scanner_limit gets a Pro-scans-specific CTA', () => {
+      expect(source).toContain('"Unlock Pro Scans"');
     });
   });
 
@@ -86,8 +82,10 @@ describe('PaywallScreen - Pro messaging', () => {
       expect(source).toMatch(/const CLOSE_BUTTON_DELAY_MS\s*=\s*\d+/);
     });
 
-    test('close button render is gated on canClose state', () => {
-      expect(source).toMatch(/\{canClose && \(\s*<Pressable/);
+    test('back button is visible on hard-paywall or after canClose dwell elapses', () => {
+      // The redesigned layout shows back chevron when isHardPaywall (so the
+      // user can step back through the funnel) OR after the dwell timer fires.
+      expect(source).toMatch(/isHardPaywall \|\| canClose/);
     });
 
     test('canClose initializes from shouldBypassPaywall (dev/expo skip the delay)', () => {
@@ -96,6 +94,18 @@ describe('PaywallScreen - Pro messaging', () => {
 
     test('schedules setCanClose via setTimeout with the delay constant', () => {
       expect(source).toMatch(/setTimeout\(\(\) => setCanClose\(true\), CLOSE_BUTTON_DELAY_MS\)/);
+    });
+  });
+
+  describe('Single-offering selection', () => {
+    test('does not reference the removed selectOfferingForUser helper', () => {
+      expect(source).not.toContain('selectOfferingForUser');
+    });
+
+    test('prefers offerings.current but falls back to any offering with packages', () => {
+      expect(source).toContain('offerings?.current');
+      expect(source).toContain('offerings?.all');
+      expect(source).toMatch(/\.find\(hasPackages\)/);
     });
   });
 

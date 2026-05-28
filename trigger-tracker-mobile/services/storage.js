@@ -154,6 +154,9 @@ export const createUser = async (...args) => {
     customFearFoods = [],
     mealTimes = [],
     medsStatus = "none",
+    // User-stated outcome captured in the onboarding goal step
+    goal = null,
+    goalLabel = null,
   } = payload;
 
   const user = {
@@ -178,6 +181,8 @@ export const createUser = async (...args) => {
     customFearFoods,
     mealTimes,
     medsStatus,
+    goal,
+    goalLabel,
     // Tracking counters
     scanCount: 0,
     lastScanDate: null,
@@ -295,6 +300,57 @@ export const incrementScanCount = async () => {
   return count;
 };
 
+// ── AI Q&A chat: per-day quota tracking ─────────────────────────────────
+//
+// Each Pro user gets AI_CHAT_DAILY_LIMIT messages per local-day. Tracked on
+// the user record so the count survives app restarts and can be reset
+// without a separate AsyncStorage key. Pattern mirrors scannerGate's
+// freeScanCount / lastScanDate.
+
+export const AI_CHAT_DAILY_LIMIT = 20;
+
+const sameLocalDay = (a, b) => {
+  if (!a || !b) return false;
+  const da = new Date(a);
+  const db = new Date(b);
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
+};
+
+export const getAIChatCount = async () => {
+  const user = await getUser();
+  if (!user) return 0;
+  const last = user.aiChatResetDate || 0;
+  if (!sameLocalDay(last, Date.now())) return 0;
+  return user.aiChatCount || 0;
+};
+
+export const resetAIChatCountIfNewDay = async () => {
+  const user = await getUser();
+  if (!user) return;
+  const last = user.aiChatResetDate || 0;
+  if (sameLocalDay(last, Date.now())) return;
+  await saveUser({ ...user, aiChatCount: 0, aiChatResetDate: Date.now() });
+};
+
+export const incrementAIChatCount = async () => {
+  const user = await getUser();
+  if (!user) return 0;
+  const lastReset = user.aiChatResetDate || 0;
+  const now = Date.now();
+  const currentCount = sameLocalDay(lastReset, now) ? user.aiChatCount || 0 : 0;
+  const newCount = currentCount + 1;
+  await saveUser({
+    ...user,
+    aiChatCount: newCount,
+    aiChatResetDate: sameLocalDay(lastReset, now) ? lastReset : now,
+  });
+  return newCount;
+};
+
 export const getScanCount7d = async () => {
   const meals = await getMeals();
   const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -320,19 +376,6 @@ export const clearAllData = async () => {
 export const clearLogs = async () => {
   await AsyncStorage.multiRemove([STORAGE_KEYS.MEALS, STORAGE_KEYS.SYMPTOMS]);
 };
-
-// ── Buddy accessory tracking ──────────────────────────────────────────
-const SEEN_ACCESSORIES_KEY = "gerdbuddy_seen_accessories";
-
-export const getSeenAccessories = async () => readJson(SEEN_ACCESSORIES_KEY, []);
-
-export const markAccessorySeen = async (accessoryId) => {
-  const seen = await getSeenAccessories();
-  if (!seen.includes(accessoryId)) {
-    await writeJson(SEEN_ACCESSORIES_KEY, [...seen, accessoryId]);
-  }
-};
-
 
 export const getPersonalTriggers = async (limit = 10) => {
   const [meals, symptoms] = await Promise.all([getMeals(), getSymptoms()]);

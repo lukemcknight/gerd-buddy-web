@@ -123,7 +123,7 @@ export default function LogSymptomScreen({ navigation }) {
 
       <View className="gap-2">
         <View className="flex-row items-center gap-2">
-          <FileText size={16} color="#3aa27f" />
+          <FileText size={16} color="#154212" />
           <Text className="text-sm font-medium text-foreground">
             Notes (optional)
           </Text>

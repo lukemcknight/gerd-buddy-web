@@ -22,10 +22,6 @@ describe('LogMealScreen redesign', () => {
     expect(source).not.toContain('@react-native-community/datetimepicker');
   });
 
-  test('uses buddy variant on submit', () => {
-    expect(source).toMatch(/variant\s*=\s*['"]buddy['"]/);
-  });
-
   test('pulls recent meal suggestions from storage', () => {
     expect(source).toContain('getRecentMealSuggestions');
   });

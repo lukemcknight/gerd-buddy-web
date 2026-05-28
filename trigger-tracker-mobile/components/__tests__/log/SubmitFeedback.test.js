@@ -14,11 +14,6 @@ describe('SubmitFeedback', () => {
     expect(source).toMatch(/export default SubmitFeedback/);
   });
 
-  test('accepts variant prop with checkmark and buddy', () => {
-    expect(source).toContain('"checkmark"');
-    expect(source).toContain('"buddy"');
-  });
-
   test('checks reducedMotion via AccessibilityInfo', () => {
     expect(source).toContain('AccessibilityInfo');
     expect(source).toContain('isReduceMotionEnabled');
@@ -32,10 +27,5 @@ describe('SubmitFeedback', () => {
   test('renders an animated checkmark via react-native-svg', () => {
     expect(source).toContain('react-native-svg');
     expect(source).toContain('strokeDashoffset');
-  });
-
-  test('renders buddy turtle and heart particle (variant="buddy")', () => {
-    expect(source).toContain('turtle_happy');
-    expect(source).toContain('heart');
   });
 });

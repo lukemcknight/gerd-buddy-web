@@ -137,7 +137,7 @@ export default function LoginScreen({ navigation, onSuccess }) {
 
             {statusMessage && !displayError && (
               <View className="flex-row items-center justify-center gap-2 p-3">
-                <ActivityIndicator size="small" color="#3aa27f" />
+                <ActivityIndicator size="small" color="#154212" />
                 <Text className="text-sm text-muted-foreground">{statusMessage}</Text>
               </View>
             )}

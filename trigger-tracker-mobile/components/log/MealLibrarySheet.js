@@ -47,10 +47,13 @@ const LIBRARY = {
   ],
 };
 
-const CATEGORIES = [...Object.keys(LIBRARY), "Custom"];
+// "Custom" leads the chip row so users see their own foods first, but the
+// sheet still opens on Breakfast — the most-used category — by default.
+const CATEGORIES = ["Custom", ...Object.keys(LIBRARY)];
+const DEFAULT_CATEGORY = "Breakfast";
 
 export const MealLibrarySheet = ({ visible, onCancel, onConfirm }) => {
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState(DEFAULT_CATEGORY);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState([]);
   const [customFoods, setCustomFoods] = useState([]);
@@ -58,7 +61,7 @@ export const MealLibrarySheet = ({ visible, onCancel, onConfirm }) => {
 
   useEffect(() => {
     if (visible) {
-      setCategory(CATEGORIES[0]);
+      setCategory(DEFAULT_CATEGORY);
       setSearch("");
       setSelected([]);
       setCustomInput("");

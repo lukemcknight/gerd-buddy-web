@@ -1,11 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { ActivityIndicator, Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Home, BarChart3, FileText, Settings, Camera, Image as ImageIcon } from "lucide-react-native";
+import { BarChart3, Camera, FileText, Home, Image as ImageIcon, Settings } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 import * as ImagePicker from "expo-image-picker";
-import Constants from "expo-constants";
 import { usePostHog } from "posthog-react-native";
 import HomeScreen from "../screens/HomeScreen";
 import InsightsScreen from "../screens/InsightsScreen";
@@ -14,25 +13,27 @@ import SettingsScreen from "../screens/SettingsScreen";
 import OnboardingScreen from "../screens/OnboardingScreen";
 import OnboardingPlanScreen from "../screens/OnboardingPlanScreen";
 import OnboardingDay7SummaryScreen from "../screens/OnboardingDay7SummaryScreen";
+import DoctorChatScreen from "../screens/DoctorChatScreen";
 import LogMealScreen from "../screens/LogMealScreen";
 import LogSymptomScreen from "../screens/LogSymptomScreen";
 import ScanResultsScreen from "../screens/ScanResultsScreen";
 import PaywallScreen from "../screens/PaywallScreen.tsx";
+import PrePaywallPlanScreen from "../screens/PrePaywallPlanScreen.tsx";
+import PrePaywallTryFreeScreen from "../screens/PrePaywallTryFreeScreen.tsx";
+import PrePaywallTimelineScreen from "../screens/PrePaywallTimelineScreen.tsx";
 import CustomerCenterScreen from "../screens/CustomerCenterScreen";
 import CancelSubscriptionScreen from "../screens/CancelSubscriptionScreen";
 import SignUpScreen from "../screens/SignUpScreen";
 import LoginScreen from "../screens/LoginScreen";
-import BuddyAccessoriesScreen from "../screens/BuddyAccessoriesScreen";
-import { getUser } from "../services/storage";
+import { getUser, getTrialInfo } from "../services/storage";
 import { isFirebaseConfigured } from "../services/firebase";
 import { syncReminderNotifications, syncSmartNotifications } from "../services/notifications";
 import { canUserScan } from "../services/scannerGate";
+import { isGrandfatheredUser } from "../services/featureFlags";
 import { EVENTS } from "../services/analytics";
 import { showToast } from "../utils/feedback";
-
-const isExpoGo = Constants?.appOwnership === "expo";
-const bypassFlag = process.env.EXPO_PUBLIC_BYPASS_PAYWALL;
-const shouldBypassPaywall = isExpoGo || (__DEV__ && bypassFlag !== "false");
+import { shouldBypassPaywall } from "../utils/devMode";
+import SplashAnimation from "../components/SplashAnimation";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -144,18 +145,22 @@ const TabNavigator = () => {
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: true,
-          tabBarActiveTintColor: "#3aa27f",
-          tabBarInactiveTintColor: "#5f6f74",
+          tabBarActiveTintColor: "#154212",
+          tabBarInactiveTintColor: "#72796e",
           tabBarStyle: {
             borderTopWidth: 1,
-            borderTopColor: "#e1e8e3",
-            backgroundColor: "#ffffff",
-            paddingBottom: 6,
-            paddingTop: 6,
+            borderTopColor: "#e5e2d9",
+            backgroundColor: "#fcf9f8",
+            paddingBottom: 8,
+            paddingTop: 8,
+            height: 78,
           },
           tabBarLabelStyle: {
-            fontSize: 12,
+            fontSize: 10,
+            fontWeight: "700",
+            letterSpacing: 0.4,
             marginBottom: 4,
+            textTransform: "uppercase",
           },
         }}
       >
@@ -163,7 +168,7 @@ const TabNavigator = () => {
           name="Home"
           component={HomeScreen}
           options={{
-            tabBarIcon: ({ color }) => <Home size={20} color={color} />,
+            tabBarIcon: ({ color }) => <Home size={24} color={color} strokeWidth={2} />,
             title: "Home",
           }}
         />
@@ -171,7 +176,7 @@ const TabNavigator = () => {
           name="Insights"
           component={InsightsScreen}
           options={{
-            tabBarIcon: ({ color }) => <BarChart3 size={20} color={color} />,
+            tabBarIcon: ({ color }) => <BarChart3 size={24} color={color} strokeWidth={2} />,
             title: "Insights",
           }}
         />
@@ -185,18 +190,18 @@ const TabNavigator = () => {
                   width: 64,
                   height: 64,
                   borderRadius: 32,
-                  backgroundColor: "#3aa27f",
+                  backgroundColor: "#154212",
                   alignItems: "center",
                   justifyContent: "center",
                   marginBottom: 20,
                   shadowColor: "#000",
-                  shadowOpacity: 0.15,
-                  shadowRadius: 6,
-                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.12,
+                  shadowRadius: 10,
+                  shadowOffset: { width: 0, height: 5 },
                   elevation: 4,
                 }}
               >
-                <Camera size={30} color="#ffffff" />
+                <Camera size={32} color="#ffffff" strokeWidth={2.2} />
               </View>
             ),
             tabBarLabel: () => null,
@@ -212,7 +217,7 @@ const TabNavigator = () => {
           name="Report"
           component={ReportScreen}
           options={{
-            tabBarIcon: ({ color }) => <FileText size={20} color={color} />,
+            tabBarIcon: ({ color }) => <FileText size={24} color={color} strokeWidth={2} />,
             title: "Report",
           }}
         />
@@ -220,7 +225,7 @@ const TabNavigator = () => {
           name="Settings"
           component={SettingsScreen}
           options={{
-            tabBarIcon: ({ color }) => <Settings size={20} color={color} />,
+            tabBarIcon: ({ color }) => <Settings size={24} color={color} strokeWidth={2} />,
             title: "Settings",
           }}
         />
@@ -283,7 +288,7 @@ const TabNavigator = () => {
 
             <Pressable onPress={() => pickImage("camera")}>
               <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 14, paddingHorizontal: 16 }}>
-                <Camera size={20} color="#3aa27f" style={{ marginRight: 14 }} />
+                <Camera size={20} color="#154212" style={{ marginRight: 14 }} />
                 <Text style={{ fontSize: 16, fontWeight: "600", color: "#1f2a30" }}>
                   Snap Photo
                 </Text>
@@ -294,7 +299,7 @@ const TabNavigator = () => {
 
             <Pressable onPress={() => pickImage("gallery")}>
               <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 14, paddingHorizontal: 16 }}>
-                <ImageIcon size={20} color="#3aa27f" style={{ marginRight: 14 }} />
+                <ImageIcon size={20} color="#154212" style={{ marginRight: 14 }} />
                 <Text style={{ fontSize: 16, fontWeight: "600", color: "#1f2a30" }}>
                   Select from Gallery
                 </Text>
@@ -310,6 +315,14 @@ const TabNavigator = () => {
 export default function RootNavigator() {
   const [isReady, setIsReady] = useState(false);
   const [flow, setFlow] = useState("onboarding"); // onboarding | signup | main
+  // Enforce a minimum splash duration so the animated brand reveal lands even
+  // when route determination is instant. Cold-launch only — this hook runs
+  // once on mount.
+  const [splashElapsed, setSplashElapsed] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setSplashElapsed(true), 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const determineFlow = async () => {
@@ -330,7 +343,30 @@ export default function RootNavigator() {
         if (!user?.onboardingComplete) {
           setFlow("onboarding");
         } else {
-          setFlow("main");
+          const grandfathered = isGrandfatheredUser(user);
+          let hasPro = Boolean(user?.subscriptionActive);
+
+          // Stale-cache safeguard: before routing to the hard paywall, refresh
+          // entitlement state from RevenueCat. Without this, an active
+          // subscriber whose local `subscriptionActive` flag is stale (renewal
+          // mid-session, restore on another device, prior write didn't persist)
+          // would get locked behind the paywall on launch. Only run for users
+          // we'd otherwise paywall — grandfathered and already-Pro users skip
+          // the network call.
+          if (!grandfathered && !hasPro && !shouldBypassPaywall) {
+            try {
+              const info = await getTrialInfo();
+              hasPro = Boolean(info?.subscriptionActive);
+            } catch (err) {
+              console.warn("RC refresh before paywall failed; using cached value", err);
+            }
+          }
+
+          if (!grandfathered && !hasPro && !shouldBypassPaywall) {
+            setFlow("hard_paywall");
+          } else {
+            setFlow("main");
+          }
         }
       } catch (error) {
         console.warn("Failed to load user state", error);
@@ -352,13 +388,8 @@ export default function RootNavigator() {
     setFlow("main");
   };
 
-  if (!isReady) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="small" color="#3aa27f" />
-        <Text className="mt-3 text-muted-foreground">Loading...</Text>
-      </View>
-    );
+  if (!isReady || !splashElapsed) {
+    return <SplashAnimation />;
   }
 
   const getInitialRoute = () => {
@@ -367,6 +398,8 @@ export default function RootNavigator() {
         return "Main";
       case "signup":
         return "SignUp";
+      case "hard_paywall":
+        return "PrePaywallPlan";
       default:
         return "Onboarding";
     }
@@ -392,7 +425,22 @@ export default function RootNavigator() {
           <LoginScreen {...props} onSuccess={handleSignUpComplete} />
         )}
       </Stack.Screen>
-      <Stack.Screen name="Paywall">
+      <Stack.Screen
+        name="PrePaywallPlan"
+        component={PrePaywallPlanScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="PrePaywallTryFree"
+        component={PrePaywallTryFreeScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="PrePaywallTimeline"
+        component={PrePaywallTimelineScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen name="Paywall" options={{ gestureEnabled: false }}>
         {(props) => <PaywallScreen {...props} />}
       </Stack.Screen>
       <Stack.Screen name="Main" component={TabNavigator} />
@@ -403,7 +451,7 @@ export default function RootNavigator() {
       <Stack.Screen name="CancelSubscription" component={CancelSubscriptionScreen} />
       <Stack.Screen name="OnboardingPlan" component={OnboardingPlanScreen} />
       <Stack.Screen name="OnboardingDay7Summary" component={OnboardingDay7SummaryScreen} />
-      <Stack.Screen name="BuddyAccessories" component={BuddyAccessoriesScreen} />
+      <Stack.Screen name="DoctorChat" component={DoctorChatScreen} />
     </Stack.Navigator>
   );
 }

@@ -1,21 +1,67 @@
 import { useCallback, useState } from "react";
-import { Image, Text, View, Share } from "react-native";
+import { ActivityIndicator, Text, View, Share } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { Clock, TrendingDown, Calendar, Share2, FileText } from "lucide-react-native";
+import { AlertTriangle, Calendar, ClipboardList, Clock, Gauge, Send, Share2, ShieldCheck } from "lucide-react-native";
+import { usePostHog } from "posthog-react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import Screen from "../components/Screen";
 import Card from "../components/Card";
 import ProTeaser from "../components/ProTeaser";
 import Button from "../components/Button";
+import ProgressRing from "../components/ProgressRing";
+import SeverityChart from "../components/SeverityChart";
+import BrandMark from "../components/BrandMark";
+import EvidenceBar from "../components/EvidenceBar";
+import SectionHeader from "../components/SectionHeader";
 import { getMeals, getSymptoms, getUser } from "../services/storage";
 import { generateTriggerReport } from "../utils/triggerEngine";
+import { getWeeklySeverity } from "../utils/severityChart";
+import { calculateEvidenceProgress } from "../utils/evidenceProgress";
 import { showToast } from "../utils/feedback";
 import { usePremiumStatus } from "../hooks/usePremiumStatus";
-
-const turtleSad = require("../assets/mascot/turtle_sad.png");
+import { generateVisitPrepQuestions } from "../services/doctorAI";
+import { buildVisitPrepHtml } from "../services/visitPrep";
+import { EVENTS } from "../services/analytics";
 
 const confidenceLabel = (c) => c > 0.7 ? "High" : c >= 0.5 ? "Medium" : "Low";
+
+const clampPercent = (value) => Math.min(100, Math.max(0, Number(value) || 0));
+
+const TriggerReportRow = ({ trigger }) => {
+  const confidence = clampPercent(Math.round((trigger.confidence || 0) * 100));
+  const symptomRate = clampPercent(trigger.symptomRate || 0);
+  return (
+    <View className="gap-2 rounded-xl border border-border bg-card p-3">
+      <View className="flex-row items-center justify-between">
+        <Text className="font-semibold text-foreground capitalize">{trigger.ingredient}</Text>
+        <View className="rounded-full border border-accent/20 bg-accent-light px-2 py-0.5">
+          <Text className="text-[10px] font-semibold uppercase tracking-wider text-accent">
+            {confidence}% conf
+          </Text>
+        </View>
+      </View>
+      <EvidenceBar
+        label="Symptom rate"
+        value={`${symptomRate}%`}
+        percent={symptomRate}
+        tone="symptom"
+      />
+    </View>
+  );
+};
+
+const SafeFoodReportRow = ({ food }) => {
+  const score = clampPercent(food.safetyScore || 0);
+  return (
+    <EvidenceBar
+      label={food.ingredient}
+      value={`${score}% safe`}
+      percent={score}
+      tone="primary"
+    />
+  );
+};
 
 const buildReportHtml = (report) => {
   const date = new Date(report.generatedAt).toLocaleDateString("en-US", {
@@ -46,19 +92,19 @@ const buildReportHtml = (report) => {
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><style>
-  body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 32px; color: #1f2a30; }
-  h1 { font-size: 22px; color: #3aa27f; margin-bottom: 4px; }
-  h2 { font-size: 16px; margin-top: 28px; border-bottom: 2px solid #3aa27f; padding-bottom: 4px; }
-  .meta { font-size: 12px; color: #888; margin-bottom: 24px; }
+  body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 32px; color: #1b1c1c; background: #fcf9f8; }
+  h1 { font-size: 22px; color: #154212; margin-bottom: 4px; }
+  h2 { font-size: 16px; margin-top: 28px; border-bottom: 2px solid #154212; padding-bottom: 4px; }
+  .meta { font-size: 12px; color: #72796e; margin-bottom: 24px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
-  th { background: #3aa27f; color: #fff; text-align: left; padding: 8px; }
-  td { padding: 8px; border-bottom: 1px solid #e5e7eb; }
-  tr.alt { background: #f9fafb; }
+  th { background: #154212; color: #fff; text-align: left; padding: 8px; }
+  td { padding: 8px; border-bottom: 1px solid #e5e2d9; }
+  tr.alt { background: #f0eded; }
   .overview { display: flex; gap: 16px; margin-top: 8px; }
-  .stat { flex: 1; background: #f3f4f6; border-radius: 8px; padding: 16px; text-align: center; }
+  .stat { flex: 1; background: #ffffff; border: 1px solid #e5e2d9; border-radius: 10px; padding: 16px; text-align: center; }
   .stat-value { font-size: 28px; font-weight: bold; }
-  .stat-label { font-size: 11px; color: #888; margin-top: 4px; }
-  .footer { margin-top: 32px; font-size: 10px; color: #aaa; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 12px; }
+  .stat-label { font-size: 11px; color: #72796e; margin-top: 4px; }
+  .footer { margin-top: 32px; font-size: 10px; color: #72796e; text-align: center; border-top: 1px solid #e5e2d9; padding-top: 12px; }
 </style></head>
 <body>
   <h1>GERD Buddy Health Report</h1>
@@ -91,8 +137,12 @@ const buildReportHtml = (report) => {
 
 export default function ReportScreen() {
   const [patternReport, setPatternReport] = useState(null);
+  const [evidence, setEvidence] = useState(null);
+  const [weeklySeverity, setWeeklySeverity] = useState([]);
   const [userId, setUserId] = useState(null);
+  const [isGeneratingVisitPrep, setIsGeneratingVisitPrep] = useState(false);
   const { isPro, refreshStatus } = usePremiumStatus(userId);
+  const posthog = usePostHog();
 
   const loadData = useCallback(async () => {
     try {
@@ -100,7 +150,15 @@ export default function ReportScreen() {
         getMeals(), getSymptoms(), getUser(),
       ]);
       if (user?.id) setUserId(user.id);
-      setPatternReport(generateTriggerReport(meals, symptoms));
+      const report = generateTriggerReport(meals, symptoms);
+      setPatternReport(report);
+      setEvidence(calculateEvidenceProgress({
+        user,
+        meals,
+        symptoms,
+        triggers: report.topTriggers,
+      }));
+      setWeeklySeverity(getWeeklySeverity(symptoms));
     } catch (error) {
       console.warn("Failed to load report data", error);
     }
@@ -142,19 +200,126 @@ export default function ReportScreen() {
     }
   };
 
+  const handleVisitPrep = async () => {
+    if (!patternReport || isGeneratingVisitPrep) return;
+    setIsGeneratingVisitPrep(true);
+    try {
+      const visitPrep = await generateVisitPrepQuestions({
+        topTriggers: patternReport.topTriggers,
+        safeFoods: patternReport.safeFoods,
+        avgSeverity: patternReport.avgSeverity,
+        lateEatingRisk: patternReport.lateEatingRisk,
+        worstTimeOfDay: patternReport.worstTimeOfDay,
+        symptomFreeDays: patternReport.symptomFreeDays,
+        totalMeals: patternReport.totalMeals,
+        totalSymptoms: patternReport.totalSymptoms,
+      });
+      posthog?.capture(EVENTS.VISIT_PREP_GENERATED, {
+        question_count: visitPrep.questions.length,
+        trend_count: visitPrep.concerningTrends.length,
+      });
+      const html = buildVisitPrepHtml(
+        patternReport,
+        visitPrep.questions,
+        visitPrep.concerningTrends
+      );
+      const { uri } = await Print.printToFileAsync({ html });
+      await Sharing.shareAsync(uri, {
+        mimeType: "application/pdf",
+        dialogTitle: "GI Visit Prep",
+        UTI: "com.adobe.pdf",
+      });
+      posthog?.capture(EVENTS.VISIT_PREP_SHARED);
+    } catch (error) {
+      showToast("Unable to generate visit prep", error.message);
+    } finally {
+      setIsGeneratingVisitPrep(false);
+    }
+  };
+
   if (!patternReport) {
     return (
-      <Screen contentClassName="items-center justify-center gap-4">
-        <Image source={turtleSad} style={{ width: 100, height: 100 }} resizeMode="contain" />
-        <Text className="text-sm text-muted-foreground text-center">
-          Log meals and symptoms to see your report.
-        </Text>
+      <Screen contentClassName="justify-center gap-4">
+        <Card
+          className="p-8 items-center gap-4 bg-muted"
+          style={{ borderStyle: "dashed", borderWidth: 2 }}
+        >
+          <BrandMark variant="dark" size={72} />
+          <View className="items-center gap-1">
+            <Text className="text-base font-semibold text-foreground">Report preview is empty</Text>
+            <Text className="text-sm text-muted-foreground text-center">
+              Log meals and symptoms to build doctor-ready evidence.
+            </Text>
+          </View>
+        </Card>
       </Screen>
     );
   }
 
+  const visibleTriggers = isPro
+    ? patternReport.topTriggers.slice(0, 3)
+    : patternReport.topTriggers.slice(0, 1);
+  const hiddenTriggerCount = isPro
+    ? 0
+    : Math.max(0, Math.min(patternReport.topTriggers.length, 3) - 1);
+  const visibleSafeFoods = patternReport.safeFoods.slice(0, 3);
+
   return (
     <Screen contentClassName="gap-5">
+      <View className="flex-row items-end justify-between">
+        <View>
+          <Text className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Doctor-ready
+          </Text>
+          <Text className="text-3xl font-bold text-primary mt-1">Report</Text>
+        </View>
+        <View className="rounded-full border border-border bg-card px-3 py-1">
+          <Text className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            PDF export
+          </Text>
+        </View>
+      </View>
+
+      {evidence && (
+        <Card className="p-4 gap-5">
+          <View>
+            <Text className="text-lg font-bold text-foreground">Report readiness</Text>
+            <Text className="text-sm text-muted-foreground mt-1">
+              A compact preview of trigger evidence, safe foods, timing, and symptom trends.
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-4">
+            <ProgressRing
+              progress={evidence.reportReadiness}
+              size={118}
+              strokeWidth={9}
+              color="#154212"
+            >
+              <Text className="text-3xl font-bold text-primary">{evidence.reportReadiness}%</Text>
+              <Text className="text-[10px] uppercase tracking-wider text-muted-foreground">ready</Text>
+            </ProgressRing>
+            <View className="flex-1 gap-3">
+              <View className="self-start rounded-full bg-primary-light px-3 py-1 border border-primary/10">
+                <Text className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+                  Day {evidence.dayProgress}/14
+                </Text>
+              </View>
+              <EvidenceBar
+                label="Meals"
+                value={`${evidence.mealProgress}/${evidence.targets.meals}`}
+                percent={evidence.mealPercent}
+              />
+              <EvidenceBar
+                label="Symptoms"
+                value={`${evidence.symptomProgress}/${evidence.targets.symptoms}`}
+                percent={evidence.symptomPercent}
+                tone="symptom"
+              />
+            </View>
+          </View>
+        </Card>
+      )}
+
       {/* Overview counts */}
       <View className="flex-row gap-3">
         <Card className="flex-1 p-4 items-center">
@@ -167,27 +332,67 @@ export default function ReportScreen() {
         </Card>
       </View>
 
+      <Card className="p-4 gap-4">
+        <SectionHeader
+          icon={AlertTriangle}
+          tone="gold"
+          title="Trigger evidence"
+          subtitle="Top patterns"
+        />
+        {visibleTriggers.length > 0 ? (
+          visibleTriggers.map((trigger) => (
+            <TriggerReportRow key={trigger.ingredient} trigger={trigger} />
+          ))
+        ) : (
+          <View className="h-16 rounded-xl bg-muted items-center justify-center">
+            <Text className="text-xs text-muted-foreground">No trigger pattern yet</Text>
+          </View>
+        )}
+        {hiddenTriggerCount > 0 && (
+          <ProTeaser
+            title={`Unlock ${hiddenTriggerCount} more patterns`}
+            description="See the full doctor report preview."
+          />
+        )}
+      </Card>
+
+      {visibleSafeFoods.length > 0 && (
+        <Card className="p-4 gap-4">
+          <SectionHeader
+            icon={ShieldCheck}
+            tone="primary"
+            title="Likely safe foods"
+            subtitle="Low-symptom meals"
+          />
+          {visibleSafeFoods.map((food) => (
+            <SafeFoodReportRow key={food.ingredient} food={food} />
+          ))}
+        </Card>
+      )}
+
+      <SeverityChart data={weeklySeverity} />
+
       {/* Stats grid */}
       {isPro ? (
         <View className="flex-row flex-wrap gap-3">
           <Card className="p-4 basis-[48%] items-center">
-            <Clock size={18} color="#5f6f74" />
-            <Text className="text-2xl font-bold text-accent mt-2">{patternReport.lateEatingRisk}%</Text>
+            <Clock size={20} color="#b94f3a" strokeWidth={2} />
+            <Text className="text-2xl font-bold text-accent mt-1">{patternReport.lateEatingRisk}%</Text>
             <Text className="text-xs text-muted-foreground mt-1">Late eating</Text>
           </Card>
           <Card className="p-4 basis-[48%] items-center">
-            <TrendingDown size={18} color="#5f6f74" />
-            <Text className="text-2xl font-bold text-foreground mt-2">{patternReport.avgSeverity}/5</Text>
+            <Gauge size={20} color="#2f3a3d" strokeWidth={2} />
+            <Text className="text-2xl font-bold text-foreground mt-1">{patternReport.avgSeverity}/5</Text>
             <Text className="text-xs text-muted-foreground mt-1">Avg severity</Text>
           </Card>
           <Card className="p-4 basis-[48%] items-center">
-            <Calendar size={18} color="#5f6f74" />
-            <Text className="text-2xl font-bold text-success mt-2">{patternReport.symptomFreeDays}</Text>
+            <Calendar size={20} color="#315f43" strokeWidth={2} />
+            <Text className="text-2xl font-bold text-success mt-1">{patternReport.symptomFreeDays}</Text>
             <Text className="text-xs text-muted-foreground mt-1">Symptom-free days</Text>
           </Card>
           <Card className="p-4 basis-[48%] items-center">
-            <Clock size={18} color="#5f6f74" />
-            <Text className="text-xl font-bold text-foreground mt-2">{patternReport.worstTimeOfDay}</Text>
+            <Clock size={20} color="#90611c" strokeWidth={2} />
+            <Text className="text-xl font-bold text-foreground mt-1">{patternReport.worstTimeOfDay}</Text>
             <Text className="text-xs text-muted-foreground mt-1">Peak symptom time</Text>
           </Card>
         </View>
@@ -200,9 +405,24 @@ export default function ReportScreen() {
 
       {isPro && (
         <View className="gap-3">
-          <Button onPress={handleSharePDF} variant="primary" className="w-full flex-row gap-2">
-            <FileText size={18} color="#ffffff" />
-            <Text className="text-white font-semibold">Share with Doctor</Text>
+          <Button
+            onPress={handleVisitPrep}
+            variant="primary"
+            disabled={isGeneratingVisitPrep}
+            className="w-full flex-row gap-2"
+          >
+            {isGeneratingVisitPrep ? (
+              <ActivityIndicator size="small" color="#ffffff" />
+            ) : (
+              <ClipboardList size={18} color="#ffffff" strokeWidth={2.2} />
+            )}
+            <Text className="text-white font-semibold">
+              {isGeneratingVisitPrep ? "Preparing visit packet…" : "Generate GI Visit Prep"}
+            </Text>
+          </Button>
+          <Button onPress={handleSharePDF} variant="outline" className="w-full flex-row gap-2">
+            <Send size={18} color="#1f2a30" strokeWidth={2.2} />
+            <Text className="text-foreground font-semibold">Share basic report</Text>
           </Button>
           <Button onPress={handleShare} variant="outline" className="w-full flex-row gap-2">
             <Share2 size={18} color="#1f2a30" />

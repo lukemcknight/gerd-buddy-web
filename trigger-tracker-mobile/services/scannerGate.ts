@@ -12,6 +12,7 @@
 
 import { getUser, saveUser } from "./storage";
 import { getSubscriptionStatus, configureRevenueCat } from "./revenuecat";
+import { shouldBypassPaywall } from "../utils/devMode";
 
 // ── Configuration ──────────────────────────────────────────────────────
 
@@ -49,6 +50,16 @@ export const canUserScan = async (): Promise<ScanGateResult> => {
       reason: "no_user",
       entitlementState: "free",
       freeScanCount: 0,
+      freeScanLimit: FREE_SCAN_LIMIT,
+    };
+  }
+
+  if (shouldBypassPaywall) {
+    return {
+      allowed: true,
+      reason: "pro",
+      entitlementState: "pro",
+      freeScanCount: user.freeScanCount ?? user.scanCount ?? 0,
       freeScanLimit: FREE_SCAN_LIMIT,
     };
   }

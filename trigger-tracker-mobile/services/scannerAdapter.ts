@@ -70,11 +70,24 @@ export const extractReasonTags = (
   result: FoodAnalysisResult
 ): ReasonTag[] => {
   const tags = new Set<ReasonTag>();
-  const searchText = [
-    ...result.reasons,
-    ...result.suggestions,
-    ...(result.detectedFoods || []),
-  ]
+
+  // If the AI already rated this food as safe (score 1-2), don't extract trigger
+  // tags. The previous behaviour scanned the reasons/suggestions text for any
+  // keyword like "acid" or "fat" — but that text is human-readable and often
+  // contains negations ("non-acidic", "low fat") that the naive matcher
+  // flipped into false triggers, contradicting the safe verdict.
+  const score = Number(result.score) || 3;
+  if (score <= 2) {
+    if (result.personalTriggerMatch && result.personalTriggerMatch.length > 0) {
+      tags.add("personal-trigger");
+    }
+    return Array.from(tags);
+  }
+
+  // Search only the detected food names — not the AI's free-form reasoning —
+  // so categorical tags reflect ingredients actually present, not words the
+  // AI used while explaining its verdict.
+  const searchText = (result.detectedFoods || [])
     .join(" ")
     .toLowerCase();
 

@@ -6,10 +6,10 @@ const BAR_HEIGHT = 88;
 const MIN_BAR_HEIGHT = 4;
 
 const barColor = (avg) => {
-  if (avg <= 0) return "#e5e7eb";
-  if (avg <= 1.5) return "#5db88a";
-  if (avg <= 3) return "#e0a93a";
-  return "#d44040";
+  if (avg <= 0) return "#e5e2d9";
+  if (avg <= 1.5) return "#2d5a27";
+  if (avg <= 3) return "#b87518";
+  return "#9e4132";
 };
 
 export const SeverityChart = ({ data }) => {
@@ -20,8 +20,8 @@ export const SeverityChart = ({ data }) => {
   return (
     <Card className="p-4">
       <View className="flex-row items-end justify-between mb-3">
-        <Text className="text-base font-semibold text-foreground">Last 7 days</Text>
-        <Text className="text-xs text-muted-foreground">Avg severity</Text>
+        <Text className="text-base font-semibold text-primary">Severity trend</Text>
+        <Text className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">7 days</Text>
       </View>
 
       <View
@@ -39,7 +39,7 @@ export const SeverityChart = ({ data }) => {
                 width: 24,
                 height: heightPx,
                 backgroundColor: barColor(day.avgSeverity),
-                borderRadius: 6,
+                borderRadius: 5,
               }}
             />
           );

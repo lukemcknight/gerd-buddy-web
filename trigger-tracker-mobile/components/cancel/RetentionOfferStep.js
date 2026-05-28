@@ -5,7 +5,7 @@ import Button from "../Button";
 const ValueRow = ({ Icon, title, body }) => (
   <View className="flex-row gap-3">
     <View className="w-9 h-9 rounded-xl items-center justify-center bg-primary/10">
-      <Icon size={18} color="#3aa27f" />
+      <Icon size={18} color="#154212" />
     </View>
     <View className="flex-1">
       <Text className="text-sm font-semibold text-foreground">{title}</Text>
@@ -38,7 +38,7 @@ export const RetentionOfferStep = ({
 
       <View className="bg-primary/5 border border-primary/30 rounded-2xl p-5 gap-3">
         <View className="flex-row items-center gap-2">
-          <Sparkles size={18} color="#3aa27f" />
+          <Sparkles size={18} color="#154212" />
           <Text className="text-xs font-semibold text-primary uppercase tracking-wide">
             Special offer
           </Text>
