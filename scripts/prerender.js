@@ -90,16 +90,20 @@ function buildPage({ title, description, path, content, jsonLd, extra = "" }) {
   <meta property="og:description" content="${esc(description)}" />
   <meta property="og:url" content="${url}" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="${SITE_URL}/turtle.png" />
+  <meta property="og:image" content="${SITE_URL}/gerdbuddy-mark.png" />
   <meta property="og:site_name" content="GERDBuddy" />
   <meta property="og:locale" content="en_US" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${esc(title)}" />
   <meta name="twitter:description" content="${esc(description)}" />
-  <meta name="twitter:image" content="${SITE_URL}/turtle.png" />
-  <meta name="theme-color" content="#4d9078" />
+  <meta name="twitter:image" content="${SITE_URL}/gerdbuddy-mark.png" />
+  <meta name="theme-color" content="#154212" />
   <meta name="apple-itunes-app" content="app-id=6756620910" />
   <link rel="alternate" type="application/rss+xml" title="GERDBuddy Blog" href="${SITE_URL}/feed.xml" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   ${cssLink}
   ${jsonLdTags}
   ${extra}
@@ -201,7 +205,7 @@ writePage("/", buildPage({
   jsonLd: [
     faqSchema,
     { "@context": "https://schema.org", "@type": "WebSite", name: "GERDBuddy", url: SITE_URL, description: "Track meals and symptoms to discover your personal GERD triggers with AI-powered insights." },
-    { "@context": "https://schema.org", "@type": "Organization", name: "GERDBuddy", url: SITE_URL, logo: `${SITE_URL}/turtle.png`, contactPoint: { "@type": "ContactPoint", email: "gerdbuddy2@gmail.com", contactType: "customer support" } },
+    { "@context": "https://schema.org", "@type": "Organization", name: "GERDBuddy", url: SITE_URL, logo: `${SITE_URL}/gerdbuddy-mark.png`, contactPoint: { "@type": "ContactPoint", email: "gerdbuddy2@gmail.com", contactType: "customer support" } },
     { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "GERDBuddy - GERD Food Scanner", operatingSystem: "iOS", applicationCategory: "HealthApplication", url: "https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
   ],
 }));
@@ -246,9 +250,9 @@ for (const post of posts) {
     articleSection: post.category,
     keywords: post.tags.join(", "),
     author: { "@type": "Organization", name: post.author },
-    publisher: { "@type": "Organization", name: "GERDBuddy", logo: { "@type": "ImageObject", url: `${SITE_URL}/turtle.png` } },
+    publisher: { "@type": "Organization", name: "GERDBuddy", logo: { "@type": "ImageObject", url: `${SITE_URL}/gerdbuddy-mark.png` } },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
-    image: `${SITE_URL}/turtle.png`,
+    image: `${SITE_URL}/gerdbuddy-mark.png`,
   };
 
   const medicalSchema = {
