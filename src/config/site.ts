@@ -1,6 +1,10 @@
 export const SITE_URL = "https://gerdbuddy.app";
 export const SITE_NAME = "GERDBuddy";
-export const DEFAULT_IMAGE = `${SITE_URL}/turtle.png`;
+export const DEFAULT_IMAGE = `${SITE_URL}/gerdbuddy-mark.png`;
+
+// Canonical App Store listing (GERDBuddy - GERD Food Scanner, app-id 6756620910).
+export const APP_STORE_URL =
+  "https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910";
 
 export const FORUM_CATEGORIES = [
   { slug: "food-and-triggers", name: "Food & Triggers", description: "What to eat, what to avoid, recipes" },

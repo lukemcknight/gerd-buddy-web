@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Outlet, NavLink, Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Apple } from "lucide-react";
 import UserMenu from "./UserMenu";
+import { APP_STORE_URL } from "@/config/site";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -15,16 +16,16 @@ const Layout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Sticky nav */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-border/50">
-        <div className="mx-auto w-full max-w-screen-xl px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="flex items-center gap-2 group" onClick={() => setMenuOpen(false)}>
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/60">
+        <div className="mx-auto w-full max-w-screen-xl px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <Link to="/" className="flex items-center gap-2.5 group" onClick={() => setMenuOpen(false)}>
               <img
-                src="/turtle.png"
+                src="/gerdbuddy-mark.png"
                 alt="GERDBuddy"
-                className="w-8 h-8 rounded-lg object-cover"
+                className="w-9 h-9 object-contain transition-transform duration-300 group-hover:-rotate-6"
               />
-              <span className="font-display font-bold text-foreground group-hover:text-primary transition-colors">
+              <span className="font-body font-extrabold tracking-tight text-lg text-foreground">
                 GERDBuddy
               </span>
             </Link>
@@ -37,7 +38,7 @@ const Layout = () => {
                   to={link.to}
                   end={link.to === "/"}
                   className={({ isActive }) =>
-                    `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    `px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                       isActive
                         ? "text-primary bg-primary/10"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -55,6 +56,16 @@ const Layout = () => {
               <UserMenu />
             </div>
 
+            <a
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+            >
+              <Apple className="w-4 h-4" />
+              Get the app
+            </a>
+
             {/* Mobile hamburger */}
             <button
               className="sm:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -68,7 +79,7 @@ const Layout = () => {
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="sm:hidden border-t border-border/50 bg-white/95 backdrop-blur-md">
+          <div className="sm:hidden border-t border-border/60 bg-background/95 backdrop-blur-md">
             <div className="mx-auto w-full max-w-screen-xl px-4 py-3 flex flex-col gap-1">
               {navLinks.map((link) => (
                 <NavLink
@@ -87,6 +98,15 @@ const Layout = () => {
                   {link.label}
                 </NavLink>
               ))}
+              <a
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+              >
+                <Apple className="w-4 h-4" />
+                Get the app
+              </a>
               <div className="px-3 py-2">
                 <UserMenu />
               </div>
@@ -101,53 +121,56 @@ const Layout = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/70 bg-white/70 backdrop-blur-sm">
-        <div className="mx-auto w-full max-w-screen-xl px-4 py-10">
+      <footer className="border-t border-border/70 bg-primary text-primary-foreground">
+        <div className="mx-auto w-full max-w-screen-xl px-4 py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Column 1: Brand */}
             <div className="space-y-3">
-              <Link to="/" className="flex items-center gap-2">
-                <img src="/turtle.png" alt="GERDBuddy" className="w-8 h-8 rounded-lg object-cover" />
-                <span className="font-display font-bold text-foreground">GERDBuddy</span>
+              <Link to="/" className="flex items-center gap-2.5">
+                <img src="/gerdbuddy-mark-light.png" alt="GERDBuddy" className="w-9 h-9 object-contain" />
+                <span className="font-body font-extrabold tracking-tight text-lg">GERDBuddy</span>
               </Link>
-              <p className="text-sm text-muted-foreground">Your all-in-one GERD resource</p>
+              <p className="text-sm text-primary-foreground/70 leading-relaxed">
+                Relief-first GERD tracking. Scan meals, calm flares, and find your triggers.
+              </p>
             </div>
 
             {/* Column 2: Quick Links */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">Quick Links</h4>
+              <h4 className="text-sm font-semibold">Explore</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/" className="text-muted-foreground hover:text-primary transition-colors">Home</Link></li>
-                <li><Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
-                <li><Link to="/forum" className="text-muted-foreground hover:text-primary transition-colors">Forum</Link></li>
+                <li><Link to="/" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Home</Link></li>
+                <li><Link to="/blog" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Blog</Link></li>
+                <li><Link to="/forum" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Forum</Link></li>
               </ul>
             </div>
 
             {/* Column 3: Legal */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">Legal</h4>
+              <h4 className="text-sm font-semibold">Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li><Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
+                <li><Link to="/privacy" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Privacy Policy</Link></li>
+                <li><Link to="/terms" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
 
             {/* Column 4: Contact */}
             <div className="space-y-3">
-              <h4 className="text-sm font-semibold text-foreground">Contact</h4>
+              <h4 className="text-sm font-semibold">Get in touch</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="mailto:gerdbuddy2@gmail.com" className="text-muted-foreground hover:text-primary transition-colors">
+                  <a href="mailto:gerdbuddy2@gmail.com" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                     gerdbuddy2@gmail.com
                   </a>
                 </li>
                 <li>
                   <a
-                    href="https://apps.apple.com/us/app/gerdbuddy-acid-reflux-tracker/id6740261875"
+                    href={APP_STORE_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="inline-flex items-center gap-1.5 text-primary-foreground/70 hover:text-primary-foreground transition-colors"
                   >
+                    <Apple className="w-4 h-4" />
                     Download on the App Store
                   </a>
                 </li>
@@ -156,8 +179,8 @@ const Layout = () => {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-8 pt-6 border-t border-border/50 text-center text-sm text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">&copy; {new Date().getFullYear()} Luke McKnight</p>
+          <div className="mt-10 pt-6 border-t border-primary-foreground/15 text-center text-sm text-primary-foreground/60 space-y-1">
+            <p className="font-semibold text-primary-foreground/90">&copy; {new Date().getFullYear()} Luke McKnight</p>
             <p>GERDBuddy is not a substitute for professional medical advice.</p>
           </div>
         </div>
