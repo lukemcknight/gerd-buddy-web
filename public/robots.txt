@@ -34,4 +34,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://gerdbuddy.app/sitemap.xml
+Sitemap: https://www.gerdbuddy.app/sitemap.xml

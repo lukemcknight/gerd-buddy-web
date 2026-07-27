@@ -1,6 +1,6 @@
 import appFacts from "./app-facts.json";
 
-export const SITE_URL = "https://gerdbuddy.app";
+export const SITE_URL = "https://www.gerdbuddy.app";
 export const SITE_NAME = "GERDBuddy";
 export const DEFAULT_IMAGE = `${SITE_URL}/gerdbuddy-mark.png`;
 

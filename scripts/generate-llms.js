@@ -17,7 +17,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SITE_URL = "https://gerdbuddy.app";
+const SITE_URL = "https://www.gerdbuddy.app";
 
 const readJson = (path) => JSON.parse(readFileSync(resolve(__dirname, path), "utf-8"));
 const APP = readJson("../src/config/app-facts.json");
