@@ -8,7 +8,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SITE_URL = "https://gerdbuddy.app";
+const SITE_URL = "https://www.gerdbuddy.app";
 
 const blogDir = resolve(__dirname, "../src/content/blog");
 const blogFiles = readdirSync(blogDir).filter(

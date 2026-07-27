@@ -13,7 +13,7 @@ import { marked } from "marked";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(__dirname, "../dist");
-const SITE_URL = "https://gerdbuddy.app";
+const SITE_URL = "https://www.gerdbuddy.app";
 
 // Shared, verified data. These same files feed the React app (src/pages/*.tsx) and
 // generate-llms.js, so the prerendered HTML, the client-rendered page, and llms.txt
