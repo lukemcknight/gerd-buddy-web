@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Explore evidence-based natural remedies for acid reflux and GERD. From dietary changes and lifestyle adjustments to herbal options, learn what can help manage your symptoms naturally.",
   date: "2026-02-17",
-  dateModified: "2026-02-17",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Treatment",
   tags: ["natural remedies", "lifestyle changes", "supplements", "home remedies", "acid reflux relief"],
@@ -101,7 +101,7 @@ The old "drink some milk for heartburn" advice is mostly a myth. Milk might feel
 
 The most effective natural approach combines several strategies:
 
-1. **Track your triggers** — you can't manage what you don't understand. Learn [how to find your personal trigger foods](/blog/gerd-trigger-foods), and use an app like [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) to log meals and symptoms so you can identify your personal patterns.
+1. **Track your triggers** — you can't manage what you don't understand. Learn [how to find your personal trigger foods](/blog/gerd-trigger-foods), and use an app like [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) to log meals and symptoms so you can identify your personal patterns.
 2. **Nail the lifestyle basics** — bed elevation, meal timing, portion control
 3. **Shift toward an anti-inflammatory diet** — more whole foods, fewer processed ones (our [GERD diet guide](/blog/gerd-diet-guide) and [meal-building guide](/blog/gerd-friendly-meals) can help)
 4. **Maybe try a supplement or two** — with your doctor's input

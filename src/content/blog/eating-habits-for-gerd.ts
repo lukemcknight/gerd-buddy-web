@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "How you eat matters as much as what you eat for GERD. Learn how meal timing, portion sizes, eating speed, posture, and post-meal activity can reduce acid reflux symptoms.",
   date: "2026-03-16",
-  dateModified: "2026-03-16",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Lifestyle & Management",
   tags: [
@@ -130,7 +130,7 @@ Here's what a GERD-friendly eating routine looks like in practice:
 5. **Dinner (6:00 PM):** Smaller than lunch. Lean protein, vegetables, easy carbs. Eat slowly at the table.
 6. **Kitchen closed by 7 PM.** Go for a walk, stay upright until bedtime.
 
-Track how these habit changes affect your symptoms with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910). You might be surprised to find that changing how you eat reduces symptoms just as much as changing what you eat — sometimes even more. The best part is that these habits cost nothing and have zero side effects. Start with one or two changes this week and build from there.
+Track how these habit changes affect your symptoms with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910). You might be surprised to find that changing how you eat reduces symptoms just as much as changing what you eat — sometimes even more. The best part is that these habits cost nothing and have zero side effects. Start with one or two changes this week and build from there.
   `.trim(),
 };
 

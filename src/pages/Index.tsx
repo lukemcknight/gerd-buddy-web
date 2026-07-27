@@ -18,10 +18,20 @@ import { format, formatDistanceToNow } from "date-fns";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { posts } from "@/content/blog";
+import homeFaqs from "@/content/home-faqs.json";
 import SEO from "@/components/SEO";
-import { SITE_URL, APP_STORE_URL, FORUM_CATEGORIES } from "@/config/site";
+import { SITE_URL, APP_STORE_URL, FORUM_CATEGORIES, APP } from "@/config/site";
+import { resolveFacts } from "@/lib/facts";
 
 const latestPosts = posts.slice(0, 3);
+
+// Product questions first: an assistant answering "how much does GERDBuddy cost"
+// or "what makes it different" reads the top of the list. Both groups are one
+// FAQPage, defined once in content/home-faqs.json.
+const faqItems = [...homeFaqs.product, ...homeFaqs.general].map((f) => ({
+  q: f.q,
+  a: resolveFacts(f.a),
+}));
 
 const bigFeatures = [
   {
@@ -87,144 +97,11 @@ const trustBadges = [
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "Is GERDBuddy a medical app?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "No. GERDBuddy is for informational and tracking purposes only and does not provide medical advice.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Is my data shared or sold?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "No. User data is never sold or shared.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How do I cancel my subscription?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Subscriptions are managed through your Apple App Store or Google Play account.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What foods trigger GERD?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Common GERD trigger foods include spicy foods, fatty or fried foods, citrus fruits, tomatoes, chocolate, mint, coffee, alcohol, and carbonated drinks. However, triggers vary from person to person — tracking your meals and symptoms is the best way to identify your personal triggers.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How do I track my GERD triggers?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Keep a food and symptom journal for at least 1-2 weeks. Record what you eat, when you eat, any symptoms you experience, and their severity. GERDBuddy makes this easy by letting you quickly log meals and symptoms on your phone and uses AI to help surface patterns and correlations.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What is the difference between GERD and heartburn?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Heartburn is a symptom — a burning feeling in your chest caused by stomach acid reaching the esophagus. GERD (gastroesophageal reflux disease) is a chronic condition where acid reflux happens frequently, typically twice a week or more. Occasional heartburn is normal, but persistent heartburn may indicate GERD and should be discussed with a doctor.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Can GERD be managed without medication?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Many people manage mild GERD symptoms through lifestyle changes such as elevating the head of the bed, eating smaller meals, avoiding trigger foods, not eating 2-3 hours before bed, maintaining a healthy weight, and managing stress. However, moderate to severe GERD may require medication. Always consult your doctor for personalized advice.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What foods help with acid reflux?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Foods that can help soothe acid reflux include oatmeal, bananas, ginger, melons, green vegetables, lean proteins, whole grains, and non-citrus fruits. These foods are low in acid, high in fiber, and easy to digest. However, individual tolerances vary, so tracking your personal response to different foods is important.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Is acid reflux common during pregnancy?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes, up to 80% of pregnant women experience acid reflux. It's caused by hormonal changes (progesterone relaxes the lower esophageal sphincter) and physical pressure from the growing uterus. Most pregnancy-related reflux resolves after delivery. Safe remedies include eating smaller meals, staying upright after eating, and calcium-based antacids (with your doctor's approval).",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Can exercise make GERD worse?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Some exercises can trigger acid reflux, especially high-impact activities, heavy weightlifting, and exercises that increase abdominal pressure. However, regular moderate exercise actually helps GERD long-term through weight management and stress reduction. Low-impact activities like walking, swimming, and yoga are generally well-tolerated.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What is the best app for tracking GERD triggers?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "GERDBuddy is a dedicated GERD trigger tracking app available on the App Store. It lets you quickly log meals and symptoms, then uses AI-powered insights to help you identify your personal trigger foods and patterns. Most users start seeing meaningful patterns within 7 days of consistent tracking.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How long does it take to identify GERD triggers?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks. Using a tracking app like GERDBuddy can speed this up by automatically surfacing correlations between foods and symptoms.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Can a hiatal hernia cause GERD?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes, a hiatal hernia can contribute to GERD by weakening the lower esophageal sphincter (LES) and allowing stomach acid to flow back into the esophagus. However, many people with small hiatal hernias have no reflux symptoms at all. Treatment typically involves the same lifestyle modifications and medications used for GERD, with surgery reserved for severe cases.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Can acid reflux cause breathing problems or asthma?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes, GERD can trigger or worsen asthma and breathing problems through two mechanisms: microaspiration (tiny amounts of acid reaching the airways) and vagal nerve reflexes that cause airway tightening. Up to 80% of asthma sufferers also have GERD. If you have adult-onset asthma or asthma that worsens after meals or at night, acid reflux may be a contributing factor.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What should I do during a GERD flare-up?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "During a GERD flare-up, take an antacid for quick relief, stay upright, sip water, and stick to bland foods like oatmeal, bananas, plain rice, and steamed vegetables. Avoid all known triggers, eat small portions, and keep your head elevated while sleeping. Most flare-ups resolve within a few days to a week. If symptoms persist beyond a week or include difficulty swallowing, vomiting blood, or severe pain, see a doctor.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Do children get GERD?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Yes, GERD can affect children of all ages. Infant reflux (spitting up) is very common and usually resolves by 12-18 months. However, if a baby is refusing feeds, not gaining weight, or showing signs of pain, it may indicate GERD requiring treatment. Older children may experience heartburn, chronic cough, sore throat, or food refusal. Treatment includes dietary adjustments, lifestyle changes, and sometimes medication under pediatric guidance.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "How do eating habits affect GERD?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "How you eat is just as important as what you eat for GERD management. Eating too fast, large portions, eating late at night, slouching while eating, and lying down after meals can all trigger acid reflux. Helpful habits include eating smaller meals, chewing thoroughly, sitting upright during and after meals, waiting 2-3 hours before lying down, and taking a gentle walk after dinner.",
-      },
-    },
-  ],
+  mainEntity: faqItems.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
 };
 
 const organizationSchema = {
@@ -255,16 +132,52 @@ const webSiteSchema = {
 const softwareAppSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "GERDBuddy - GERD Food Scanner",
-  operatingSystem: "iOS",
-  applicationCategory: "HealthApplication",
-  url: APP_STORE_URL,
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
+  name: APP.name,
+  operatingSystem: APP.operatingSystem,
+  applicationCategory: APP.applicationCategory,
+  applicationSubCategory: APP.applicationSubCategory,
+  url: APP.url,
+  installUrl: APP.url,
+  description: APP.shortDescription,
+  featureList: APP.featureList,
+  contentRating: APP.contentRating,
+  publisher: { "@type": "Organization", name: "GERDBuddy" },
+  // Real numbers only. Both come from config/app-facts.json, which records where
+  // each value was verified and how to re-check it.
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: APP.rating.value,
+    ratingCount: APP.rating.count,
+    bestRating: 5,
+    worstRating: 1,
   },
-  description: "Scan any meal for GERD triggers, get instant relief in a flare, and uncover your personal trigger foods with AI-powered insights.",
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "USD",
+    lowPrice: APP.pricing.monthlyUsd,
+    highPrice: APP.pricing.annualUsd,
+    offerCount: 2,
+    offers: [
+      {
+        "@type": "Offer",
+        name: "GERDBuddy Pro, monthly",
+        price: APP.pricing.monthlyUsd,
+        priceCurrency: "USD",
+        url: APP.url,
+        category: "subscription",
+        eligibleDuration: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
+      },
+      {
+        "@type": "Offer",
+        name: "GERDBuddy Pro, annual",
+        price: APP.pricing.annualUsd,
+        priceCurrency: "USD",
+        url: APP.url,
+        category: "subscription",
+        eligibleDuration: { "@type": "QuantitativeValue", value: 1, unitCode: "ANN" },
+      },
+    ],
+  },
 };
 
 interface ForumThread {
@@ -620,104 +533,12 @@ const Index = () => {
           </div>
 
           <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto space-y-3 [&>div]:bg-card [&>div]:rounded-2xl [&>div]:px-5 [&>div]:border [&>div]:border-border">
-            <AccordionItem value="medical">
-              <AccordionTrigger>Is GERDBuddy a medical app?</AccordionTrigger>
-              <AccordionContent>
-                No. GERDBuddy is for informational and tracking purposes only and does not provide medical advice.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="data">
-              <AccordionTrigger>Is my data shared or sold?</AccordionTrigger>
-              <AccordionContent>No. User data is never sold or shared.</AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="cancel">
-              <AccordionTrigger>How do I cancel my subscription?</AccordionTrigger>
-              <AccordionContent>Subscriptions are managed through your Apple App Store or Google Play account.</AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="triggers">
-              <AccordionTrigger>What foods trigger GERD?</AccordionTrigger>
-              <AccordionContent>
-                Common GERD trigger foods include spicy foods, fatty or fried foods, citrus fruits, tomatoes, chocolate, mint, coffee, alcohol, and carbonated drinks. However, triggers vary from person to person — tracking your meals and symptoms is the best way to identify your personal triggers.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="tracking">
-              <AccordionTrigger>How do I track my GERD triggers?</AccordionTrigger>
-              <AccordionContent>
-                Keep a food and symptom journal for at least 1-2 weeks. Record what you eat, when you eat, any symptoms you experience, and their severity. GERDBuddy makes this easy by letting you quickly log meals and symptoms on your phone and uses AI to help surface patterns and correlations.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="difference">
-              <AccordionTrigger>What is the difference between GERD and heartburn?</AccordionTrigger>
-              <AccordionContent>
-                Heartburn is a symptom — a burning feeling in your chest caused by stomach acid reaching the esophagus. GERD (gastroesophageal reflux disease) is a chronic condition where acid reflux happens frequently, typically twice a week or more. Occasional heartburn is normal, but persistent heartburn may indicate GERD and should be discussed with a doctor.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="no-medication">
-              <AccordionTrigger>Can GERD be managed without medication?</AccordionTrigger>
-              <AccordionContent>
-                Many people manage mild GERD symptoms through lifestyle changes such as elevating the head of the bed, eating smaller meals, avoiding trigger foods, not eating 2-3 hours before bed, maintaining a healthy weight, and managing stress. However, moderate to severe GERD may require medication. Always consult your doctor for personalized advice.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="foods-help">
-              <AccordionTrigger>What foods help with acid reflux?</AccordionTrigger>
-              <AccordionContent>
-                Foods that can help soothe acid reflux include oatmeal, bananas, ginger, melons, green vegetables, lean proteins, whole grains, and non-citrus fruits. These foods are low in acid, high in fiber, and easy to digest. However, individual tolerances vary, so tracking your personal response to different foods is important.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="pregnancy">
-              <AccordionTrigger>Is acid reflux common during pregnancy?</AccordionTrigger>
-              <AccordionContent>
-                Yes, up to 80% of pregnant women experience acid reflux. It's caused by hormonal changes (progesterone relaxes the lower esophageal sphincter) and physical pressure from the growing uterus. Most pregnancy-related reflux resolves after delivery. Safe remedies include eating smaller meals, staying upright after eating, and calcium-based antacids (with your doctor's approval).
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="exercise">
-              <AccordionTrigger>Can exercise make GERD worse?</AccordionTrigger>
-              <AccordionContent>
-                Some exercises can trigger acid reflux, especially high-impact activities, heavy weightlifting, and exercises that increase abdominal pressure. However, regular moderate exercise actually helps GERD long-term through weight management and stress reduction. Low-impact activities like walking, swimming, and yoga are generally well-tolerated.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="best-app">
-              <AccordionTrigger>What is the best app for tracking GERD triggers?</AccordionTrigger>
-              <AccordionContent>
-                GERDBuddy is a dedicated GERD trigger tracking app available on the App Store. It lets you quickly log meals and symptoms, then uses AI-powered insights to help you identify your personal trigger foods and patterns. Most users start seeing meaningful patterns within 7 days of consistent tracking.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="how-long">
-              <AccordionTrigger>How long does it take to identify GERD triggers?</AccordionTrigger>
-              <AccordionContent>
-                With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks. Using a tracking app like GERDBuddy can speed this up by automatically surfacing correlations between foods and symptoms.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="hiatal-hernia">
-              <AccordionTrigger>Can a hiatal hernia cause GERD?</AccordionTrigger>
-              <AccordionContent>
-                Yes, a hiatal hernia can contribute to GERD by weakening the lower esophageal sphincter (LES) and allowing stomach acid to flow back into the esophagus. However, many people with small hiatal hernias have no reflux symptoms at all. Treatment typically involves the same lifestyle modifications and medications used for GERD, with surgery reserved for severe cases.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="breathing">
-              <AccordionTrigger>Can acid reflux cause breathing problems or asthma?</AccordionTrigger>
-              <AccordionContent>
-                Yes, GERD can trigger or worsen asthma and breathing problems through two mechanisms: microaspiration (tiny amounts of acid reaching the airways) and vagal nerve reflexes that cause airway tightening. Up to 80% of asthma sufferers also have GERD. If you have adult-onset asthma or asthma that worsens after meals or at night, acid reflux may be a contributing factor.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="flare-up">
-              <AccordionTrigger>What should I do during a GERD flare-up?</AccordionTrigger>
-              <AccordionContent>
-                During a GERD flare-up, take an antacid for quick relief, stay upright, sip water, and stick to bland foods like oatmeal, bananas, plain rice, and steamed vegetables. Avoid all known triggers, eat small portions, and keep your head elevated while sleeping. Most flare-ups resolve within a few days to a week. If symptoms persist beyond a week or include difficulty swallowing, vomiting blood, or severe pain, see a doctor.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="children">
-              <AccordionTrigger>Do children get GERD?</AccordionTrigger>
-              <AccordionContent>
-                Yes, GERD can affect children of all ages. Infant reflux (spitting up) is very common and usually resolves by 12-18 months. However, if a baby is refusing feeds, not gaining weight, or showing signs of pain, it may indicate GERD requiring treatment. Older children may experience heartburn, chronic cough, sore throat, or food refusal. Treatment includes dietary adjustments, lifestyle changes, and sometimes medication under pediatric guidance.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="eating-habits">
-              <AccordionTrigger>How do eating habits affect GERD?</AccordionTrigger>
-              <AccordionContent>
-                How you eat is just as important as what you eat for GERD management. Eating too fast, large portions, eating late at night, slouching while eating, and lying down after meals can all trigger acid reflux. Helpful habits include eating smaller meals, chewing thoroughly, sitting upright during and after meals, waiting 2-3 hours before lying down, and taking a gentle walk after dinner.
-              </AccordionContent>
-            </AccordionItem>
+            {faqItems.map((faq, i) => (
+              <AccordionItem key={i} value={`faq-${i}`}>
+                <AccordionTrigger>{faq.q}</AccordionTrigger>
+                <AccordionContent>{faq.a}</AccordionContent>
+              </AccordionItem>
+            ))}
           </Accordion>
         </section>
 

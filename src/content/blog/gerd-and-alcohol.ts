@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Alcohol is a common GERD trigger, but some drinks are worse than others. Learn which to avoid, which are better tolerated, and tips for drinking socially with acid reflux.",
   date: "2026-03-10",
-  dateModified: "2026-03-10",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Diet & Nutrition",
   tags: ["alcohol", "trigger foods", "GERD triggers", "lifestyle tips", "wine"],
@@ -73,7 +73,7 @@ No alcoholic drink is truly GERD-friendly. Some are just less bad. If alcohol is
 
 Here's the thing that helped me the most: actually tracking which drinks cause problems and which don't. I discovered that I can handle a single light beer or a vodka soda without much issue, but even one glass of red wine guarantees a bad night. I never would have figured that out without data.
 
-Keep a log of what you drink, how much, what you ate with it, and how your symptoms were afterward. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) makes this kind of tracking simple — log your drinks alongside meals and symptoms, and the patterns become clear within a few weeks.
+Keep a log of what you drink, how much, what you ate with it, and how your symptoms were afterward. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes this kind of tracking simple — log your drinks alongside meals and symptoms, and the patterns become clear within a few weeks.
 
 ## When Cutting Back Makes Sense
 

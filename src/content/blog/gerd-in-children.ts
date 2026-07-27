@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "GERD affects children differently than adults. Learn how to recognize acid reflux symptoms in infants, toddlers, and older kids, plus safe management strategies for parents.",
   date: "2026-03-16",
-  dateModified: "2026-03-16",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Conditions & Diagnosis",
   tags: [
@@ -181,7 +181,7 @@ What helps:
 
 ## Tracking Your Child's Symptoms
 
-Keeping a log of your child's meals, symptoms, and behaviors is incredibly valuable for both managing the condition and communicating with their pediatrician. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) makes this easy — log what your child eats and any symptoms that follow, and patterns will emerge quickly.
+Keeping a log of your child's meals, symptoms, and behaviors is incredibly valuable for both managing the condition and communicating with their pediatrician. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes this easy — log what your child eats and any symptoms that follow, and patterns will emerge quickly.
 
 This data is especially helpful at doctor's appointments. Instead of saying "they seem to have reflux sometimes after eating," you can show specific patterns: "They consistently have symptoms after dairy and tomato sauce, but are fine with chicken and rice."
 

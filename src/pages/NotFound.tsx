@@ -22,7 +22,7 @@ const NotFound = () => {
             Blog
           </Link>
           <a
-            href="https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910"
+            href="https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910"
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary font-semibold hover:underline"

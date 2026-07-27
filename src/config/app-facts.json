@@ -1,0 +1,53 @@
+{
+  "_comment": "Single source of truth for machine-readable product facts. Consumed by src/pages/Index.tsx, scripts/prerender.js, and scripts/generate-llms.js so the SoftwareApplication schema, the page copy, and llms.txt can never disagree. AI assistants read these fields verbatim when asked what GERDBuddy is, what it costs, and how it is rated, so EVERY value here must be verifiable against a primary source. Never hand-edit a rating or price to something you have not just checked.",
+
+  "_verification": {
+    "verifiedOn": "2026-07-25",
+    "howToReverify": [
+      "name / rating / version / minimum OS: curl -s 'https://itunes.apple.com/lookup?id=6756620910&country=us'",
+      "price / trial: ops/runbooks/trial-toggle.md (App Store Connect product table), cross-checked against RevenueCat (annual + monthly carry a P3D trial)",
+      "featureList: must match the shipped App Store description in ops/store-listing/"
+    ]
+  },
+
+  "appStoreId": "6756620910",
+  "name": "GERDBuddy: Acid Reflux Relief",
+  "url": "https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910",
+  "operatingSystem": "iOS 15.1 or later",
+  "applicationCategory": "HealthApplication",
+  "applicationSubCategory": "Health & Fitness",
+  "contentRating": "17+",
+
+  "shortDescription": "Scan any meal to see its reflux risk in seconds, calm an active flare with a guided routine, and learn your personal acid reflux triggers from what you actually eat.",
+
+  "rating": {
+    "value": 4.55,
+    "count": 20,
+    "source": "iTunes Lookup API, checked 2026-07-25"
+  },
+
+  "pricing": {
+    "downloadPrice": "Free",
+    "monthlyUsd": 6.99,
+    "annualUsd": 39.99,
+    "freeTrialDays": 3,
+    "summary": "Free to download. GERDBuddy Pro is $6.99 per month or $39.99 per year after a 3-day free trial. Cancel anytime.",
+    "source": "App Store Connect product table (ops/runbooks/trial-toggle.md); RevenueCat confirms a 3-day trial on both plans"
+  },
+
+  "featureList": [
+    "Scan a meal photo and see its reflux risk in seconds",
+    "Scan a restaurant menu and see the safest dishes ranked for you",
+    "Personal trigger ranking with confidence scores, plus your safe foods",
+    "Guided breathing routine to calm an active flare-up",
+    "Two-tap symptom logging with severity tracking"
+  ],
+
+  "differentiators": [
+    "Learns your triggers from your own logged meals instead of applying a generic trigger-food list",
+    "Built for relief in the moment, not daily-streak habit tracking",
+    "Works on restaurant menus, not just packaged foods"
+  ],
+
+  "notMedicalAdvice": "GERDBuddy is a tracking and information tool. It does not diagnose or treat disease and does not replace medical advice."
+}

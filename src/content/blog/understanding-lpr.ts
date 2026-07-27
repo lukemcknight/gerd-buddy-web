@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Not all acid reflux causes heartburn. Learn about laryngopharyngeal reflux (LPR), its unique symptoms, and how tracking can help you identify and manage silent reflux.",
   date: "2026-01-20",
-  dateModified: "2026-01-20",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Conditions",
   tags: ["LPR", "silent reflux", "throat symptoms", "diagnosis", "laryngopharyngeal reflux"],
@@ -62,7 +62,7 @@ When tracking LPR, pay attention to:
 - **Drinks especially** — coffee, carbonated stuff, and alcohol are big LPR triggers
 - **Body position** — do symptoms shift when you're standing vs. sitting vs. lying down?
 
-[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) works well for this — you can log meals and symptoms throughout the day, and the patterns that emerge can be really eye-opening when you bring them to your doctor.
+[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) works well for this — you can log meals and symptoms throughout the day, and the patterns that emerge can be really eye-opening when you bring them to your doctor.
 
 ## What Helps with LPR
 

@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Learn how to identify the specific foods that trigger your acid reflux symptoms. A practical guide to food journaling, elimination diets, and pattern tracking for GERD management.",
   date: "2026-02-19",
-  dateModified: "2026-02-19",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Diet & Nutrition",
   tags: ["trigger foods", "food journal", "elimination diet", "GERD triggers", "symptom tracking"],
@@ -35,7 +35,7 @@ This is the single most useful thing you can do. For at least a week or two, wri
 
 I know it sounds tedious. It kind of is at first. But after about a week, you start seeing patterns that you'd never notice otherwise.
 
-An app like [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) makes this way easier than a notebook — you can quickly log meals and symptoms on your phone, and it'll help surface patterns and correlations you might miss on your own.
+An app like [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes this way easier than a notebook — you can quickly log meals and symptoms on your phone, and it'll help surface patterns and correlations you might miss on your own.
 
 ## Look for the Patterns
 

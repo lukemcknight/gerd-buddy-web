@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Not all food is the enemy. These 15 foods can actually soothe acid reflux and reduce GERD symptoms. Learn what to eat more of and the science behind why it helps.",
   date: "2026-02-20",
-  dateModified: "2026-02-20",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Diet & Nutrition",
   tags: ["safe foods", "GERD diet", "anti-inflammatory", "meal planning", "acid reflux relief"],
@@ -150,7 +150,7 @@ For more meal ideas, check out our [GERD-friendly recipes guide](/blog/gerd-frie
 
 Here's the important caveat: these are foods that are *generally* well-tolerated, but every person's GERD is different. Some people can eat ginger all day with no issues, while others find it triggers reflux. Some do great with yogurt, others don't.
 
-The only way to know what works for **you** is to track what you eat and how you feel afterward. [GERDBuddy](https://apps.apple.com/app/apple-store/id6743079169?pt=127744576&ct=blog-foods-help&mt=8) helps you identify your personal safe foods and trigger foods, so you can build a diet that works for your body.
+The only way to know what works for **you** is to track what you eat and how you feel afterward. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) helps you identify your personal safe foods and trigger foods, so you can build a diet that works for your body.
 
 ## The Bottom Line
 

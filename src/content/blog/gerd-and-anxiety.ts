@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Anxiety and GERD are deeply connected. Learn how they create a vicious cycle, why your brain and gut are linked, and practical ways to break free from both.",
   date: "2026-02-25",
-  dateModified: "2026-02-25",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Lifestyle",
   tags: ["anxiety", "mental health", "gut-brain axis", "stress", "coping strategies"],
@@ -150,7 +150,7 @@ There's no shame in getting help for both the physical and emotional aspects of 
 
 One of the most empowering things you can do is track the relationship between your stress levels and your symptoms. When you can see the data — "I always have worse reflux during work deadlines" or "my symptoms improved the week I started daily walks" — it makes the connection concrete and actionable.
 
-[GERDBuddy](https://apps.apple.com/app/apple-store/id6743079169?pt=127744576&ct=blog-anxiety&mt=8) helps you log meals, symptoms, and patterns, making it easier to see how your emotional state correlates with your digestive health.
+[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) helps you log meals, symptoms, and patterns, making it easier to see how your emotional state correlates with your digestive health.
 
 ## The Bottom Line
 

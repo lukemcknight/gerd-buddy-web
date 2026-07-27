@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Excess weight is one of the strongest risk factors for GERD. Learn how even modest weight loss helps, and how to lose weight without making reflux worse.",
   date: "2026-03-06",
-  dateModified: "2026-03-06",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Lifestyle",
   tags: ["weight loss", "lifestyle tips", "GERD management", "diet", "exercise"],
@@ -86,7 +86,7 @@ For detailed guidance, check out our full guide on [exercising with GERD](/blog/
 
 ### Step 4: Track Everything
 
-This is where the real magic happens. When you're tracking both your food intake and your GERD symptoms, you can see in real time how dietary changes affect both your weight and your reflux. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) helps you log meals and symptoms, so you can optimize your diet for both goals simultaneously.
+This is where the real magic happens. When you're tracking both your food intake and your GERD symptoms, you can see in real time how dietary changes affect both your weight and your reflux. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) helps you log meals and symptoms, so you can optimize your diet for both goals simultaneously.
 
 You start to see which meals keep you satisfied without triggering symptoms — and those become your go-to choices.
 

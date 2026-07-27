@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Eating well with GERD doesn't mean eating bland food. Learn meal-building strategies, ingredient swaps, and cooking techniques that keep meals flavorful and reflux-friendly.",
   date: "2026-01-28",
-  dateModified: "2026-01-28",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Diet & Nutrition",
   tags: ["recipes", "GERD diet", "meal planning", "cooking tips", "safe foods"],
@@ -117,7 +117,7 @@ I've had much better luck eating smaller meals more often throughout the day ins
 
 All of these are general guidelines. Your body might agree with all of them, or it might have its own opinions. The only way to know is to pay attention.
 
-Try a new recipe, note how you feel. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) can help you connect the dots between what you eat and how your symptoms respond — and over time, you build a personalized playbook that no generic list can match.
+Try a new recipe, note how you feel. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) can help you connect the dots between what you eat and how your symptoms respond — and over time, you build a personalized playbook that no generic list can match.
 
 What works for one person with GERD won't always work for another. That's not a limitation — it's actually freeing. It means your diet doesn't have to look like anyone else's. It just has to work for you.
   `.trim(),

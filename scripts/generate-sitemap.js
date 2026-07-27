@@ -38,10 +38,13 @@ for (const file of blogFiles) {
   const content = readFileSync(resolve(blogDir, file), "utf-8");
   const slugMatch = content.match(/slug:\s*["']([^"']+)["']/);
   const dateMatch = content.match(/date:\s*["']([^"']+)["']/);
+  // Prefer dateModified: lastmod should reflect the last real edit, which is what
+  // tells a crawler the page is worth refetching.
+  const modifiedMatch = content.match(/dateModified:\s*["']([^"']+)["']/);
   if (slugMatch) {
     blogEntries.push({
       path: `/blog/${slugMatch[1]}`,
-      lastmod: dateMatch ? dateMatch[1] : new Date().toISOString().split("T")[0],
+      lastmod: modifiedMatch?.[1] || dateMatch?.[1] || new Date().toISOString().split("T")[0],
       priority: "0.7",
       changefreq: "monthly",
     });

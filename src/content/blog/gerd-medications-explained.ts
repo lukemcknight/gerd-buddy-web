@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Confused by all the acid reflux medications? Learn how PPIs, H2 blockers, and antacids work, their side effects, and which one might be right for your GERD.",
   date: "2026-03-05",
-  dateModified: "2026-03-05",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Treatment",
   tags: ["medications", "PPIs", "H2 blockers", "antacids", "treatment"],
@@ -157,7 +157,7 @@ The most effective approach combines:
 - [Stress management](/blog/stress-and-gerd)
 - [Nighttime positioning strategies](/blog/nighttime-gerd-tips)
 
-Tracking your symptoms alongside your medication can help you and your doctor determine what's working. [GERDBuddy](https://apps.apple.com/app/apple-store/id6743079169?pt=127744576&ct=blog-medications&mt=8) makes it easy to log meals, symptoms, and see patterns over time.
+Tracking your symptoms alongside your medication can help you and your doctor determine what's working. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes it easy to log meals, symptoms, and see patterns over time.
 
 ## Talking to Your Doctor
 

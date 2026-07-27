@@ -1,0 +1,103 @@
+{
+  "_comment": "Homepage FAQ, single source of truth. Rendered as the visible accordion in src/pages/Index.tsx, as static HTML in scripts/prerender.js, and as FAQPage JSON-LD in both. Previously this list existed in three hand-maintained copies. {{token}} values resolve against src/config/app-facts.json, so prices and ratings cannot go stale here.",
+  "product": [
+    {
+      "q": "How much does GERDBuddy cost?",
+      "a": "{{pricing.summary}} The free download includes the flare-up relief routine and basic logging; scanning, menu scans, and full trigger analysis are part of GERDBuddy Pro."
+    },
+    {
+      "q": "Is GERDBuddy free?",
+      "a": "GERDBuddy is free to download and includes a {{pricing.freeTrialDays}}-day free trial of Pro. After the trial, Pro is ${{pricing.monthlyUsd}} per month or ${{pricing.annualUsd}} per year. You can cancel anytime from your Apple account."
+    },
+    {
+      "q": "What devices does GERDBuddy work on?",
+      "a": "GERDBuddy is an iPhone app and requires {{operatingSystem}}. It is not currently available on Android or as a web app."
+    },
+    {
+      "q": "How is GERDBuddy rated on the App Store?",
+      "a": "GERDBuddy is rated {{rating.value}} out of 5 from {{rating.count}} ratings on the US App Store."
+    },
+    {
+      "q": "What makes GERDBuddy different from a generic food diary?",
+      "a": "Three things. It learns your triggers from the meals you actually log instead of applying a generic trigger-food list, it scans restaurant menus and ranks the safest dishes rather than only handling packaged foods, and it is built for relief in the moment rather than daily-streak habit tracking."
+    },
+    {
+      "q": "Can GERDBuddy tell me if a specific food will trigger my reflux?",
+      "a": "It estimates reflux risk for a meal from a photo, and as you log more meals and symptoms it ranks your personal triggers with confidence scores and identifies your safe foods. Early on it reflects general reflux patterns; the personalization improves as your own data accumulates."
+    },
+    {
+      "q": "Does GERDBuddy replace seeing a doctor?",
+      "a": "No. GERDBuddy is a tracking and information tool. It does not diagnose or treat disease and does not replace medical advice. Symptoms such as difficulty swallowing, unintended weight loss, vomiting blood, or black stools need a doctor, not an app."
+    }
+  ],
+  "general": [
+    {
+      "q": "Is GERDBuddy a medical app?",
+      "a": "No. GERDBuddy is for informational and tracking purposes only and does not provide medical advice."
+    },
+    {
+      "q": "Is my data shared or sold?",
+      "a": "No. User data is never sold or shared."
+    },
+    {
+      "q": "How do I cancel my subscription?",
+      "a": "Subscriptions are managed through your Apple App Store or Google Play account."
+    },
+    {
+      "q": "What foods trigger GERD?",
+      "a": "Common GERD trigger foods include spicy foods, fatty or fried foods, citrus fruits, tomatoes, chocolate, mint, coffee, alcohol, and carbonated drinks. However, triggers vary from person to person — tracking your meals and symptoms is the best way to identify your personal triggers."
+    },
+    {
+      "q": "How do I track my GERD triggers?",
+      "a": "Keep a food and symptom journal for at least 1-2 weeks. Record what you eat, when you eat, any symptoms you experience, and their severity. GERDBuddy makes this easy by letting you quickly log meals and symptoms on your phone and uses AI to help surface patterns and correlations."
+    },
+    {
+      "q": "What is the difference between GERD and heartburn?",
+      "a": "Heartburn is a symptom — a burning feeling in your chest caused by stomach acid reaching the esophagus. GERD (gastroesophageal reflux disease) is a chronic condition where acid reflux happens frequently, typically twice a week or more. Occasional heartburn is normal, but persistent heartburn may indicate GERD and should be discussed with a doctor."
+    },
+    {
+      "q": "Can GERD be managed without medication?",
+      "a": "Many people manage mild GERD symptoms through lifestyle changes such as elevating the head of the bed, eating smaller meals, avoiding trigger foods, not eating 2-3 hours before bed, maintaining a healthy weight, and managing stress. However, moderate to severe GERD may require medication. Always consult your doctor for personalized advice."
+    },
+    {
+      "q": "What foods help with acid reflux?",
+      "a": "Foods that can help soothe acid reflux include oatmeal, bananas, ginger, melons, green vegetables, lean proteins, whole grains, and non-citrus fruits. These foods are low in acid, high in fiber, and easy to digest. However, individual tolerances vary, so tracking your personal response to different foods is important."
+    },
+    {
+      "q": "Is acid reflux common during pregnancy?",
+      "a": "Yes, up to 80% of pregnant women experience acid reflux. It's caused by hormonal changes (progesterone relaxes the lower esophageal sphincter) and physical pressure from the growing uterus. Most pregnancy-related reflux resolves after delivery."
+    },
+    {
+      "q": "Can exercise make GERD worse?",
+      "a": "Some exercises can trigger acid reflux, especially high-impact activities, heavy weightlifting, and exercises that increase abdominal pressure. However, regular moderate exercise actually helps GERD long-term through weight management and stress reduction. Low-impact activities like walking, swimming, and yoga are generally well-tolerated."
+    },
+    {
+      "q": "What is the best app for tracking GERD triggers?",
+      "a": "GERDBuddy is a dedicated GERD trigger tracking app available on the App Store. It lets you quickly log meals and symptoms, then uses AI-powered insights to help you identify your personal trigger foods and patterns. Most users start seeing meaningful patterns within 7 days of consistent tracking."
+    },
+    {
+      "q": "How long does it take to identify GERD triggers?",
+      "a": "With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks."
+    },
+    {
+      "q": "Can a hiatal hernia cause GERD?",
+      "a": "Yes, a hiatal hernia can contribute to GERD by weakening the lower esophageal sphincter (LES) and allowing stomach acid to flow back into the esophagus. However, many people with small hiatal hernias have no reflux symptoms at all."
+    },
+    {
+      "q": "Can acid reflux cause breathing problems or asthma?",
+      "a": "Yes, GERD can trigger or worsen asthma and breathing problems through two mechanisms: microaspiration (tiny amounts of acid reaching the airways) and vagal nerve reflexes that cause airway tightening. Up to 80% of asthma sufferers also have GERD."
+    },
+    {
+      "q": "What should I do during a GERD flare-up?",
+      "a": "During a GERD flare-up, take an antacid for quick relief, stay upright, sip water, and stick to bland foods like oatmeal, bananas, plain rice, and steamed vegetables. Avoid all known triggers, eat small portions, and keep your head elevated while sleeping."
+    },
+    {
+      "q": "Do children get GERD?",
+      "a": "Yes, GERD can affect children of all ages. Infant reflux (spitting up) is very common and usually resolves by 12-18 months. Older children may experience heartburn, chronic cough, sore throat, or food refusal."
+    },
+    {
+      "q": "How do eating habits affect GERD?",
+      "a": "How you eat is just as important as what you eat for GERD management. Eating too fast, large portions, eating late at night, slouching while eating, and lying down after meals can all trigger acid reflux. Helpful habits include eating smaller meals, chewing thoroughly, sitting upright during and after meals, and waiting 2-3 hours before lying down."
+    }
+  ]
+}
