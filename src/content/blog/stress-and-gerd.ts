@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "How stress affects GERD symptoms and what you can do about it. Understanding the gut-brain connection and practical strategies for stress-related reflux.",
   date: "2026-02-05",
-  dateModified: "2026-02-05",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Lifestyle",
   tags: ["stress", "gut-brain axis", "anxiety", "lifestyle tips", "mindfulness"],
@@ -73,7 +73,7 @@ The basics: consistent bedtime, cool and dark room, no screens right before bed,
 
 ## Track the Stress Connection
 
-Here's where it gets really useful. If you're already tracking your food and symptoms (and if you're not, [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) makes it simple), try noting your stress level too. Even just a quick high/medium/low rating alongside your meals.
+Here's where it gets really useful. If you're already tracking your food and symptoms (and if you're not, [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes it simple), try noting your stress level too. Even just a quick high/medium/low rating alongside your meals.
 
 After a couple weeks, you might see patterns like:
 

@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "A comprehensive guide to eating with GERD. Learn which foods are generally safe, which common triggers to watch for, and how to build meals that minimize acid reflux symptoms.",
   date: "2026-02-15",
-  dateModified: "2026-02-15",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Diet & Nutrition",
   tags: ["GERD diet", "trigger foods", "safe foods", "meal planning", "food guide"],
@@ -151,7 +151,7 @@ Here's what I really want you to take away from this: these lists are starting p
 
 I've seen people who can eat spicy food without a problem but can't touch dairy. Others are fine with coffee but get wrecked by chocolate. The only way to build a diet that truly works for *you* is to [track what you eat alongside how you feel](/blog/gerd-trigger-foods).
 
-[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) is built exactly for this — log your meals, note your symptoms, and let the patterns reveal themselves over a week or two. It's way more effective than guessing, and the insights you get are personalized to your body, not based on averages.
+[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) is built exactly for this — log your meals, note your symptoms, and let the patterns reveal themselves over a week or two. It's way more effective than guessing, and the insights you get are personalized to your body, not based on averages.
 
 ## If Diet Alone Isn't Cutting It
 

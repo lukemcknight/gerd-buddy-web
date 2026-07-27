@@ -15,12 +15,43 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(__dirname, "../dist");
 const SITE_URL = "https://gerdbuddy.app";
 
+// Shared, verified data. These same files feed the React app (src/pages/*.tsx) and
+// generate-llms.js, so the prerendered HTML, the client-rendered page, and llms.txt
+// cannot drift apart. See src/config/app-facts.json for how each value was verified.
+const readJson = (path) => JSON.parse(readFileSync(resolve(__dirname, path), "utf-8"));
+const APP = readJson("../src/config/app-facts.json");
+const HOME_FAQS = readJson("../src/content/home-faqs.json");
+const BLOG_FAQS = readJson("../src/content/blog/faqs.json");
+
+// Byline. Mirrors AUTHOR in src/config/site.ts.
+const AUTHOR = { name: "Luke McKnight", jobTitle: "Founder, GERDBuddy" };
+
+// Resolve {{dotted.path}} tokens in FAQ answers against app-facts.json. Unlike the
+// browser-side resolver this THROWS, so a bad token fails `npm run build` instead of
+// shipping a literal "{{pricing.summary}}" to an AI crawler.
+const resolveFacts = (text) =>
+  text.replace(/\{\{([\w.]+)\}\}/g, (_, path) => {
+    const value = path.split(".").reduce((acc, key) => (acc == null ? acc : acc[key]), APP);
+    if (value === undefined || value === null) {
+      throw new Error(`prerender: unknown app-facts token {{${path}}}`);
+    }
+    return String(value);
+  });
+
 // Read the built index.html as our shell
 const shell = readFileSync(resolve(DIST, "index.html"), "utf-8");
 
 // Extract CSS link from the shell so prerendered pages load styles
 const cssLink = shell.match(/<link[^>]+\.css[^>]*>/)?.[0] || "";
 const jsScripts = [...shell.matchAll(/<script[^>]*src="[^"]*"[^>]*><\/script>/g)].map((m) => m[0]).join("\n");
+
+// Lift inline <script> blocks (the analytics snippet) out of the shell so prerendered
+// pages are measured too. Without this, every blog post and forum page would be a
+// blind spot, which is exactly where AI referrals land. Single source stays index.html.
+const inlineScripts = [...shell.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)]
+  .filter((m) => !/application\/ld\+json/.test(m[0]))
+  .map((m) => m[0])
+  .join("\n");
 
 // Parse blog post files
 const blogDir = resolve(__dirname, "../src/content/blog");
@@ -105,6 +136,7 @@ function buildPage({ title, description, path, content, jsonLd, extra = "" }) {
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   ${cssLink}
+  ${inlineScripts}
   ${jsonLdTags}
   ${extra}
 </head>
@@ -125,26 +157,11 @@ function writePage(route, html) {
 
 console.log(`Prerendering ${2 + 1 + posts.length + 6} routes...`);
 
-// FAQ data for homepage prerender
-const faqItems = [
-  { q: "Is GERDBuddy a medical app?", a: "No. GERDBuddy is for informational and tracking purposes only and does not provide medical advice." },
-  { q: "Is my data shared or sold?", a: "No. User data is never sold or shared." },
-  { q: "How do I cancel my subscription?", a: "Subscriptions are managed through your Apple App Store or Google Play account." },
-  { q: "What foods trigger GERD?", a: "Common GERD trigger foods include spicy foods, fatty or fried foods, citrus fruits, tomatoes, chocolate, mint, coffee, alcohol, and carbonated drinks. However, triggers vary from person to person — tracking your meals and symptoms is the best way to identify your personal triggers." },
-  { q: "How do I track my GERD triggers?", a: "Keep a food and symptom journal for at least 1-2 weeks. Record what you eat, when you eat, any symptoms you experience, and their severity. GERDBuddy makes this easy by letting you quickly log meals and symptoms on your phone and uses AI to help surface patterns and correlations." },
-  { q: "What is the difference between GERD and heartburn?", a: "Heartburn is a symptom — a burning feeling in your chest caused by stomach acid reaching the esophagus. GERD (gastroesophageal reflux disease) is a chronic condition where acid reflux happens frequently, typically twice a week or more. Occasional heartburn is normal, but persistent heartburn may indicate GERD and should be discussed with a doctor." },
-  { q: "Can GERD be managed without medication?", a: "Many people manage mild GERD symptoms through lifestyle changes such as elevating the head of the bed, eating smaller meals, avoiding trigger foods, not eating 2-3 hours before bed, maintaining a healthy weight, and managing stress. However, moderate to severe GERD may require medication. Always consult your doctor for personalized advice." },
-  { q: "What foods help with acid reflux?", a: "Foods that can help soothe acid reflux include oatmeal, bananas, ginger, melons, green vegetables, lean proteins, whole grains, and non-citrus fruits. These foods are low in acid, high in fiber, and easy to digest. However, individual tolerances vary, so tracking your personal response to different foods is important." },
-  { q: "Is acid reflux common during pregnancy?", a: "Yes, up to 80% of pregnant women experience acid reflux. It's caused by hormonal changes (progesterone relaxes the lower esophageal sphincter) and physical pressure from the growing uterus. Most pregnancy-related reflux resolves after delivery." },
-  { q: "Can exercise make GERD worse?", a: "Some exercises can trigger acid reflux, especially high-impact activities, heavy weightlifting, and exercises that increase abdominal pressure. However, regular moderate exercise actually helps GERD long-term through weight management and stress reduction. Low-impact activities like walking, swimming, and yoga are generally well-tolerated." },
-  { q: "What is the best app for tracking GERD triggers?", a: "GERDBuddy is a dedicated GERD trigger tracking app available on the App Store. It lets you quickly log meals and symptoms, then uses AI-powered insights to help you identify your personal trigger foods and patterns. Most users start seeing meaningful patterns within 7 days of consistent tracking." },
-  { q: "How long does it take to identify GERD triggers?", a: "With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks." },
-  { q: "Can a hiatal hernia cause GERD?", a: "Yes, a hiatal hernia can contribute to GERD by weakening the lower esophageal sphincter (LES) and allowing stomach acid to flow back into the esophagus. However, many people with small hiatal hernias have no reflux symptoms at all." },
-  { q: "Can acid reflux cause breathing problems or asthma?", a: "Yes, GERD can trigger or worsen asthma and breathing problems through two mechanisms: microaspiration (tiny amounts of acid reaching the airways) and vagal nerve reflexes that cause airway tightening. Up to 80% of asthma sufferers also have GERD." },
-  { q: "What should I do during a GERD flare-up?", a: "During a GERD flare-up, take an antacid for quick relief, stay upright, sip water, and stick to bland foods like oatmeal, bananas, plain rice, and steamed vegetables. Avoid all known triggers, eat small portions, and keep your head elevated while sleeping." },
-  { q: "Do children get GERD?", a: "Yes, GERD can affect children of all ages. Infant reflux (spitting up) is very common and usually resolves by 12-18 months. Older children may experience heartburn, chronic cough, sore throat, or food refusal." },
-  { q: "How do eating habits affect GERD?", a: "How you eat is just as important as what you eat for GERD management. Eating too fast, large portions, eating late at night, slouching while eating, and lying down after meals can all trigger acid reflux. Helpful habits include eating smaller meals, chewing thoroughly, sitting upright during and after meals, and waiting 2-3 hours before lying down." },
-];
+// FAQ data for the homepage, from the same file the React page renders.
+const faqItems = [...HOME_FAQS.product, ...HOME_FAQS.general].map((f) => ({
+  q: f.q,
+  a: resolveFacts(f.a),
+}));
 
 const faqHtml = faqItems
   .map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`)
@@ -182,8 +199,9 @@ writePage("/", buildPage({
   <a href="/forum">Visit the forum</a>
 
   <h2>GERDBuddy App</h2>
-  <p>Track your triggers on the go. Log meals and symptoms, then let AI surface your personal patterns.</p>
-  <a href="https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910">Get it on the App Store</a>
+  <p>${esc(APP.shortDescription)}</p>
+  <p>${esc(APP.pricing.summary)} Rated ${APP.rating.value} out of 5 from ${APP.rating.count} ratings. Requires ${esc(APP.operatingSystem)}.</p>
+  <a href="${APP.url}">Get it on the App Store</a>
 </section>
 
 <section>
@@ -206,7 +224,32 @@ writePage("/", buildPage({
     faqSchema,
     { "@context": "https://schema.org", "@type": "WebSite", name: "GERDBuddy", url: SITE_URL, description: "Track meals and symptoms to discover your personal GERD triggers with AI-powered insights." },
     { "@context": "https://schema.org", "@type": "Organization", name: "GERDBuddy", url: SITE_URL, logo: `${SITE_URL}/gerdbuddy-mark.png`, contactPoint: { "@type": "ContactPoint", email: "gerdbuddy2@gmail.com", contactType: "customer support" } },
-    { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "GERDBuddy - GERD Food Scanner", operatingSystem: "iOS", applicationCategory: "HealthApplication", url: "https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910", offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: APP.name,
+      operatingSystem: APP.operatingSystem,
+      applicationCategory: APP.applicationCategory,
+      applicationSubCategory: APP.applicationSubCategory,
+      url: APP.url,
+      installUrl: APP.url,
+      description: APP.shortDescription,
+      featureList: APP.featureList,
+      contentRating: APP.contentRating,
+      publisher: { "@type": "Organization", name: "GERDBuddy" },
+      aggregateRating: { "@type": "AggregateRating", ratingValue: APP.rating.value, ratingCount: APP.rating.count, bestRating: 5, worstRating: 1 },
+      offers: {
+        "@type": "AggregateOffer",
+        priceCurrency: "USD",
+        lowPrice: APP.pricing.monthlyUsd,
+        highPrice: APP.pricing.annualUsd,
+        offerCount: 2,
+        offers: [
+          { "@type": "Offer", name: "GERDBuddy Pro, monthly", price: APP.pricing.monthlyUsd, priceCurrency: "USD", url: APP.url, category: "subscription" },
+          { "@type": "Offer", name: "GERDBuddy Pro, annual", price: APP.pricing.annualUsd, priceCurrency: "USD", url: APP.url, category: "subscription" },
+        ],
+      },
+    },
   ],
 }));
 console.log("  ✓ /");
@@ -249,11 +292,16 @@ for (const post of posts) {
     wordCount,
     articleSection: post.category,
     keywords: post.tags.join(", "),
-    author: { "@type": "Organization", name: post.author },
+    author: { "@type": "Person", name: AUTHOR.name, jobTitle: AUTHOR.jobTitle },
     publisher: { "@type": "Organization", name: "GERDBuddy", logo: { "@type": "ImageObject", url: `${SITE_URL}/gerdbuddy-mark.png` } },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
     image: `${SITE_URL}/gerdbuddy-mark.png`,
   };
+
+  // AEO block for this post: extractable Q&As plus the verified primary sources.
+  const postFaq = BLOG_FAQS.posts[post.slug];
+  const faqs = postFaq?.faq || [];
+  const sources = (postFaq?.sources || []).map((k) => BLOG_FAQS.sources[k]).filter(Boolean);
 
   const medicalSchema = {
     "@context": "https://schema.org",
@@ -264,7 +312,42 @@ for (const post of posts) {
     about: { "@type": "MedicalCondition", name: "Gastroesophageal Reflux Disease (GERD)", alternateName: "GERD" },
     medicalAudience: { "@type": "MedicalAudience", audienceType: "Patient" },
     lastReviewed: post.dateModified || post.date,
+    ...(sources.length && {
+      citation: sources.map((src) => ({
+        "@type": "CreativeWork",
+        name: src.title,
+        publisher: { "@type": "Organization", name: src.publisher },
+        url: src.url,
+      })),
+    }),
   };
+
+  const faqSchema = faqs.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }
+    : null;
+
+  const postFaqHtml = faqs.length
+    ? `<section>
+  <h2>Common Questions</h2>
+  ${faqs.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("\n  ")}
+</section>`
+    : "";
+
+  const sourcesHtml = sources.length
+    ? `<section>
+  <h2>Sources and further reading</h2>
+  <ul>${sources.map((src) => `<li><a href="${src.url}" rel="nofollow">${esc(src.title)}</a>, ${esc(src.publisher)}</li>`).join("")}</ul>
+  <p>This article is general information, not medical advice. Talk to your doctor about your own symptoms and treatment.</p>
+</section>`
+    : "";
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -286,10 +369,12 @@ for (const post of posts) {
 <article>
   <h1>${esc(post.title)}</h1>
   <time datetime="${post.date}">${post.date}</time>
-  <span>${post.author}</span>
+  <span>${esc(AUTHOR.name)}, ${esc(AUTHOR.jobTitle)}</span>
   <div class="prose">${articleHtml}</div>
-</article>`,
-    jsonLd: [articleSchema, medicalSchema, breadcrumbSchema],
+</article>
+${postFaqHtml}
+${sourcesHtml}`,
+    jsonLd: [articleSchema, medicalSchema, breadcrumbSchema, faqSchema].filter(Boolean),
     extra: `<meta property="article:published_time" content="${post.date}" />
   <meta property="article:modified_time" content="${post.dateModified || post.date}" />
   <meta property="article:section" content="${esc(post.category)}" />

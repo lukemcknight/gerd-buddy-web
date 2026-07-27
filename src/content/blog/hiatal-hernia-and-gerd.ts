@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "A hiatal hernia doesn't guarantee GERD, but it makes acid reflux more likely. Learn how the two are connected, what symptoms to watch for, and how to manage both.",
   date: "2026-03-16",
-  dateModified: "2026-03-16",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Conditions & Diagnosis",
   tags: ["hiatal hernia", "GERD causes", "diagnosis", "symptoms", "treatment"],
@@ -80,7 +80,7 @@ These are your first line of defense and they make a real difference:
 - **Don't eat 2-3 hours before bed** — lying down with a full stomach is a recipe for reflux, especially with a hernia.
 - **Maintain a healthy weight** — extra abdominal weight increases pressure on the hernia. Even modest [weight loss](/blog/gerd-and-weight-loss) can make a significant difference.
 - **Avoid tight clothing** — anything that puts pressure on your abdomen can push the hernia upward and worsen symptoms.
-- **Track your triggers** — personal trigger identification becomes even more important when you have a hernia. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) can help you log meals and symptoms to identify patterns specific to your situation.
+- **Track your triggers** — personal trigger identification becomes even more important when you have a hernia. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) can help you log meals and symptoms to identify patterns specific to your situation.
 
 ### Dietary Adjustments
 
@@ -116,7 +116,7 @@ But surgery is not a casual decision. Most people with hiatal hernias and GERD c
 
 Having a hiatal hernia doesn't automatically mean your GERD will be severe or unmanageable. Many people with hernias control their symptoms well through the same strategies that work for GERD in general — they just need to be more consistent about applying them.
 
-The most important thing is understanding your personal triggers and patterns. Start tracking what you eat, how you eat, and when symptoms appear. With a hiatal hernia, the margin for error is smaller, so the data becomes even more valuable. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) can help you build that picture quickly and clearly.
+The most important thing is understanding your personal triggers and patterns. Start tracking what you eat, how you eat, and when symptoms appear. With a hiatal hernia, the margin for error is smaller, so the data becomes even more valuable. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) can help you build that picture quickly and clearly.
 
 If your symptoms are worsening despite lifestyle changes, or if you're experiencing any [warning signs](/blog/when-to-see-doctor-acid-reflux), talk to your doctor about further evaluation. A hiatal hernia is very manageable — but it does benefit from attention and consistency.
   `.trim(),

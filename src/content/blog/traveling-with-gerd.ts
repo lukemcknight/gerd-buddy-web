@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Don't let GERD ruin your trip. Learn practical tips for packing medications, eating smart while traveling, managing reflux on flights, and keeping symptoms in check away from home.",
   date: "2026-03-16",
-  dateModified: "2026-03-16",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Lifestyle & Management",
   tags: [
@@ -106,7 +106,7 @@ Travel is inherently stressful — flight delays, unfamiliar environments, disru
 - **Build in buffer time** — rushing to the airport or between connections adds unnecessary stress.
 - **Practice deep breathing** — a few minutes of diaphragmatic breathing can calm both your nervous system and your digestive system.
 - **Accept imperfection** — you might have a bad reflux day on your trip. That's okay. It doesn't mean the whole trip is ruined.
-- **Keep tracking** — logging your meals and symptoms while traveling with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) helps you identify what works and what doesn't in new environments. This data is valuable for future trips too.
+- **Keep tracking** — logging your meals and symptoms while traveling with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) helps you identify what works and what doesn't in new environments. This data is valuable for future trips too.
 
 ## Road Trips
 
@@ -135,7 +135,7 @@ Traveling with GERD doesn't mean you can't enjoy yourself. It means you need a l
 
 The more trips you take while managing your GERD, the better you get at it. I've gotten to the point where my travel routine is almost automatic — GERD kit in the carry-on, safe snacks in the bag, restaurant menus checked the night before. It takes maybe 15 extra minutes of planning and saves days of discomfort.
 
-Track what works and what doesn't with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) so you build a personalized travel playbook. Every trip teaches you something, and before long, GERD becomes just a minor consideration rather than a travel-defining limitation.
+Track what works and what doesn't with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) so you build a personalized travel playbook. Every trip teaches you something, and before long, GERD becomes just a minor consideration rather than a travel-defining limitation.
   `.trim(),
 };
 

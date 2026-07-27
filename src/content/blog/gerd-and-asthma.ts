@@ -7,7 +7,7 @@ const post: BlogPost = {
   description:
     "Up to 80% of asthma sufferers also have GERD. Learn how acid reflux triggers breathing problems, why asthma can worsen reflux, and how to manage both conditions together.",
   date: "2026-03-16",
-  dateModified: "2026-03-16",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Conditions & Diagnosis",
   tags: ["asthma", "breathing", "GERD complications", "cough", "respiratory"],
@@ -92,7 +92,7 @@ All the standard GERD lifestyle modifications become even more important:
 
 - **Elevate the head of your bed** — 6-8 inches of elevation helps prevent nighttime acid from reaching your airways. This alone can significantly reduce nighttime cough and wheezing.
 - **Time your meals carefully** — eat at least 3 hours before lying down. This is critical for both reflux and respiratory symptoms.
-- **Identify your food triggers** — tracking with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) can help you connect specific foods not just to heartburn, but to breathing symptoms too. You might find patterns you'd never notice otherwise.
+- **Identify your food triggers** — tracking with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) can help you connect specific foods not just to heartburn, but to breathing symptoms too. You might find patterns you'd never notice otherwise.
 - **Follow a [GERD-friendly diet](/blog/gerd-diet-guide)** — the usual suspects (fatty foods, citrus, chocolate, mint, [coffee](/blog/gerd-and-coffee), [alcohol](/blog/gerd-and-alcohol)) may be making your breathing worse.
 - **Maintain a healthy weight** — excess weight worsens both conditions. Even modest [weight loss](/blog/gerd-and-weight-loss) can reduce both reflux and asthma severity.
 - **Manage stress** — [stress and anxiety](/blog/stress-and-gerd) can exacerbate both GERD and asthma simultaneously.
@@ -127,7 +127,7 @@ Your doctor may recommend pH monitoring to measure acid exposure in your esophag
 
 The key to managing GERD and asthma together is understanding that treating one often helps the other. When you get your reflux under better control, your airways calm down. When your breathing improves, you cough less and put less pressure on your stomach.
 
-Start by tracking both your reflux symptoms and your respiratory symptoms alongside your meals and activities. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) makes it easy to log everything in one place, so you can spot connections between what you eat and how you breathe.
+Start by tracking both your reflux symptoms and your respiratory symptoms alongside your meals and activities. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes it easy to log everything in one place, so you can spot connections between what you eat and how you breathe.
 
 It took me a while to connect my cough to my diet, but once I did, the solution was surprisingly straightforward. Sometimes the hardest part is just recognizing the connection — and then tracking consistently enough to find your specific triggers.
   `.trim(),

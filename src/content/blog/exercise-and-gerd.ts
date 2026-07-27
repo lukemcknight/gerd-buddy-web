@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Exercise can make GERD worse — or better. Learn which workouts trigger acid reflux, which ones help, and how to stay active without the burn.",
   date: "2026-03-01",
-  dateModified: "2026-03-01",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Lifestyle",
   tags: ["exercise", "workout", "fitness", "lifestyle tips", "acid reflux"],
@@ -136,7 +136,7 @@ Different exercises affect different people differently. What triggers your refl
 
 Log what you ate, when you ate it, what exercise you did, and how your symptoms were. Over time, you'll see clear patterns — and you can adjust accordingly.
 
-[GERDBuddy](https://apps.apple.com/app/apple-store/id6743079169?pt=127744576&ct=blog-exercise&mt=8) helps you track meals and symptoms so you can see how different activities affect your reflux.
+[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) helps you track meals and symptoms so you can see how different activities affect your reflux.
 
 ## The Bottom Line
 

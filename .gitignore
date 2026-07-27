@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 # Environment variables and secrets
+.claude/settings.local.json
 .env
 .env.*
 !.env.example
@@ -43,3 +44,23 @@ google-services.json
 
 # Build artifacts
 *.ipa
+
+# Financials / spreadsheets — never commit
+*.xlsx
+*.xls
+*.numbers
+
+# Skill/agent working files
+.superpowers/
+docs/superpowers/
+
+# design-sync (machine-generated build state; durable inputs under .design-sync/ ARE committed)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+.design-sync/assets/
+
+# ops — machine-generated cache only; ledgers, weekly reports & scorecard.csv ARE committed
+ops/.cache/

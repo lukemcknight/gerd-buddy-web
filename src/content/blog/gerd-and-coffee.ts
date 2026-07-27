@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Yes, many people with GERD can still enjoy coffee — with some adjustments. Learn which brewing methods, timing, and portions minimize acid reflux symptoms.",
   date: "2026-03-12",
-  dateModified: "2026-03-12",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Diet & Nutrition",
   tags: ["coffee", "caffeine", "trigger foods", "GERD triggers", "lifestyle tips"],
@@ -67,7 +67,7 @@ A simple coffee with a splash of oat milk has been my go-to. Boring? Maybe. But 
 
 Decaf removes most of the caffeine, but coffee has other compounds that stimulate acid production. Some people find decaf just as problematic as regular. That said, if caffeine is your main trigger, decaf might help — it's worth testing.
 
-The key word here is testing. Everyone's body responds differently, and the only way to know what works for you is to experiment and track the results. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) makes this easy — log your coffee intake alongside your symptoms for a couple of weeks and you'll have clear data on your personal caffeine tolerance.
+The key word here is testing. Everyone's body responds differently, and the only way to know what works for you is to experiment and track the results. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes this easy — log your coffee intake alongside your symptoms for a couple of weeks and you'll have clear data on your personal caffeine tolerance.
 
 ## An Approach That Works
 

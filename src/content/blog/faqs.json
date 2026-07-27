@@ -1,0 +1,566 @@
+{
+  "_comment": "AEO/GEO data for blog posts. Keyed by post slug. Consumed by src/pages/BlogPost.tsx (React) and scripts/prerender.js (static build) so both emit identical FAQPage JSON-LD and visible Q&A. Kept as JSON, not TS, so the plain-node prerender script can read it without a TypeScript loader. Every URL in `sources` was fetched and title-verified before being added: do not add a source you have not opened.",
+
+  "sources": {
+    "niddk-adults": {
+      "title": "Acid Reflux (GER & GERD) in Adults",
+      "publisher": "National Institute of Diabetes and Digestive and Kidney Diseases (NIH)",
+      "url": "https://www.niddk.nih.gov/health-information/digestive-diseases/acid-reflux-ger-gerd-adults"
+    },
+    "niddk-children": {
+      "title": "Acid Reflux (GER & GERD) in Children",
+      "publisher": "National Institute of Diabetes and Digestive and Kidney Diseases (NIH)",
+      "url": "https://www.niddk.nih.gov/health-information/digestive-diseases/acid-reflux-ger-gerd-children"
+    },
+    "medlineplus": {
+      "title": "GERD | Gastroesophageal Reflux Disease",
+      "publisher": "MedlinePlus, U.S. National Library of Medicine",
+      "url": "https://medlineplus.gov/gerd.html"
+    },
+    "nhs": {
+      "title": "Heartburn and acid reflux",
+      "publisher": "NHS",
+      "url": "https://www.nhs.uk/conditions/heartburn-and-acid-reflux/"
+    },
+    "acg-guideline": {
+      "title": "ACG Clinical Guideline for the Diagnosis and Management of Gastroesophageal Reflux Disease",
+      "publisher": "American College of Gastroenterology",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34807007/"
+    },
+    "acog": {
+      "title": "Problems of the Digestive System",
+      "publisher": "American College of Obstetricians and Gynecologists",
+      "url": "https://www.acog.org/womens-health/faqs/problems-of-the-digestive-system"
+    }
+  },
+
+  "posts": {
+    "acid-reflux-pregnancy": {
+      "sources": ["acog", "niddk-adults", "nhs"],
+      "faq": [
+        {
+          "q": "Is acid reflux normal during pregnancy?",
+          "a": "Yes. Heartburn is one of the most common pregnancy complaints, and estimates suggest up to 80% of pregnant women experience it at some point. It happens because progesterone relaxes the lower esophageal sphincter while the growing uterus presses upward on the stomach. It is uncomfortable but rarely dangerous."
+        },
+        {
+          "q": "What can I take for heartburn while pregnant?",
+          "a": "Calcium-based antacids such as Tums are generally considered safe, and most OBs consider H2 blockers like famotidine safe during pregnancy. Avoid antacids containing sodium bicarbonate, which can cause fluid retention, and ask about aluminum-containing antacids in the first trimester. Always confirm with your OB-GYN before taking anything."
+        },
+        {
+          "q": "When does pregnancy heartburn start and when is it worst?",
+          "a": "It can begin in the first trimester as hormone levels shift, often picks up around weeks 16 to 20, and peaks in the third trimester when the uterus presses directly against the stomach."
+        },
+        {
+          "q": "How should I sleep with pregnancy reflux?",
+          "a": "Sleep on your left side, which is already recommended during pregnancy and keeps the stomach below the esophagus. Elevate your upper body with a pregnancy wedge pillow rather than stacking pillows under your head, and finish eating at least 3 hours before bed."
+        },
+        {
+          "q": "Will acid reflux go away after giving birth?",
+          "a": "For most women, yes. Pregnancy-related reflux typically resolves within a few weeks of delivery as hormone levels normalize and the physical pressure lifts. If it continues beyond 6 to 8 weeks postpartum, follow up with your doctor."
+        }
+      ]
+    },
+
+    "eating-habits-for-gerd": {
+      "sources": ["niddk-adults", "nhs"],
+      "faq": [
+        {
+          "q": "Does eating too fast cause acid reflux?",
+          "a": "Yes. Eating quickly makes you swallow more air, chew less, and overshoot fullness before your brain registers it, all of which increase pressure on the lower esophageal sphincter. Aim for meals lasting at least 20 minutes and put your fork down between bites."
+        },
+        {
+          "q": "How long should I wait after eating before lying down?",
+          "a": "Wait 2 to 3 hours. Reclining with a full stomach removes gravity's help in keeping acid down, which is why late meals are one of the most common causes of nighttime reflux."
+        },
+        {
+          "q": "Is it better to eat smaller meals with GERD?",
+          "a": "Yes. Four to five smaller meals put less pressure on the lower esophageal sphincter than two or three large ones, even when the total amount of food is identical. Stopping at roughly 80% full is a practical rule."
+        },
+        {
+          "q": "Does chewing gum help acid reflux?",
+          "a": "It can. Chewing sugar-free gum for 20 to 30 minutes after a meal stimulates saliva, which is naturally alkaline and helps clear acid from the esophagus. Avoid mint-flavored gum, since mint relaxes the lower esophageal sphincter."
+        },
+        {
+          "q": "Does posture while eating affect reflux?",
+          "a": "Yes. Slouching compresses the stomach and raises abdominal pressure. Sit upright at a table rather than hunched over a desk or slumped on a couch, never eat in bed, and stay upright for 30 to 60 minutes afterward."
+        }
+      ]
+    },
+
+    "exercise-and-gerd": {
+      "sources": ["niddk-adults", "acg-guideline"],
+      "faq": [
+        {
+          "q": "Can exercise make acid reflux worse?",
+          "a": "It can in the short term. Movements that compress the abdomen, high-impact jostling, reduced blood flow to the digestive tract, and heavy breathing all provoke reflux during a workout. Regular moderate exercise still improves GERD long term through weight management and stress reduction."
+        },
+        {
+          "q": "Which exercises are safest with GERD?",
+          "a": "Walking, swimming, upright cycling, the elliptical, tai chi, light strength training, and most yoga excluding inversions. Higher-risk options include heavy weightlifting, crunches and sit-ups, sprinting, burpees, and headstands."
+        },
+        {
+          "q": "How long should I wait after eating to exercise?",
+          "a": "At least 2 to 3 hours. A near-empty stomach means there is less available to reflux. If you need fuel first, a small banana, plain crackers, a small portion of oatmeal, or toast with a thin spread are gentler choices."
+        },
+        {
+          "q": "Why do I get heartburn when I run?",
+          "a": "Running creates a sloshing effect in the stomach while intense effort diverts blood away from digestion and changes the pressure dynamics around the lower esophageal sphincter. Try lower-impact alternatives such as brisk incline walking, and leave a longer gap after meals."
+        }
+      ]
+    },
+
+    "foods-that-help-acid-reflux": {
+      "sources": ["niddk-adults", "medlineplus"],
+      "faq": [
+        {
+          "q": "What foods help acid reflux?",
+          "a": "Oatmeal, bananas, small amounts of ginger, melons, green vegetables, rice, lean proteins, whole grain bread, non-fried potatoes, non-citrus fruits, low-fat yogurt, egg whites, fennel, and non-mint herbal teas are generally well tolerated. They tend to be low in acid and fat, high in fiber, and easy to digest."
+        },
+        {
+          "q": "What is the best breakfast for acid reflux?",
+          "a": "Plain oatmeal is the most reliable choice, because its soluble fiber absorbs acid and it digests easily. Top it with banana slices or a little honey rather than acidic berries. Egg white omelets and whole grain toast with a thin spread of almond butter also work well."
+        },
+        {
+          "q": "Do bananas help heartburn?",
+          "a": "For most people, yes. Bananas sit at a pH of about 5.6, making them low in acid, and they are gentle on the stomach lining. Ripe bananas are easier to digest than unripe ones."
+        },
+        {
+          "q": "Does ginger help acid reflux?",
+          "a": "In small amounts it can. Ginger has anti-inflammatory properties and supports gastric emptying. Too much ginger can itself trigger reflux, so keep it to a few slices in tea or about a teaspoon grated into cooking."
+        }
+      ]
+    },
+
+    "gerd-and-alcohol": {
+      "sources": ["niddk-adults", "nhs"],
+      "faq": [
+        {
+          "q": "Why does alcohol cause acid reflux?",
+          "a": "Alcohol relaxes the lower esophageal sphincter, increases stomach acid production, slows gastric emptying, and directly irritates the esophageal lining. It also loosens dietary discipline, so the late-night trigger foods that follow a few drinks often compound the problem."
+        },
+        {
+          "q": "Which alcoholic drinks are worst for GERD?",
+          "a": "Red wine is generally the worst, combining high acidity, tannins, and histamines. White wine, champagne and prosecco, citrus cocktails, and beer are also common problems. Light beer and clear spirits with a still, non-citrus mixer tend to be better tolerated."
+        },
+        {
+          "q": "Can I still drink alcohol if I have GERD?",
+          "a": "Many people manage an occasional drink. Eat first, alternate each drink with water, skip carbonation and citrus garnishes, set a limit before you start, and stay upright for 2 to 3 hours afterward rather than going straight to bed."
+        },
+        {
+          "q": "Will cutting out alcohol improve my reflux?",
+          "a": "Often, yes. A 2 to 3 week alcohol-free trial is a practical way to see how much alcohol is contributing to your baseline symptoms before you decide how much to drink going forward."
+        }
+      ]
+    },
+
+    "gerd-and-anxiety": {
+      "sources": ["niddk-adults", "acg-guideline"],
+      "faq": [
+        {
+          "q": "Can anxiety cause acid reflux?",
+          "a": "Yes. Stress hormones increase stomach acid production, slow gastric emptying, and tighten the muscles around the diaphragm and esophagus. Anxiety also lowers the threshold for perceiving esophageal discomfort, so the same acid exposure genuinely feels more painful."
+        },
+        {
+          "q": "Why does GERD make my anxiety worse?",
+          "a": "Reflux chest pain closely resembles cardiac pain, which can trigger health anxiety and panic. Add disrupted sleep, uncertainty about which foods will cause symptoms, and the social limits of a chronic condition, and reflux feeds anxiety directly."
+        },
+        {
+          "q": "How do I break the GERD and anxiety cycle?",
+          "a": "Treat both sides at once. On the anxiety side, CBT, diaphragmatic breathing, progressive muscle relaxation, mindfulness, and regular exercise all help. On the reflux side, identifying your specific triggers restores a sense of control, and fewer symptoms gives anxiety less to work with."
+        },
+        {
+          "q": "Is deep breathing good for acid reflux?",
+          "a": "It helps twice over. Diaphragmatic breathing activates the calming parasympathetic response and strengthens the diaphragm, which supports lower esophageal sphincter function. Breathe in through the nose for 4 counts letting the belly expand, exhale slowly for 6, and repeat for 5 to 10 minutes."
+        }
+      ]
+    },
+
+    "gerd-and-asthma": {
+      "sources": ["acg-guideline", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Can acid reflux cause breathing problems?",
+          "a": "Yes, through two routes. Microaspiration carries small amounts of acid into the airways, causing inflammation, mucus, bronchospasm, cough, and wheezing. Separately, acid in the lower esophagus can trigger a vagal nerve reflex that tightens the airways without any acid reaching the lungs."
+        },
+        {
+          "q": "How do I know if my asthma is related to reflux?",
+          "a": "Suspect a connection if your asthma began in adulthood, worsens after meals or when lying down, responds poorly to standard asthma medication, or comes alongside hoarseness, frequent throat clearing, or a sensation of something stuck in your throat."
+        },
+        {
+          "q": "Can GERD cause a chronic cough?",
+          "a": "Yes. GERD is one of the top three causes of chronic cough. Reflux-related cough is usually dry, worse at night or after meals, may be set off by talking or laughing, and does not respond well to standard cough medicine."
+        },
+        {
+          "q": "Do asthma medications make reflux worse?",
+          "a": "Some can. Bronchodilators such as albuterol and theophylline can relax the lower esophageal sphincter, and oral corticosteroids can increase stomach acid production. Never stop or change asthma medication on your own; ask your doctor about adjusting the type or timing."
+        }
+      ]
+    },
+
+    "gerd-and-coffee": {
+      "sources": ["niddk-adults", "nhs"],
+      "faq": [
+        {
+          "q": "Can you drink coffee with acid reflux?",
+          "a": "Many people can, with adjustments. Coffee relaxes the lower esophageal sphincter, stimulates acid production, and is naturally acidic at around pH 4.5 to 5, but tolerance varies enormously. Smaller amounts, lower-acid preparations, and always drinking it with food make it workable for most people."
+        },
+        {
+          "q": "Is cold brew better for acid reflux?",
+          "a": "Usually yes. Cold brew is roughly 60 to 70% less acidic than hot-brewed coffee, because hot water extracts more of the acidic compounds from the beans. It is worth trying before giving up coffee entirely."
+        },
+        {
+          "q": "Is decaf coffee better for GERD?",
+          "a": "Sometimes, but not always. Decaf removes most of the caffeine, yet coffee contains other compounds that stimulate acid production, so some people find decaf just as problematic. If caffeine is your main trigger it may help, so test it rather than assume."
+        },
+        {
+          "q": "When is the worst time to drink coffee with GERD?",
+          "a": "On an empty stomach first thing in the morning, and late in the day. Caffeine lingers for 6 or more hours, so an afternoon coffee can still be affecting your lower esophageal sphincter at bedtime."
+        }
+      ]
+    },
+
+    "gerd-and-sleep-apnea": {
+      "sources": ["niddk-adults", "acg-guideline"],
+      "faq": [
+        {
+          "q": "Are GERD and sleep apnea related?",
+          "a": "Yes, and the relationship runs both ways. Estimates suggest up to 60% of people with sleep apnea also have GERD. Apnea events create negative chest pressure that pulls acid upward, while reflux inflames the airway and fragments sleep, worsening the apnea."
+        },
+        {
+          "q": "Does CPAP help acid reflux?",
+          "a": "Often, yes. CPAP prevents the negative chest pressure that drags acid upward during apnea events, stabilizes the diaphragm, and reduces micro-arousals. Many people using CPAP consistently report reflux improvement within weeks."
+        },
+        {
+          "q": "Why is my nighttime reflux not improving?",
+          "a": "If you have elevated the bed, stopped eating before bed, and avoided your triggers and still wake with reflux, untreated sleep apnea is worth investigating. Loud snoring with pauses, daytime sleepiness, morning headaches, and a dry mouth on waking are the clues."
+        }
+      ]
+    },
+
+    "gerd-and-weight-loss": {
+      "sources": ["niddk-adults", "acg-guideline"],
+      "faq": [
+        {
+          "q": "Does losing weight help acid reflux?",
+          "a": "Yes, it is one of the highest-impact changes available. Excess abdominal fat physically pushes stomach contents through the lower esophageal sphincter. Research indicates that losing even 5 to 10% of body weight can produce noticeable symptom improvement."
+        },
+        {
+          "q": "Can a keto diet make GERD worse?",
+          "a": "It often does. Fat is one of the strongest reflux triggers because it slows gastric emptying and relaxes the lower esophageal sphincter, so a very high-fat diet can worsen symptoms even while you are losing weight."
+        },
+        {
+          "q": "What is the best way to lose weight with GERD?",
+          "a": "A moderate deficit of 1 to 2 pounds per week, four to five smaller meals rather than large ones, lean proteins, vegetables and whole grains, and consistent moderate exercise such as walking or swimming. Avoid crash diets, very high-fat keto, fasting followed by large meals, and citrus juice cleanses."
+        },
+        {
+          "q": "How long does it take for weight loss to improve reflux?",
+          "a": "It is gradual. It can take weeks to months of sustained weight loss before symptom reduction is consistent, so judge progress over months rather than week to week."
+        }
+      ]
+    },
+
+    "gerd-diet-guide": {
+      "sources": ["niddk-adults", "medlineplus", "nhs"],
+      "faq": [
+        {
+          "q": "What should I eat on a GERD diet?",
+          "a": "Build meals from lean protein, non-acidic vegetables, complex carbohydrates, and a small amount of healthy fat. Leafy greens, root vegetables, skinless poultry, fish, tofu, eggs, oatmeal, brown rice, bananas, and melons are reliable staples."
+        },
+        {
+          "q": "What foods should I avoid with GERD?",
+          "a": "The most common triggers are citrus, tomatoes and tomato-based sauces, vinegar, fried and fatty foods, full-fat dairy, fatty meats, spicy foods, coffee, alcohol, carbonated drinks, chocolate, mint, and raw onion and garlic."
+        },
+        {
+          "q": "Is how food is prepared as important as the food itself?",
+          "a": "Often, yes. Steamed broccoli is fine while broccoli under cheese sauce is not, and grilled chicken is fine while fried chicken is not. Baking, grilling, steaming, and poaching are safe defaults; deep frying is where most of the trouble starts."
+        },
+        {
+          "q": "Do I have to avoid every trigger food forever?",
+          "a": "No. Generic lists are a starting point, not a verdict. Tolerance is highly individual, so tracking your own responses usually lets you keep foods a generic list would have told you to cut."
+        }
+      ]
+    },
+
+    "gerd-flare-up": {
+      "sources": ["niddk-adults", "nhs"],
+      "faq": [
+        {
+          "q": "What should I do during a GERD flare-up?",
+          "a": "Take an antacid, sip a small glass of water, stay upright, loosen tight clothing, chew non-mint gum to stimulate saliva, and try ginger. Do not lie down, do not drink milk, do not eat more to coat the stomach, and avoid aspirin and ibuprofen."
+        },
+        {
+          "q": "What can I eat during a reflux flare-up?",
+          "a": "Stick to plain oatmeal, bananas, plain rice, boiled or steamed vegetables, toast or crackers, baked lean chicken or turkey, melon, and broth-based soups. A flare is not the time to test your limits."
+        },
+        {
+          "q": "How long does a GERD flare-up last?",
+          "a": "Most resolve within a few days to a week with strict management: one to two days of bland food with antacids as needed, three to five days of stabilization, then a gradual return to your normal reflux-friendly diet."
+        },
+        {
+          "q": "Why does milk make heartburn worse?",
+          "a": "Milk soothes briefly and then stimulates acid production, so symptoms usually rebound afterward. Small sips of water are a better choice during a flare."
+        },
+        {
+          "q": "When is a flare-up a reason to see a doctor?",
+          "a": "If it has not improved after a week of strict management, or if you have difficulty swallowing, vomiting blood, black stools, unexplained weight loss, severe or unfamiliar chest pain, or over-the-counter medication is not touching it."
+        }
+      ]
+    },
+
+    "gerd-friendly-meals": {
+      "sources": ["niddk-adults", "medlineplus"],
+      "faq": [
+        {
+          "q": "What are some easy GERD-friendly meals?",
+          "a": "Oatmeal with banana and honey, scrambled eggs with spinach and whole grain toast, grilled chicken salad with cucumber and an oil-based dressing, a turkey and avocado wrap, baked salmon with roasted sweet potato and asparagus, or pesto pasta with grilled chicken."
+        },
+        {
+          "q": "How do I make GERD-friendly food taste good?",
+          "a": "Lean on fresh herbs such as basil, rosemary, thyme, dill, and ginger, and build flavor through technique: roast vegetables at high heat, get a proper sear on protein, and slow cook. Warm spices like cumin, coriander, turmeric, and smoked paprika add depth without the burn."
+        },
+        {
+          "q": "What can I use instead of tomato sauce?",
+          "a": "Butternut squash sauce or pesto both work well on pasta. For creaminess, pureed cauliflower or a splash of coconut milk substitutes for heavy cream, and fennel or a very small amount of apple cider vinegar can replace citrus for brightness."
+        }
+      ]
+    },
+
+    "gerd-in-children": {
+      "sources": ["niddk-children", "medlineplus"],
+      "faq": [
+        {
+          "q": "Is my baby's spitting up normal or is it GERD?",
+          "a": "Spitting up is very common and usually not GERD. A baby who spits up but is otherwise happy, feeding well, and gaining weight is a happy spitter. Frequent forceful vomiting, refusing feeds, arching the back, poor weight gain, or blood needs medical evaluation."
+        },
+        {
+          "q": "When does infant reflux go away?",
+          "a": "Physiologic reflux typically peaks around 4 months and resolves by 12 to 18 months as the lower esophageal sphincter matures. Symptoms persisting past 18 months are worth raising with your pediatrician."
+        },
+        {
+          "q": "What are GERD symptoms in older children?",
+          "a": "Heartburn or chest pain they may describe as a tummy ache that travels upward, a sour taste, feeling food come back up, sore throat or hoarseness, difficulty swallowing, nausea, appetite loss, dental erosion, and asthma-like cough or wheeze."
+        },
+        {
+          "q": "How can I help a child with reflux eat well?",
+          "a": "Serve smaller portions more often, limit citrus, tomato sauce, chocolate, mint, fried and spicy foods and fizzy drinks, cut back on juice, set a cutoff 2 to 3 hours before bed, and frame changes as foods that make your tummy feel good rather than as restrictions."
+        }
+      ]
+    },
+
+    "gerd-medications-explained": {
+      "sources": ["acg-guideline", "medlineplus", "niddk-adults"],
+      "faq": [
+        {
+          "q": "What is the difference between antacids, H2 blockers, and PPIs?",
+          "a": "Antacids such as Tums neutralize acid that is already there, working within minutes but wearing off quickly. H2 blockers such as famotidine reduce how much acid the stomach produces and last longer. PPIs such as omeprazole block the proton pumps at the source and give the strongest acid suppression."
+        },
+        {
+          "q": "Which GERD medication works fastest?",
+          "a": "Antacids. They chemically neutralize acid on contact, which makes them the right tool for breakthrough symptoms. They do not reduce acid production, so they are not a long-term control strategy on their own."
+        },
+        {
+          "q": "Are PPIs safe to take long term?",
+          "a": "PPIs are among the most widely used medications in the world and are effective, but years of daily use has been associated with several potential concerns, so the goal is the lowest effective dose. Do not stop a PPI abruptly. Ask your doctor whether you still need it or could step down."
+        },
+        {
+          "q": "What should I ask my doctor about GERD medication?",
+          "a": "How severe is my GERD, how long should I take this, can we try stepping down to something less powerful, should I take it daily or only as needed, and does it interact with my other medications."
+        }
+      ]
+    },
+
+    "gerd-trigger-foods": {
+      "sources": ["niddk-adults", "medlineplus", "nhs"],
+      "faq": [
+        {
+          "q": "How do I find my personal GERD trigger foods?",
+          "a": "Keep a food and symptom journal recording what you ate, when you ate it, which symptoms appeared, when they hit, and how severe they were on a simple 1 to 5 scale. Look for repeat patterns, then eliminate one suspected trigger at a time to confirm it."
+        },
+        {
+          "q": "How long does it take to identify GERD triggers?",
+          "a": "Most people surface their primary triggers within 1 to 2 weeks of consistent tracking, with a fuller picture after 3 to 4 weeks. Track the good days as well as the bad ones, since you need to know what did not cause problems."
+        },
+        {
+          "q": "What are the most common GERD trigger foods?",
+          "a": "Acidic foods such as citrus, tomatoes and vinegar; fatty and fried foods; spicy foods; coffee, alcohol and carbonated drinks; chocolate and mint; dairy for some people; and onion and garlic, which hide in a lot of dishes."
+        },
+        {
+          "q": "Why don't generic trigger food lists work?",
+          "a": "Because triggers are individual. A generic list describes what tends to cause problems across a population, not what causes yours, so following one usually means cutting foods you actually tolerate while missing the ones that genuinely affect you."
+        }
+      ]
+    },
+
+    "gerd-vs-heartburn": {
+      "sources": ["niddk-adults", "medlineplus", "nhs"],
+      "faq": [
+        {
+          "q": "What is the difference between GERD and heartburn?",
+          "a": "Heartburn is a symptom, the burning feeling caused by stomach acid reaching the esophagus. GERD is the chronic condition in which reflux happens frequently, typically twice a week or more. Occasional heartburn is normal; persistent heartburn may be GERD."
+        },
+        {
+          "q": "When does heartburn become GERD?",
+          "a": "The usual threshold is symptoms twice a week or more over a period of weeks, or reflux that is causing complications such as inflammation of the esophagus, regardless of how often it burns."
+        },
+        {
+          "q": "What are GERD symptoms besides heartburn?",
+          "a": "Regurgitation, difficulty swallowing, a chronic dry cough especially at night, hoarseness, a persistent sore throat, chest pain, wheezing or shortness of breath, dental erosion, and bad breath. Some people with GERD never get classic heartburn at all."
+        },
+        {
+          "q": "What happens if GERD is left untreated?",
+          "a": "Ongoing acid exposure can lead to esophagitis, strictures that narrow the esophagus, Barrett's esophagus which carries an increased cancer risk, esophageal ulcers, and respiratory problems. That is why persistent symptoms are worth investigating rather than managing indefinitely with over-the-counter remedies."
+        }
+      ]
+    },
+
+    "hiatal-hernia-and-gerd": {
+      "sources": ["niddk-adults", "acg-guideline"],
+      "faq": [
+        {
+          "q": "Can a hiatal hernia cause GERD?",
+          "a": "It makes reflux considerably more likely. A hernia displaces the junction where the diaphragm normally reinforces the lower esophageal sphincter, can trap an acid pocket above the diaphragm, impairs the esophagus's ability to clear acid, and is associated with lower resting sphincter pressure."
+        },
+        {
+          "q": "Does everyone with a hiatal hernia get reflux?",
+          "a": "No. Many people with small sliding hiatal hernias have no symptoms at all and only find out incidentally during testing for something else."
+        },
+        {
+          "q": "How is a hiatal hernia diagnosed?",
+          "a": "Usually by upper endoscopy, where a camera examines the esophagus and stomach and can also check for inflammation, or by a barium swallow, where X-rays follow a chalky liquid through the digestive tract."
+        },
+        {
+          "q": "Do I need surgery for a hiatal hernia?",
+          "a": "Most people do not. Surgery is generally reserved for large paraesophageal hernias at risk of strangulation, severe GERD that does not respond to medication and lifestyle changes, or complications such as stricture, Barrett's esophagus, or severe esophagitis."
+        }
+      ]
+    },
+
+    "natural-remedies-acid-reflux": {
+      "sources": ["niddk-adults", "nhs", "acg-guideline"],
+      "faq": [
+        {
+          "q": "What natural remedies actually work for acid reflux?",
+          "a": "The best-supported ones are structural rather than herbal: raising the head of the bed, stopping food 3 hours before bed, losing weight if you need to, eating smaller meals, and wearing looser clothing. Small amounts of ginger and a Mediterranean-style eating pattern also have reasonable support."
+        },
+        {
+          "q": "Does apple cider vinegar help acid reflux?",
+          "a": "There is no good evidence that it does, and it is acidic, so it can irritate an already inflamed esophagus. It is one of the most popular internet remedies with the least support behind it."
+        },
+        {
+          "q": "Is baking soda safe for heartburn?",
+          "a": "As an occasional emergency measure it can neutralize acid, but it is not appropriate as a regular remedy. It is high in sodium and can cause fluid retention and rebound effects."
+        },
+        {
+          "q": "Do supplements like slippery elm or melatonin help reflux?",
+          "a": "Some people find slippery elm, marshmallow root, melatonin, or d-limonene helpful, and they are worth discussing with your doctor. Treat them as an addition to the lifestyle basics, not a replacement for them."
+        }
+      ]
+    },
+
+    "nighttime-gerd-tips": {
+      "sources": ["niddk-adults", "acg-guideline", "nhs"],
+      "faq": [
+        {
+          "q": "How do I stop acid reflux at night?",
+          "a": "Elevate the head of the bed by 6 to 8 inches, stop eating 3 hours before bed, sleep on your left side, wear loose clothing, avoid your known triggers at dinner, skip the nightcap, and keep a consistent wind-down routine."
+        },
+        {
+          "q": "Which side should I sleep on for acid reflux?",
+          "a": "The left side. It positions the stomach below the esophagus so gravity works in your favor. Sleeping on the right side tends to make reflux worse."
+        },
+        {
+          "q": "Is it better to raise the bed or use more pillows?",
+          "a": "Raise the bed. Elevating the whole head of the bed by 6 to 8 inches with risers or a wedge under the mattress creates a consistent incline. Stacking pillows bends you at the waist, which raises abdominal pressure and can make reflux worse."
+        },
+        {
+          "q": "How long before bed should I stop eating?",
+          "a": "At least 3 hours. Lying down with a full stomach removes gravity's help and is one of the most reliable causes of nighttime symptoms."
+        }
+      ]
+    },
+
+    "stress-and-gerd": {
+      "sources": ["niddk-adults", "acg-guideline"],
+      "faq": [
+        {
+          "q": "Can stress cause acid reflux?",
+          "a": "Yes. Stress hormones increase acid production, delay gastric emptying so food sits longer, tighten the muscles around the esophagus and stomach, and raise your sensitivity to pain, so the same amount of reflux feels worse."
+        },
+        {
+          "q": "Why does my reflux feel worse when I am stressed even though nothing else changed?",
+          "a": "Because stress lowers your perception threshold. Research shows that anxious and stressed people register esophageal discomfort at lower levels of acid exposure, so symptom intensity can climb without any change in the actual reflux."
+        },
+        {
+          "q": "What helps stress-related reflux?",
+          "a": "Deep diaphragmatic breathing, regular movement, mindful eating rather than rushed and distracted meals, and fixing your sleep. If stress is persistent, CBT is genuinely effective for managing chronic health conditions and is worth asking your doctor about."
+        }
+      ]
+    },
+
+    "traveling-with-gerd": {
+      "sources": ["niddk-adults", "nhs"],
+      "faq": [
+        {
+          "q": "How do I manage acid reflux while traveling?",
+          "a": "Pack a GERD kit with more of your regular medication than you think you need, fast-acting chewable antacids, ginger chews, and an inflatable travel wedge. Eat a safe meal before you fly, bring your own snacks, stay hydrated, and keep your normal eating habits even on vacation."
+        },
+        {
+          "q": "Why is flying bad for acid reflux?",
+          "a": "Cabin pressure changes expand gas in the stomach and raise pressure on the lower esophageal sphincter, cramped seating compresses the abdomen, airline food tends to be high in fat and sodium, dry cabin air dehydrates you, and travel stress amplifies symptoms."
+        },
+        {
+          "q": "How do I elevate my bed in a hotel?",
+          "a": "Bring an inflatable travel wedge, place folded blankets or towels under the head end of the mattress, or stack pillows as a last resort. Some hotels can supply a foam wedge or an adjustable bed if you explain the medical need."
+        },
+        {
+          "q": "Which cuisines are easiest to eat with GERD?",
+          "a": "Japanese and Mediterranean tend to be gentlest, built around rice, grilled fish, and steamed vegetables. Thai and Vietnamese work if you watch spice levels and coconut-heavy curries. Italian and Mexican are hardest, given tomato, garlic, citrus, spice, and fried elements."
+        }
+      ]
+    },
+
+    "understanding-lpr": {
+      "sources": ["acg-guideline", "niddk-adults"],
+      "faq": [
+        {
+          "q": "What is LPR or silent reflux?",
+          "a": "Laryngopharyngeal reflux is acid reaching the throat and voice box rather than producing classic chest burning. It is called silent reflux because many people who have it never experience heartburn at all."
+        },
+        {
+          "q": "What are the symptoms of silent reflux?",
+          "a": "Chronic throat clearing, hoarseness especially in the morning, a post-nasal drip sensation that is not from your sinuses, a persistent dry cough, difficulty swallowing or a lump-in-the-throat feeling, a recurring sore throat without infection, voice fatigue, and a bitter taste on waking."
+        },
+        {
+          "q": "How is LPR different from regular GERD?",
+          "a": "LPR often occurs without heartburn, affects the throat and larynx rather than the esophagus, can happen during the day while you are upright rather than mainly at night, and usually takes longer to resolve with treatment."
+        },
+        {
+          "q": "Should I clear my throat if it feels blocked?",
+          "a": "Try not to. Throat clearing further irritates already inflamed tissue and perpetuates the sensation. Sip water instead, and avoid whispering when you are hoarse, since whispering strains the vocal cords more than speaking normally."
+        }
+      ]
+    },
+
+    "when-to-see-doctor-acid-reflux": {
+      "sources": ["nhs", "acg-guideline", "niddk-adults"],
+      "faq": [
+        {
+          "q": "When should I see a doctor about acid reflux?",
+          "a": "See a doctor promptly for difficulty swallowing, unintended weight loss, persistent vomiting or vomiting blood, black or tarry stools, severe chest pain, choking or aspiration, or a chronic cough or hoarseness that will not resolve. Also go if you need over-the-counter medication more than twice a week."
+        },
+        {
+          "q": "What tests are used to diagnose GERD?",
+          "a": "Upper endoscopy to view the esophagus and stomach lining, pH monitoring to measure acid exposure over 24 to 48 hours, esophageal manometry to measure the pressure and coordination of the esophageal muscles, and a barium swallow to reveal structural problems such as hiatal hernias or strictures."
+        },
+        {
+          "q": "Is acid reflux chest pain dangerous?",
+          "a": "Reflux chest pain is usually harmless, but it can closely mimic cardiac pain. Always get chest pain evaluated rather than assuming it is reflux, particularly if it is severe, new, or different from your usual symptoms."
+        },
+        {
+          "q": "What should I bring to a GERD appointment?",
+          "a": "Bring your symptom data: what you have been eating and which foods seem to trigger symptoms, when symptoms occur relative to meals and body position, how severe they are on a simple scale, and what you have already tried and whether it helped."
+        }
+      ]
+    }
+  }
+}

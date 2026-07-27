@@ -4,8 +4,9 @@ import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import { ArrowLeft, Calendar, User, Clock, ChevronRight } from "lucide-react";
 import { posts } from "@/content/blog";
+import faqData from "@/content/blog/faqs.json";
 import SEO from "@/components/SEO";
-import { SITE_URL } from "@/config/site";
+import { SITE_URL, AUTHOR } from "@/config/site";
 
 const readTime = (content: string) => {
   const words = content.trim().split(/\s+/).length;
@@ -51,6 +52,21 @@ const BlogPost = () => {
 
   const relatedPosts = getRelatedPosts(post.slug, post.tags);
 
+  // AEO data for this post: extractable Q&As and the primary sources behind it.
+  // Both live in content/blog/faqs.json so scripts/prerender.js emits the same thing.
+  const postFaq = faqData.posts[post.slug as keyof typeof faqData.posts];
+  const faqs = postFaq?.faq ?? [];
+  const sources = (postFaq?.sources ?? [])
+    .map((key) => faqData.sources[key as keyof typeof faqData.sources])
+    .filter(Boolean);
+
+  // A named person carries far more weight than an anonymous org byline on
+  // medical topics, for search engines and AI answer engines alike.
+  const authorName = AUTHOR.person?.name ?? post.author;
+  const authorSchema = AUTHOR.person
+    ? { "@type": "Person", name: AUTHOR.person.name, jobTitle: AUTHOR.person.jobTitle }
+    : { "@type": "Organization", name: post.author };
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -61,10 +77,7 @@ const BlogPost = () => {
     wordCount: wordCount(post.content),
     articleSection: post.category || "GERD Management",
     keywords: post.tags?.join(", "),
-    author: {
-      "@type": "Organization",
-      name: post.author,
-    },
+    author: authorSchema,
     publisher: {
       "@type": "Organization",
       name: "GERDBuddy",
@@ -100,7 +113,30 @@ const BlogPost = () => {
       audienceType: "Patient",
     },
     lastReviewed: post.dateModified || post.date,
+    ...(sources.length && {
+      citation: sources.map((s) => ({
+        "@type": "CreativeWork",
+        name: s.title,
+        publisher: { "@type": "Organization", name: s.publisher },
+        url: s.url,
+      })),
+    }),
+    ...(AUTHOR.reviewedBy && {
+      reviewedBy: { "@type": "Person", name: AUTHOR.reviewedBy.name },
+    }),
   };
+
+  const faqSchema = faqs.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }
+    : null;
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -145,10 +181,10 @@ const BlogPost = () => {
         type="article"
         publishedTime={post.date}
         modifiedTime={post.dateModified || post.date}
-        author={post.author}
+        author={authorName}
         section={post.category}
         tags={post.tags}
-        jsonLd={[articleSchema, medicalWebPageSchema, breadcrumbSchema]}
+        jsonLd={[articleSchema, medicalWebPageSchema, breadcrumbSchema, faqSchema].filter(Boolean)}
       />
 
       <article className="mx-auto w-full max-w-screen-xl px-4 py-12 space-y-8">
@@ -185,7 +221,10 @@ const BlogPost = () => {
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <User className="w-4 h-4" />
-                {post.author}
+                {authorName}
+                {AUTHOR.person?.jobTitle && (
+                  <span className="text-xs">({AUTHOR.person.jobTitle})</span>
+                )}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
@@ -213,6 +252,55 @@ const BlogPost = () => {
             </ReactMarkdown>
           </div>
 
+          {/* Common questions. Visible on the page and mirrored into FAQPage JSON-LD:
+              answer engines will not quote an answer that is only in the markup. */}
+          {faqs.length > 0 && (
+            <section className="space-y-4 opacity-0 animate-slide-up stagger-3">
+              <h2 className="text-2xl font-display font-semibold">Common Questions</h2>
+              <div className="space-y-3">
+                {faqs.map((faq, i) => (
+                  <details
+                    key={i}
+                    className="card-elevated p-5 group"
+                    open={i === 0}
+                  >
+                    <summary className="font-semibold cursor-pointer list-none flex items-start justify-between gap-3">
+                      <span>{faq.q}</span>
+                      <ChevronRight className="w-4 h-4 mt-1 shrink-0 transition-transform group-open:rotate-90" />
+                    </summary>
+                    <p className="text-muted-foreground mt-3 leading-relaxed">{faq.a}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Sources. Every URL here was fetched and title-verified before being added. */}
+          {sources.length > 0 && (
+            <section className="space-y-3 opacity-0 animate-slide-up stagger-3">
+              <h2 className="text-xl font-display font-semibold">Sources and further reading</h2>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                {sources.map((source) => (
+                  <li key={source.url}>
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="text-primary hover:underline"
+                    >
+                      {source.title}
+                    </a>
+                    <span>, {source.publisher}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-muted-foreground">
+                This article is general information, not medical advice. Talk to your doctor
+                about your own symptoms and treatment.
+              </p>
+            </section>
+          )}
+
           {/* CTA Section */}
           <section className="card-elevated p-6 sm:p-8 space-y-4 text-center opacity-0 animate-slide-up stagger-3">
             <h2 className="text-2xl font-display font-semibold">
@@ -231,7 +319,7 @@ const BlogPost = () => {
               <p className="text-xs text-muted-foreground">
                 Or track your triggers with the{" "}
                 <a
-                  href="https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910"
+                  href="https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline"

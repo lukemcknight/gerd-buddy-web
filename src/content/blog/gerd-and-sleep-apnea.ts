@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "GERD and sleep apnea frequently occur together and make each other worse. Learn about the bidirectional relationship and how treating one can improve the other.",
   date: "2026-02-28",
-  dateModified: "2026-02-28",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Conditions",
   tags: ["sleep apnea", "nighttime reflux", "sleep", "GERD complications", "CPAP"],
@@ -91,7 +91,7 @@ If you have both conditions (or suspect you might), the most effective approach 
 2. **Use CPAP consistently** — compliance is everything with CPAP. Even a few nights of skipping it can bring back both the apnea and the reflux.
 3. **Elevate the head of your bed** — helps with both conditions
 4. **Work on weight loss** — addresses the root cause for many people
-5. **Track your symptoms** — log both your sleep quality and your reflux symptoms. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) can help you track meals and symptoms so you can see how changes in one area affect the other.
+5. **Track your symptoms** — log both your sleep quality and your reflux symptoms. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) can help you track meals and symptoms so you can see how changes in one area affect the other.
 6. **Talk to your doctor** — about treating both conditions together rather than in isolation
 
 ## The Bottom Line

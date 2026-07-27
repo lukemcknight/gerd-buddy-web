@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Struggling with acid reflux at night? These evidence-based strategies can help you reduce nighttime symptoms and get better sleep.",
   date: "2026-02-12",
-  dateModified: "2026-02-12",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Lifestyle",
   tags: ["nighttime reflux", "sleep", "lifestyle tips", "acid reflux at night", "bed elevation"],
@@ -59,7 +59,7 @@ A simple bedtime routine — some light reading, gentle stretching, a few minute
 
 One of the most helpful things you can do is keep a record of which nights are good and which are rough. Over a couple of weeks, you'll start to see real patterns. Maybe you notice it's always worse after eating past 8pm, or after specific ingredients, or on particularly stressful days.
 
-That kind of personal data is genuinely more useful than any generic tips list. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) makes it easy to log your meals and symptoms each day so you can spot those patterns without needing a spreadsheet.
+That kind of personal data is genuinely more useful than any generic tips list. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes it easy to log your meals and symptoms each day so you can spot those patterns without needing a spreadsheet.
 
 ## When to Talk to Your Doctor
 

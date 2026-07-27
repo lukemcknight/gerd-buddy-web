@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Heartburn and GERD are often used interchangeably, but they're not the same thing. Learn the key differences, when occasional heartburn becomes GERD, and when to see a doctor.",
   date: "2026-02-13",
-  dateModified: "2026-02-13",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Conditions",
   tags: ["GERD", "heartburn", "diagnosis", "symptoms", "acid reflux"],
@@ -107,7 +107,7 @@ Sounds scary, and it can be. But here's the good news: all of this is preventabl
 
 ## What to Do If You Think It's GERD
 
-1. **Start tracking your symptoms.** Note what you eat, when symptoms hit, how bad they are, what seems to make them better or worse. Even a week of data gives your doctor something concrete to work with. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) is designed specifically for this — quick logging, symptom tracking, and pattern recognition so you walk into your appointment with real information instead of vague descriptions.
+1. **Start tracking your symptoms.** Note what you eat, when symptoms hit, how bad they are, what seems to make them better or worse. Even a week of data gives your doctor something concrete to work with. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) is designed specifically for this — quick logging, symptom tracking, and pattern recognition so you walk into your appointment with real information instead of vague descriptions.
 2. **Try the basic lifestyle changes.** Elevate your bed, stop eating before bed, identify and avoid your worst triggers.
 3. **See your doctor.** Bring your symptom data. Seriously — doctors tell me all the time that patients who come in with tracking data get diagnosed and treated faster.
 4. **Stick with it.** GERD is manageable, but it's usually a long-term thing. Consistency matters more than perfection.

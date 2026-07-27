@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "GERD flare-ups happen even when you're doing everything right. Learn what triggers them, how to get relief fast, what to eat during a flare, and how to prevent the next one.",
   date: "2026-03-16",
-  dateModified: "2026-03-16",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Lifestyle & Management",
   tags: [
@@ -147,7 +147,7 @@ The most common cause of flare-ups is inconsistency — doing well for a while, 
 
 ### Track to Predict
 
-If you're consistently logging your meals, symptoms, and lifestyle factors with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910), you'll start to see patterns in what precedes flare-ups. Maybe it's always after a stressful week. Maybe it's after consecutive days of poor eating. Maybe it's when you skip your evening walk. The data tells a story — use it.
+If you're consistently logging your meals, symptoms, and lifestyle factors with [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910), you'll start to see patterns in what precedes flare-ups. Maybe it's always after a stressful week. Maybe it's after consecutive days of poor eating. Maybe it's when you skip your evening walk. The data tells a story — use it.
 
 ### Manage the Stress Factor
 
@@ -168,7 +168,7 @@ A few things worth remembering:
 
 GERD flare-ups are annoying but manageable. Respond quickly with antacids and lifestyle adjustments, eat bland and safe for a few days, stay upright, manage stress, and let your body calm down. Track what happened leading up to the flare so you can learn from it. And if things don't improve within a week or symptoms are unusually severe, see your doctor.
 
-Every flare teaches you something. Use [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) to capture that data, and over time you'll get better at seeing flares coming before they hit full force — and sometimes stopping them before they start.
+Every flare teaches you something. Use [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) to capture that data, and over time you'll get better at seeing flares coming before they hit full force — and sometimes stopping them before they start.
   `.trim(),
 };
 

@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Pregnancy heartburn is incredibly common. Learn why acid reflux happens during pregnancy, which remedies are safe, and practical tips for relief in every trimester.",
   date: "2026-03-08",
-  dateModified: "2026-03-08",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Conditions",
   tags: ["pregnancy", "heartburn", "safe remedies", "trimester", "acid reflux"],
@@ -116,7 +116,7 @@ If reflux continues beyond 6-8 weeks postpartum, it's worth following up with yo
 
 Every pregnancy is different, and what triggers one person's reflux might be fine for another. Keeping a simple food and symptom log can help you identify your personal triggers quickly — which is especially useful when you're dealing with pregnancy cravings and aversions at the same time.
 
-[GERDBuddy](https://apps.apple.com/app/apple-store/id6743079169?pt=127744576&ct=blog-pregnancy&mt=8) can help you track meals and symptoms to find your personal trigger patterns, even during pregnancy.
+[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) can help you track meals and symptoms to find your personal trigger patterns, even during pregnancy.
 
 ## The Bottom Line
 

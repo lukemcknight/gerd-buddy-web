@@ -6,7 +6,7 @@ const post: BlogPost = {
   description:
     "Not all acid reflux can be managed at home. Learn the warning signs that mean it's time to see a doctor, what tests to expect, and how to prepare for your appointment.",
   date: "2026-03-03",
-  dateModified: "2026-03-03",
+  dateModified: "2026-07-25",
   author: "GERDBuddy Team",
   category: "Conditions",
   tags: ["diagnosis", "symptoms", "doctor", "when to seek help", "acid reflux"],
@@ -76,7 +76,7 @@ This is the single most useful thing you can do to make your appointment product
 
 Doctors consistently say that patients who bring tracking data get diagnosed faster and receive more targeted treatment plans. Instead of a vague "I get heartburn a lot," you can say "I have reflux 4-5 times per week, usually after dinner, and it's worst when I eat fatty foods or lie down within two hours of eating."
 
-[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910) is designed specifically for this kind of tracking. Log your meals and symptoms for even just 1-2 weeks before your appointment, and you'll have concrete data to share with your doctor.
+[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) is designed specifically for this kind of tracking. Log your meals and symptoms for even just 1-2 weeks before your appointment, and you'll have concrete data to share with your doctor.
 
 ## What Treatment Might Look Like
 
