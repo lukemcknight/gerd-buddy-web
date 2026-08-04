@@ -34,7 +34,7 @@ export const FUNNEL_STEPS: FunnelStep[] = [
   { id: "pattern_demo", phase: "proof", type: "interstitial", title: "Here is how GERDBuddy finds YOUR triggers.",
     subtitle: "You log meals and symptoms. GERDBuddy cross-references timing, ingredients, and severity to isolate your personal triggers, not a generic avoid-everything list. The scanner reads menus and labels so eating out stops being a gamble.", cta: "Show me" },
   { id: "reviews", phase: "proof", type: "interstitial", title: "People like you, eating like themselves again.",
-    subtitle: "\"I was very pleased with how much this app improved my symptoms. I went in with very low expectations after hearing about it a few times, but now I am pleasantly surprised. Thanks!\" - creisert\nREAL REVIEWS NEEDED\nREAL REVIEWS NEEDED",
+    subtitle: "Rated 4.4 out of 5 on the App Store.\n\"I was very pleased with how much this app improved my symptoms. I went in with very low expectations after hearing about it a few times, but now I am pleasantly surprised. Thanks!\" - creisert",
     cta: "Continue" },
   { id: "trust", phase: "proof", type: "interstitial", title: "Your answers stay yours.",
     subtitle: "Your logs live on your device. Your account exists so your plan is waiting when you open the app.", cta: "Continue" },
