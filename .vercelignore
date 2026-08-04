@@ -1,0 +1,21 @@
+# Web deploys should upload only the website. This is a monorepo; everything
+# below is mobile/ops/agent tooling the Vite build never reads.
+trigger-tracker-mobile
+ops
+docs
+.design-sync
+.playwright-mcp
+.agents
+.claude
+.codex
+app.json
+eas.json
+skills-lock.json
+
+# Belt-and-braces: secrets and heavy dirs (also gitignored, but .vercelignore
+# is authoritative when present)
+node_modules
+dist
+.env
+.env.*
+*.p8
