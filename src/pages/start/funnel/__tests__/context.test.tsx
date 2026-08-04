@@ -55,28 +55,23 @@ it("answer() on select step advances and persists", () => {
   expect(result.current.index).toBeGreaterThan(1);
 });
 
-it("renderTitle() substitutes placeholders", () => {
-  const answers = { name: "Alex", nights: 3, spend: 50 };
-  const stats = lossStats(answers);
+it("renderTitle() substitutes all three tokens in one call", () => {
+  const testString = "Hello {name}, you have {nightsPerYear} nights and spend ${dollarsPerYear}/year";
+  const rendered = renderTitle(testString, {
+    name: "Alex",
+    nightsPerYear: 156,
+    dollarsPerYear: 600,
+  });
+  expect(rendered).toBe("Hello Alex, you have 156 nights and spend $600/year");
+});
 
-  const ctx = {
-    displayName: "Alex",
-    stats,
-  };
-
-  const titleStep = FUNNEL_STEPS.find((s) => s.title.includes("{name}"));
-  const statStep = FUNNEL_STEPS.find((s) => s.title.includes("{nightsPerYear}"));
-
-  if (titleStep) {
-    const rendered = renderTitle(titleStep, ctx);
-    expect(rendered).toContain("Alex");
-  }
-
-  if (statStep) {
-    const rendered = renderTitle(statStep, ctx);
-    expect(rendered).toContain("156");
-    expect(rendered).toContain("600");
-  }
+it("renderTitle() handles missing name", () => {
+  const testString = "Hello {name}";
+  const rendered = renderTitle(testString, {
+    nightsPerYear: 0,
+    dollarsPerYear: 0,
+  });
+  expect(rendered).toBe("Hello ");
 });
 
 it("displayName falls back to 'friend' when name is empty", () => {
@@ -98,4 +93,92 @@ it("hydrates from saved state on mount", () => {
   const { result } = renderHook(() => useFunnel(), { wrapper });
   expect(result.current.index).toBe(2);
   expect(result.current.answers.age).toBe("30-44");
+});
+
+it("trackStep called exactly once for initial step", () => {
+  vi.mocked(analytics.trackStep).mockClear();
+  renderHook(() => useFunnel(), { wrapper });
+  expect(vi.mocked(analytics.trackStep)).toHaveBeenCalledTimes(1);
+  expect(vi.mocked(analytics.trackStep)).toHaveBeenCalledWith(
+    FUNNEL_STEPS[0],
+    0
+  );
+});
+
+it("slider-type answer records but does not advance", () => {
+  const { result } = renderHook(() => useFunnel(), { wrapper });
+
+  // Navigate to nights step (index 8, slider type)
+  for (let i = 0; i < 8; i++) {
+    act(() => {
+      result.current.next();
+    });
+  }
+  const nightsStepIndex = result.current.index;
+
+  // Record answer on slider
+  act(() => {
+    result.current.answer("nights", 3);
+  });
+
+  expect(result.current.answers.nights).toBe(3);
+  expect(result.current.index).toBe(nightsStepIndex);
+});
+
+it("back() clamps at 0 and next() clamps at last index", () => {
+  const { result } = renderHook(() => useFunnel(), { wrapper });
+
+  // Test back() clamp at start
+  expect(result.current.index).toBe(0);
+  act(() => {
+    result.current.back();
+  });
+  expect(result.current.index).toBe(0);
+
+  // Test next() clamp at end
+  while (result.current.index < FUNNEL_STEPS.length - 1) {
+    act(() => {
+      result.current.next();
+    });
+  }
+  const lastIndex = result.current.index;
+  act(() => {
+    result.current.next();
+  });
+  expect(result.current.index).toBe(lastIndex);
+});
+
+it("useFunnel() outside FunnelProvider throws", () => {
+  expect(() => renderHook(() => useFunnel())).toThrow(
+    "useFunnel must be used within FunnelProvider"
+  );
+});
+
+it("save() called with expected shape when advancing", () => {
+  const { result } = renderHook(() => useFunnel(), { wrapper });
+
+  // Clear the mock after hydration
+  vi.mocked(persistence.save).mockClear();
+
+  // Navigate to age step and answer (select step auto-advances)
+  act(() => {
+    result.current.next(); // Go from landing to age
+  });
+
+  vi.mocked(persistence.save).mockClear();
+
+  act(() => {
+    result.current.answer("age", "30-44"); // Answers on age step (select type, auto-advances)
+  });
+
+  expect(vi.mocked(persistence.save)).toHaveBeenCalled();
+  const lastCall = vi.mocked(persistence.save).mock.calls[
+    vi.mocked(persistence.save).mock.calls.length - 1
+  ][0];
+  expect(lastCall).toEqual(
+    expect.objectContaining({
+      stepIndex: expect.any(Number),
+      answers: expect.objectContaining({ age: "30-44" }),
+    })
+  );
 });

@@ -41,7 +41,7 @@ function funnelReducer(state: FunnelState, action: FunnelAction): FunnelState {
   switch (action.type) {
     case "HYDRATE":
       return {
-        index: action.index,
+        index: Math.max(0, Math.min(action.index, FUNNEL_STEPS.length - 1)),
         answers: action.answers,
         hydrated: true,
       };
@@ -144,15 +144,15 @@ export function useFunnel(): FunnelContextValue {
 }
 
 /**
- * Renders a step's title with template substitutions.
+ * Renders a title string with template substitutions.
  * Replaces {name}, {nightsPerYear}, {dollarsPerYear}.
  */
 export function renderTitle(
-  step: FunnelStep,
-  ctx: Pick<FunnelContextValue, "displayName" | "stats">
+  text: string,
+  ctx: { name?: string; nightsPerYear: number; dollarsPerYear: number }
 ): string {
-  return step.title
-    .replace("{name}", ctx.displayName)
-    .replace("{nightsPerYear}", String(ctx.stats.nightsPerYear))
-    .replace("{dollarsPerYear}", String(ctx.stats.dollarsPerYear));
+  return text
+    .replace("{name}", ctx.name || "")
+    .replace("{nightsPerYear}", String(ctx.nightsPerYear))
+    .replace("{dollarsPerYear}", String(ctx.dollarsPerYear));
 }
