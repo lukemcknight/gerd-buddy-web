@@ -99,7 +99,7 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   const stats = lossStats(state.answers);
   const displayName =
     typeof state.answers.name === "string" && state.answers.name.trim()
-      ? state.answers.name
+      ? state.answers.name.trim()
       : "friend";
 
   const answer = (id: string, value: Answers[string]) => {

@@ -84,6 +84,15 @@ it("displayName falls back to 'friend' when name is empty", () => {
   expect(result.current.displayName).toBe("Jordan");
 });
 
+it("displayName returns trimmed value when name has leading/trailing whitespace", () => {
+  const { result } = renderHook(() => useFunnel(), { wrapper });
+
+  act(() => {
+    result.current.answer("name", "  Jordan  ");
+  });
+  expect(result.current.displayName).toBe("Jordan");
+});
+
 it("hydrates from saved state on mount", () => {
   vi.mocked(persistence.load).mockReturnValueOnce({
     stepIndex: 2,
