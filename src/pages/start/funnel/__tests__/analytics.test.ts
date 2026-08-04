@@ -1,5 +1,5 @@
 import { vi, it, expect, afterEach } from "vitest";
-import { trackStep, trackEvent, pixel } from "../analytics";
+import { trackStep, trackEvent, pixel, gtagEvent } from "../analytics";
 import { FUNNEL_STEPS } from "../steps";
 
 afterEach(() => {
@@ -27,5 +27,6 @@ it("never throws without globals", () => {
     trackStep(FUNNEL_STEPS[0], 0);
     trackEvent("x");
     pixel("Lead");
+    gtagEvent("test");
   }).not.toThrow();
 });
