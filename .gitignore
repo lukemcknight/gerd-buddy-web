@@ -64,3 +64,6 @@ ds-bundle/
 
 # ops — machine-generated cache only; ledgers, weekly reports & scorecard.csv ARE committed
 ops/.cache/
+
+# Vercel deploy metadata
+.vercel
