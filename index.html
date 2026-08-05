@@ -61,6 +61,63 @@
       respect_dnt: true
     });
   </script>
+
+  <!--
+    Meta Pixel base code + Google Ads gtag.js loader. Both guarded on env values that Vite
+    inlines at build time via its native %VITE_X% HTML replacement (no vite.config.ts
+    `define` needed -- Vite does this for any %VITE_-prefixed% token found in this file,
+    sourced from .env* / real process env at build time).
+
+    CAVEAT this guard exists for: when a var is UNSET, Vite does not substitute anything --
+    it leaves the literal string "%VITE_X%" in the HTML. So each snippet below reads the
+    (maybe-substituted) value into a local var and bails before touching the network if it
+    still starts with "%" (never substituted) or is empty (defined-but-blank, e.g. the
+    blank line in .env.example). No fbq/gtag request fires when the id is unset. Both ids
+    are unset today -- Luke creates the Meta pixel + Google Ads conversion action later; see
+    ops/ for status once they exist.
+
+    Neither snippet uses a static `<script src="...">` tag: a src built from an unset
+    id would still fire a (broken) network request the instant the browser parses it, which
+    the guard couldn't prevent after the fact. Both loaders are therefore created via JS
+    inside the guarded IIFE instead, same technique Meta's own base code already uses for
+    fbevents.js.
+
+    scripts/prerender.js carries a matching pair of guarded snippets built from the same
+    env vars (read via process.env there, since prerender runs as plain node, not through
+    Vite) in its own head template -- marked with the same data-ad-snippet attribute so the
+    generic inline-script lift in prerender.js skips these two and prerendered pages don't
+    get them twice.
+  -->
+  <script data-ad-snippet="meta-pixel">
+    (function () {
+      var id = "%VITE_META_PIXEL_ID%";
+      if (!id || id.charAt(0) === "%") return;
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', id);
+      fbq('track', 'PageView');
+    })();
+  </script>
+  <script data-ad-snippet="gtag">
+    (function () {
+      var id = "%VITE_GOOGLE_ADS_ID%";
+      if (!id || id.charAt(0) === "%") return;
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
+      var s = document.createElement("script");
+      s.async = true;
+      s.src = "https://www.googletagmanager.com/gtag/js?id=" + id;
+      document.head.appendChild(s);
+      gtag('js', new Date());
+      gtag('config', id);
+    })();
+  </script>
 </head>
 
 <body>

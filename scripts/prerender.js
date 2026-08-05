@@ -48,9 +48,55 @@ const jsScripts = [...shell.matchAll(/<script[^>]*src="[^"]*"[^>]*><\/script>/g)
 // Lift inline <script> blocks (the analytics snippet) out of the shell so prerendered
 // pages are measured too. Without this, every blog post and forum page would be a
 // blind spot, which is exactly where AI referrals land. Single source stays index.html.
+// data-ad-snippet scripts (Meta Pixel / gtag, see below) are excluded here and rebuilt
+// explicitly from process.env instead, so they don't end up duplicated on every page.
 const inlineScripts = [...shell.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)]
   .filter((m) => !/application\/ld\+json/.test(m[0]))
+  .filter((m) => !/data-ad-snippet=/.test(m[0]))
   .map((m) => m[0])
+  .join("\n");
+
+// Meta Pixel + Google Ads gtag loader, mirrored from index.html's guarded snippets (see
+// the comment there for the full rationale). index.html's copies are guarded at runtime
+// against Vite's unsubstituted "%VITE_X%" placeholder because Vite does that templating;
+// prerender.js has no such step -- it runs as plain node, so the ids come straight from
+// process.env (set for real by Vercel/the shell at build time; unset locally is the
+// default today) and each script tag is included only when its id is actually present.
+// That keeps the *behavior* identical to index.html's output (no fbq/gtag network request
+// when an id is unset) even though the mechanism is build-time omission here rather than
+// a runtime guard.
+const metaPixelId = process.env.VITE_META_PIXEL_ID || "";
+const googleAdsId = process.env.VITE_GOOGLE_ADS_ID || "";
+
+const adSnippets = [
+  metaPixelId &&
+    `<script data-ad-snippet="meta-pixel">
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', ${JSON.stringify(metaPixelId)});
+    fbq('track', 'PageView');
+  </script>`,
+  googleAdsId &&
+    `<script data-ad-snippet="gtag">
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    (function () {
+      var s = document.createElement("script");
+      s.async = true;
+      s.src = ${JSON.stringify("https://www.googletagmanager.com/gtag/js?id=" + googleAdsId)};
+      document.head.appendChild(s);
+    })();
+    gtag('js', new Date());
+    gtag('config', ${JSON.stringify(googleAdsId)});
+  </script>`,
+]
+  .filter(Boolean)
   .join("\n");
 
 // Parse blog post files
@@ -137,6 +183,7 @@ function buildPage({ title, description, path, content, jsonLd, extra = "" }) {
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   ${cssLink}
   ${inlineScripts}
+  ${adSnippets}
   ${jsonLdTags}
   ${extra}
 </head>
