@@ -9,7 +9,15 @@ const mockSignUp = vi.fn();
 const mockSignIn = vi.fn();
 
 vi.mock("../../../contexts/AuthContext", () => ({
-  useAuth: () => ({ signUp: mockSignUp, signIn: mockSignIn, user: null }),
+  // `loading: true`: this file only asserts that a successful signup
+  // advances *past* AccountStep into the paywall step (title text visible).
+  // It never exercises PaywallStep's own RC behavior, so auth is left
+  // "still resolving" here on purpose -- that keeps PaywallStep's
+  // `if (!user) return` init guard in effect (no real, unmocked rc.ts calls)
+  // and keeps its signed-out redirect (which only fires once loading
+  // resolves to false) from firing and bouncing back to AccountStep before
+  // the assertion runs. See paywall.test.tsx for real PaywallStep coverage.
+  useAuth: () => ({ signUp: mockSignUp, signIn: mockSignIn, user: null, loading: true }),
 }));
 
 function seedAtAccountStep(answers: Record<string, unknown> = { name: "Sam" }) {
