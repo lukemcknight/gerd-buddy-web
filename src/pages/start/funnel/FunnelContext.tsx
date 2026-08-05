@@ -4,6 +4,7 @@ import { FUNNEL_STEPS } from "./steps";
 import { nextIndex, prevIndex, lossStats } from "./engine";
 import { save, load } from "./persistence";
 import { trackStep } from "./analytics";
+import { parseUtm } from "./utm";
 
 interface FunnelContextValue {
   step: FunnelStep;
@@ -86,6 +87,18 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
         index: 0,
         answers: {},
       });
+    }
+  }, []);
+
+  // Stash UTM params from the landing URL into answers.utm, once, on first
+  // render. Declared after the hydrate effect above so it always dispatches
+  // after HYDRATE (which replaces `answers` wholesale) rather than before it,
+  // where it would otherwise get clobbered. Never overwrites an existing
+  // (already-persisted) utm answer with an empty one.
+  useEffect(() => {
+    const utm = parseUtm(window.location.search);
+    if (Object.keys(utm).length > 0) {
+      dispatch({ type: "ANSWER", id: "utm", value: utm });
     }
   }, []);
 

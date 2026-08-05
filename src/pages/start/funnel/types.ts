@@ -14,4 +14,7 @@ export interface FunnelStep {
   autoAdvanceMs?: number;
 }
 
-export type Answers = Record<string, string | string[] | number>;
+export type Answers = Record<
+  string,
+  string | string[] | number | Record<string, string>
+>;

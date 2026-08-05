@@ -26,6 +26,7 @@ beforeEach(() => {
 
 afterEach(() => {
   localStorage.clear();
+  window.history.pushState({}, "", "/");
 });
 
 const wrapper = ({ children }: { children: ReactNode }) => (
@@ -155,6 +156,31 @@ it("back() clamps at 0 and next() clamps at last index", () => {
     result.current.next();
   });
   expect(result.current.index).toBe(lastIndex);
+});
+
+it("stashes utm params from location.search into answers.utm on first render", () => {
+  window.history.pushState(
+    {},
+    "",
+    "/start?utm_source=meta&utm_medium=cpc&utm_campaign=launch&utm_content=hero"
+  );
+
+  const { result } = renderHook(() => useFunnel(), { wrapper });
+
+  expect(result.current.answers.utm).toEqual({
+    utm_source: "meta",
+    utm_medium: "cpc",
+    utm_campaign: "launch",
+    utm_content: "hero",
+  });
+});
+
+it("does not add a utm answer when no utm params are in the URL", () => {
+  window.history.pushState({}, "", "/start");
+
+  const { result } = renderHook(() => useFunnel(), { wrapper });
+
+  expect(result.current.answers.utm).toBeUndefined();
 });
 
 it("useFunnel() outside FunnelProvider throws", () => {
