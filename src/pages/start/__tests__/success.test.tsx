@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { HelmetProvider } from "react-helmet-async";
 import StartPage from "../StartPage";
 
 const SUCCESS_STEP_INDEX = 25; // Last step in the funnel
@@ -71,17 +72,21 @@ afterEach(() => {
   delete (window as unknown as { gtag?: unknown }).gtag;
 });
 
+const renderWithHelmet = (component: React.ReactElement) => {
+  return render(<HelmetProvider>{component}</HelmetProvider>);
+};
+
 describe("SuccessStep", () => {
   it("renders the title greeting by name", async () => {
     seedAtSuccessStep({ name: "Sam", email: "sam@example.com" });
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(await screen.findByText("You are in, Sam.")).toBeInTheDocument();
   });
 
   it("renders the email bold in the sign-in line", async () => {
     seedAtSuccessStep({ name: "Sam", email: "sam@example.com" });
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await screen.findByText("You are in, Sam.");
     const emailBold = screen.getByText("sam@example.com");
@@ -91,7 +96,7 @@ describe("SuccessStep", () => {
 
   it("renders fallback text when email is missing", async () => {
     seedAtSuccessStep({ name: "Sam" }); // no email
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await screen.findByText("You are in, Sam.");
     expect(screen.getByText("Sign in with")).toBeInTheDocument();
@@ -100,7 +105,7 @@ describe("SuccessStep", () => {
 
   it("renders the reassurance line", async () => {
     seedAtSuccessStep({ name: "Sam", email: "sam@example.com" });
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(
       await screen.findByText(
@@ -111,7 +116,7 @@ describe("SuccessStep", () => {
 
   it("renders an App Store link with the correct URL", async () => {
     seedAtSuccessStep({ name: "Sam", email: "sam@example.com" });
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await screen.findByText("You are in, Sam.");
     const appStoreLink = screen.getByRole("link", {
@@ -128,7 +133,7 @@ describe("SuccessStep", () => {
 
   it("fires web_funnel_completed event exactly once on mount", async () => {
     seedAtSuccessStep({ name: "Sam", email: "sam@example.com" });
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await screen.findByText("You are in, Sam.");
 
@@ -149,7 +154,7 @@ describe("SuccessStep", () => {
 
   it("does not duplicate web_funnel_completed on rerender", async () => {
     seedAtSuccessStep({ name: "Sam", email: "sam@example.com" });
-    const { rerender } = render(<StartPage />);
+    const { rerender } = renderWithHelmet(<StartPage />);
 
     await screen.findByText("You are in, Sam.");
 
@@ -161,7 +166,7 @@ describe("SuccessStep", () => {
       );
     expect(completionCallsBeforeRerender).toHaveLength(1);
 
-    rerender(<StartPage />);
+    rerender(<HelmetProvider><StartPage /></HelmetProvider>);
 
     const completionCallsAfterRerender = vi
       .mocked(win.posthog.capture)

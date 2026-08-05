@@ -18,6 +18,7 @@ const ForumCategory = lazy(() => import("./pages/ForumCategory"));
 const NewThread = lazy(() => import("./pages/NewThread"));
 const ForumThread = lazy(() => import("./pages/ForumThread"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Start = lazy(() => import("./pages/start/StartPage"));
 
 const App = () => (
   <HelmetProvider>
@@ -26,6 +27,7 @@ const App = () => (
         <ScrollToTop />
         <Suspense fallback={null}>
           <Routes>
+            <Route path="/start" element={<Start />} />
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/privacy" element={<Privacy />} />

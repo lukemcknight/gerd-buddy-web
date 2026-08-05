@@ -1,6 +1,7 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { HelmetProvider } from "react-helmet-async";
 import StartPage from "../StartPage";
 
 const ACCOUNT_STEP_INDEX = 23;
@@ -43,12 +44,16 @@ afterEach(() => {
   delete (window as unknown as { fbq?: unknown }).fbq;
 });
 
+const renderWithHelmet = (component: React.ReactElement) => {
+  return render(<HelmetProvider>{component}</HelmetProvider>);
+};
+
 describe("AccountStep", () => {
   it("happy signup: advances, records the email answer, and fires analytics", async () => {
     mockSignUp.mockResolvedValueOnce(undefined);
     seedAtAccountStep();
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(await screen.findByText("Save your plan")).toBeInTheDocument();
 
@@ -91,7 +96,7 @@ describe("AccountStep", () => {
     );
     seedAtAccountStep();
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await user.type(screen.getByLabelText("Email"), "sam@example.com");
     await user.type(screen.getByLabelText("Password"), "correct-horse-1");
@@ -118,7 +123,7 @@ describe("AccountStep", () => {
 
     seedAtAccountStep();
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await user.type(screen.getByLabelText("Email"), "sam@example.com");
     await user.type(screen.getByLabelText("Password"), "wrong-attempt");
@@ -149,7 +154,7 @@ describe("AccountStep", () => {
 
     seedAtAccountStep();
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await user.type(screen.getByLabelText("Email"), "sam@example.com");
     await user.type(screen.getByLabelText("Password"), "bad-password");
@@ -168,7 +173,7 @@ describe("AccountStep", () => {
     mockSignUp.mockResolvedValueOnce(undefined);
     seedAtAccountStep({}); // no `name` answer -> displayName UI fallback is "friend"
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await user.type(screen.getByLabelText("Email"), "nameless@example.com");
     await user.type(screen.getByLabelText("Password"), "correct-horse-1");
@@ -195,7 +200,7 @@ describe("AccountStep", () => {
     );
     seedAtAccountStep();
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const emailInput = screen.getByLabelText("Email");
     const passwordInput = screen.getByLabelText("Password");

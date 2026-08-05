@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { HelmetProvider } from "react-helmet-async";
 import StartPage from "../StartPage";
 
 beforeEach(() => {
@@ -11,15 +12,19 @@ afterEach(() => {
   localStorage.clear();
 });
 
+const renderWithHelmet = (component: React.ReactElement) => {
+  return render(<HelmetProvider>{component}</HelmetProvider>);
+};
+
 describe("StartPage", () => {
   it("shows the landing title", () => {
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
     expect(screen.getByText("Eat without fear again.")).toBeInTheDocument();
   });
 
   it("clicking the landing CTA shows the age step", async () => {
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await user.click(screen.getByRole("button", { name: "Start my quiz" }));
 
@@ -28,7 +33,7 @@ describe("StartPage", () => {
 
   it("selecting an age option advances to sex", async () => {
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     await user.click(screen.getByRole("button", { name: "Start my quiz" }));
     await user.click(screen.getByRole("button", { name: "30-44" }));
@@ -42,7 +47,7 @@ describe("StartPage", () => {
       JSON.stringify({ v: 1, stepIndex: 8, answers: {} })
     );
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(
       await screen.findByText(
@@ -63,7 +68,7 @@ describe("StartPage", () => {
       JSON.stringify({ v: 1, stepIndex: 8, answers: {} })
     );
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const slider = await screen.findByRole("slider");
     fireEvent.change(slider, { target: { value: "4" } });
@@ -85,7 +90,7 @@ describe("StartPage", () => {
       JSON.stringify({ v: 1, stepIndex: 9, answers: { nights: 4 } })
     );
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(
       await screen.findByText("What do you spend per month managing it?")
@@ -106,7 +111,7 @@ describe("StartPage", () => {
       "gb_funnel_v1",
       JSON.stringify({ v: 1, stepIndex: 20, answers: {} })
     );
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(
       await screen.findByRole("textbox", { name: "What should we call you?" })

@@ -1,6 +1,7 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { HelmetProvider } from "react-helmet-async";
 import StartPage from "../StartPage";
 
 const PAYWALL_STEP_INDEX = 24;
@@ -86,13 +87,17 @@ afterEach(() => {
   delete (window as unknown as { gtag?: unknown }).gtag;
 });
 
+const renderWithHelmet = (component: React.ReactElement) => {
+  return render(<HelmetProvider>{component}</HelmetProvider>);
+};
+
 describe("PaywallStep", () => {
   it("skips straight to the next step when the user already has the entitlement (idempotent re-entry)", async () => {
     configureRC.mockReturnValue(
       fakePurchases({ getCustomerInfo: vi.fn().mockResolvedValue(activeCustomerInfo) })
     );
     seedAtPaywallStep();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(await screen.findByText("You are in, Sam.")).toBeInTheDocument();
     expect(configureRC).toHaveBeenCalledWith("uid-123");
@@ -102,7 +107,7 @@ describe("PaywallStep", () => {
   it("renders the CTA, checkmark line, and verbatim subtitle once the package loads", async () => {
     configureRC.mockReturnValue(fakePurchases());
     seedAtPaywallStep();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(await screen.findByText("Try GERDBuddy Pro for $0.00")).toBeInTheDocument();
     expect(screen.getByText("✓ No Payment Due Now")).toBeInTheDocument();
@@ -120,7 +125,7 @@ describe("PaywallStep", () => {
     seedAtPaywallStep({ name: "Sam", utm: { utm_source: "meta", utm_medium: "cpc" } });
 
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const cta = await screen.findByRole("button", { name: "try for $0.00" });
     await user.click(cta);
@@ -149,7 +154,7 @@ describe("PaywallStep", () => {
     seedAtPaywallStep();
 
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const cta = await screen.findByRole("button", { name: "try for $0.00" });
     await user.click(cta);
@@ -174,7 +179,7 @@ describe("PaywallStep", () => {
     seedAtPaywallStep();
 
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const cta = await screen.findByRole("button", { name: "try for $0.00" });
     await user.click(cta);
@@ -203,7 +208,7 @@ describe("PaywallStep", () => {
     seedAtPaywallStep();
 
     const user = userEvent.setup();
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const cta = await screen.findByRole("button", { name: "try for $0.00" });
     // Mount-time entitlement check already consumed the default (inactive)
@@ -237,7 +242,7 @@ describe("PaywallStep", () => {
     );
     seedAtPaywallStep();
 
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const cta = await screen.findByRole("button", { name: "try for $0.00" });
     // Two synchronous clicks with no await between them, so the second
@@ -262,7 +267,7 @@ describe("PaywallStep", () => {
       .mockReturnValue(fakePurchases());
     seedAtPaywallStep();
 
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(
@@ -288,7 +293,7 @@ describe("PaywallStep", () => {
     configureRC.mockReturnValue(fakePurchases({ getCustomerInfo }));
     seedAtPaywallStep();
 
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(
@@ -305,7 +310,7 @@ describe("PaywallStep", () => {
     getAnnualPackage.mockRejectedValue(new Error("network"));
     seedAtPaywallStep();
 
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent(PKG_ERROR_MESSAGE);
@@ -317,7 +322,7 @@ describe("PaywallStep", () => {
     authState = { user: null, loading: false };
     seedAtPaywallStep();
 
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(await screen.findByText("Save your plan")).toBeInTheDocument();
     expect(configureRC).not.toHaveBeenCalled();
@@ -334,7 +339,7 @@ describe("PaywallStep", () => {
     configureRC.mockReturnValue(fakePurchases());
     seedAtPaywallStep();
 
-    render(<StartPage />);
+    renderWithHelmet(<StartPage />);
 
     expect(await screen.findByText("Try GERDBuddy Pro for $0.00")).toBeInTheDocument();
     const cta = screen.getByText("Loading...");

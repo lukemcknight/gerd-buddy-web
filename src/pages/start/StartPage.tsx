@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { FunnelProvider, useFunnel, renderTitle } from "./funnel/FunnelContext";
 import ProgressBar from "./components/ProgressBar";
 import InterstitialStep from "./components/InterstitialStep";
@@ -77,8 +78,14 @@ function FunnelShell() {
 
 export default function StartPage() {
   return (
-    <FunnelProvider>
-      <FunnelShell />
-    </FunnelProvider>
+    <>
+      <Helmet>
+        <title>Your Relief Plan Quiz | GERDBuddy</title>
+        <meta name="robots" content="noindex" />
+      </Helmet>
+      <FunnelProvider>
+        <FunnelShell />
+      </FunnelProvider>
+    </>
   );
 }
