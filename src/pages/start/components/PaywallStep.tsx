@@ -89,7 +89,7 @@ export default function PaywallStep() {
 
       let purchases: Purchases;
       try {
-        purchases = configureRC(user.uid);
+        purchases = await configureRC(user.uid);
       } catch (err) {
         if (!cancelled) {
           trackEvent("web_paywall_init_failed", {

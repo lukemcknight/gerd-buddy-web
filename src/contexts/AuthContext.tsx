@@ -14,8 +14,12 @@ import { auth } from "@/lib/firebase";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, displayName?: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  // Resolve to the signed-in user's Firebase uid (not void): callers use it
+  // to identify the person to analytics (see AccountStep's identifyUser
+  // call), so web-funnel persons stitch to the same person the mobile app
+  // identifies with.
+  signUp: (email: string, password: string, displayName?: string) => Promise<string>;
+  signIn: (email: string, password: string) => Promise<string>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   sendVerification: () => Promise<void>;
@@ -42,10 +46,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (displayName) {
       await updateProfile(user, { displayName });
     }
+    return user.uid;
   };
 
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const { user } = await signInWithEmailAndPassword(auth, email, password);
+    return user.uid;
   };
 
   const signOut = async () => {

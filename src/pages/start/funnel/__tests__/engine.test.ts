@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { nextIndex, prevIndex, progressPct, lossStats } from "../engine";
-import { save, load } from "../persistence";
 import type { FunnelStep } from "../types";
 
 const steps = [
@@ -30,15 +29,6 @@ describe("engine", () => {
   });
 });
 
-describe("persistence", () => {
-  beforeEach(() => localStorage.clear());
-  it("round-trips state", () => {
-    save({ stepIndex: 4, answers: { age: "45-59" } });
-    expect(load()).toEqual({ stepIndex: 4, answers: { age: "45-59" } });
-  });
-  it("returns null on empty or corrupt storage", () => {
-    expect(load()).toBeNull();
-    localStorage.setItem("gb_funnel_v1", "{not json");
-    expect(load()).toBeNull();
-  });
-});
+// Persistence (save/load/resume) tests moved to ./persistence.test.ts, which
+// needs to mock "../steps" to exercise reorder resilience -- keeping that
+// module-mocking machinery out of this file so it can't affect these tests.

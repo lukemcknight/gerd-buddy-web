@@ -13,8 +13,15 @@ const normalize = (value: string): string => value.trim().toLowerCase();
  * returns the configured singleton `Purchases` instance. Safe to call more
  * than once (e.g. on remount): reuses the shared instance instead of
  * reconfiguring, and switches the app user id via `changeUser` if it drifted.
+ *
+ * Awaits `changeUser` before resolving. This is deliberate: the caller
+ * (PaywallStep) immediately follows configureRC with getCustomerInfo /
+ * purchase calls against the returned instance, and those must run under the
+ * requested `uid`, not whatever identity the shared instance still had
+ * mid-flight. A rejected `changeUser` call rejects this promise too, rather
+ * than silently returning an instance under the previous user's identity.
  */
-export function configureRC(uid: string): Purchases {
+export async function configureRC(uid: string): Promise<Purchases> {
   const apiKey = import.meta.env.VITE_RC_WEB_API_KEY as string | undefined;
   if (!apiKey) {
     throw new Error(
@@ -25,9 +32,7 @@ export function configureRC(uid: string): Purchases {
   if (Purchases.isConfigured()) {
     const instance = Purchases.getSharedInstance();
     if (instance.getAppUserId() !== uid) {
-      // Fire and forget: PaywallStep re-reads customer info after configureRC
-      // returns, so a late-resolving changeUser does not block rendering.
-      void instance.changeUser(uid);
+      await instance.changeUser(uid);
     }
     return instance;
   }

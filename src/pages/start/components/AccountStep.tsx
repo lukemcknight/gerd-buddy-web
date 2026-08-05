@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useFunnel, renderTitle } from "../funnel/FunnelContext";
 import { useAuth } from "../../../contexts/AuthContext";
-import { trackEvent, pixel } from "../funnel/analytics";
+import { trackEvent, pixel, identifyUser } from "../funnel/analytics";
 
 const SIGN_IN_MESSAGE = "Welcome back. Enter your password to keep going.";
 
@@ -38,11 +38,16 @@ export default function AccountStep() {
     setPending(true);
 
     try {
-      if (mode === "signin") {
-        await signIn(email, password);
-      } else {
-        await signUp(email, password, realName);
-      }
+      const uid =
+        mode === "signin"
+          ? await signIn(email, password)
+          : await signUp(email, password, realName);
+
+      // Stitches this web-funnel person to the same PostHog person the
+      // mobile app identifies with (Firebase UID), so the web-to-app
+      // handoff is measurable person-level. Must run before next() so the
+      // identify call fires on every success path, not just some of them.
+      identifyUser(uid);
 
       answer("email", email);
       trackEvent("web_account_created");

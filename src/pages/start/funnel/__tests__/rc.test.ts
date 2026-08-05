@@ -39,11 +39,11 @@ afterEach(() => {
 });
 
 describe("configureRC", () => {
-  it("configures the SDK with the api key + uid when not already configured", () => {
+  it("configures the SDK with the api key + uid when not already configured", async () => {
     const instance = fakeInstance();
     configure.mockReturnValue(instance);
 
-    const result = configureRC("uid-123");
+    const result = await configureRC("uid-123");
 
     expect(configure).toHaveBeenCalledWith({
       apiKey: "rcb_sb_test_key",
@@ -52,31 +52,72 @@ describe("configureRC", () => {
     expect(result).toBe(instance);
   });
 
-  it("reuses the shared instance when already configured for the same uid", () => {
+  it("reuses the shared instance when already configured for the same uid", async () => {
     isConfigured.mockReturnValue(true);
     const instance = fakeInstance({ getAppUserId: vi.fn(() => "uid-123") });
     getSharedInstance.mockReturnValue(instance);
 
-    const result = configureRC("uid-123");
+    const result = await configureRC("uid-123");
 
     expect(configure).not.toHaveBeenCalled();
     expect(instance.changeUser).not.toHaveBeenCalled();
     expect(result).toBe(instance);
   });
 
-  it("calls changeUser when already configured for a different uid", () => {
+  it("calls changeUser when already configured for a different uid", async () => {
     isConfigured.mockReturnValue(true);
     const instance = fakeInstance({ getAppUserId: vi.fn(() => "old-uid") });
     getSharedInstance.mockReturnValue(instance);
 
-    configureRC("new-uid");
+    await configureRC("new-uid");
 
     expect(instance.changeUser).toHaveBeenCalledWith("new-uid");
   });
 
-  it("throws when the api key env var is missing", () => {
+  it("awaits changeUser before resolving, so callers never observe the instance mid-switch (wrong-identity risk)", async () => {
+    isConfigured.mockReturnValue(true);
+    let resolveChangeUser: () => void = () => {};
+    const changeUser = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveChangeUser = resolve;
+        })
+    );
+    const instance = fakeInstance({ getAppUserId: vi.fn(() => "old-uid"), changeUser });
+    getSharedInstance.mockReturnValue(instance);
+
+    let settled = false;
+    const pending = configureRC("new-uid").then((result) => {
+      settled = true;
+      return result;
+    });
+
+    // Flush pending microtasks without resolving changeUser: configureRC
+    // must still be in flight, not resolved with a stale-identity instance.
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(changeUser).toHaveBeenCalledWith("new-uid");
+    expect(settled).toBe(false);
+
+    resolveChangeUser();
+    const result = await pending;
+
+    expect(settled).toBe(true);
+    expect(result).toBe(instance);
+  });
+
+  it("propagates a changeUser rejection instead of resolving with a wrong-identity instance", async () => {
+    isConfigured.mockReturnValue(true);
+    const changeUser = vi.fn().mockRejectedValue(new Error("changeUser failed"));
+    const instance = fakeInstance({ getAppUserId: vi.fn(() => "old-uid"), changeUser });
+    getSharedInstance.mockReturnValue(instance);
+
+    await expect(configureRC("new-uid")).rejects.toThrow("changeUser failed");
+  });
+
+  it("throws when the api key env var is missing", async () => {
     vi.stubEnv("VITE_RC_WEB_API_KEY", "");
-    expect(() => configureRC("uid-123")).toThrow();
+    await expect(configureRC("uid-123")).rejects.toThrow();
   });
 });
 

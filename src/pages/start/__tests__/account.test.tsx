@@ -32,8 +32,9 @@ beforeEach(() => {
   localStorage.clear();
   mockSignUp.mockReset();
   mockSignIn.mockReset();
-  (window as unknown as { posthog?: { capture: ReturnType<typeof vi.fn> } }).posthog = {
+  (window as unknown as { posthog?: { capture: ReturnType<typeof vi.fn>; identify: ReturnType<typeof vi.fn> } }).posthog = {
     capture: vi.fn(),
+    identify: vi.fn(),
   };
   (window as unknown as { fbq?: ReturnType<typeof vi.fn> }).fbq = vi.fn();
 });
@@ -50,7 +51,7 @@ const renderWithHelmet = (component: React.ReactElement) => {
 
 describe("AccountStep", () => {
   it("happy signup: advances, records the email answer, and fires analytics", async () => {
-    mockSignUp.mockResolvedValueOnce(undefined);
+    mockSignUp.mockResolvedValueOnce("uid-signup-happy");
     seedAtAccountStep();
     const user = userEvent.setup();
     renderWithHelmet(<StartPage />);
@@ -76,7 +77,7 @@ describe("AccountStep", () => {
     expect(saved.answers.email).toBe("sam@example.com");
 
     const win = window as unknown as {
-      posthog: { capture: ReturnType<typeof vi.fn> };
+      posthog: { capture: ReturnType<typeof vi.fn>; identify: ReturnType<typeof vi.fn> };
       fbq: ReturnType<typeof vi.fn>;
     };
     expect(win.posthog.capture).toHaveBeenCalledWith(
@@ -84,6 +85,10 @@ describe("AccountStep", () => {
       expect.objectContaining({ platform: "web" })
     );
     expect(win.fbq).toHaveBeenCalledWith("track", "Lead", {});
+    // Person stitching: web-funnel signup identifies to PostHog by the
+    // Firebase uid, so this person can be joined to the same person the
+    // mobile app identifies with.
+    expect(win.posthog.identify).toHaveBeenCalledWith("uid-signup-happy");
   });
 
   it("disables the submit button while the request is pending", async () => {
@@ -119,7 +124,7 @@ describe("AccountStep", () => {
       code: "auth/email-already-in-use",
     });
     mockSignUp.mockRejectedValueOnce(err);
-    mockSignIn.mockResolvedValueOnce(undefined);
+    mockSignIn.mockResolvedValueOnce("uid-signin-happy");
 
     seedAtAccountStep();
     const user = userEvent.setup();
@@ -136,6 +141,12 @@ describe("AccountStep", () => {
     ).toBeInTheDocument();
     expect(mockSignIn).not.toHaveBeenCalled();
 
+    const win = window as unknown as {
+      posthog: { capture: ReturnType<typeof vi.fn>; identify: ReturnType<typeof vi.fn> };
+    };
+    // The failed signup attempt must never identify a person.
+    expect(win.posthog.identify).not.toHaveBeenCalled();
+
     // form flips to sign-in mode; submit now signs in instead of signing up
     await user.type(screen.getByLabelText("Password"), "actual-password");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
@@ -144,6 +155,9 @@ describe("AccountStep", () => {
     expect(
       await screen.findByText("Try GERDBuddy Pro for $0.00")
     ).toBeInTheDocument();
+    // Person stitching: sign-in success path identifies to PostHog too, not
+    // just signup.
+    expect(win.posthog.identify).toHaveBeenCalledWith("uid-signin-happy");
   });
 
   it("renders an inline error and does not advance on failure", async () => {
