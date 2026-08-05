@@ -32,6 +32,7 @@ export default function TextStep() {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Your first name"
+        aria-label={title}
         className="w-full rounded-full border-2 border-border bg-white px-6 py-4 text-center text-lg text-foreground outline-none focus:border-primary"
       />
       <button

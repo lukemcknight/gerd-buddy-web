@@ -32,26 +32,28 @@ function FallbackStep() {
 function StepRenderer() {
   const { step } = useFunnel();
 
+  // key={step.id} forces a fresh mount per step so stateful step types
+  // (slider, text) never carry a previous step's local state forward.
   switch (step.type) {
     case "interstitial":
-      return <InterstitialStep />;
+      return <InterstitialStep key={step.id} />;
     case "select":
-      return <SelectStep />;
+      return <SelectStep key={step.id} />;
     case "multi":
-      return <MultiSelectStep />;
+      return <MultiSelectStep key={step.id} />;
     case "slider":
-      return <SliderStep />;
+      return <SliderStep key={step.id} />;
     case "text":
-      return <TextStep />;
+      return <TextStep key={step.id} />;
     case "stat":
-      return <StatStep />;
+      return <StatStep key={step.id} />;
     case "plan":
-      return <PlanStep />;
+      return <PlanStep key={step.id} />;
     case "account":
     case "paywall":
     case "success":
     default:
-      return <FallbackStep />;
+      return <FallbackStep key={step.id} />;
   }
 }
 

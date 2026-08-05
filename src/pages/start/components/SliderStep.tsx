@@ -39,7 +39,7 @@ export default function SliderStep() {
         )}
       </div>
       <div className="flex flex-col items-center gap-4">
-        <div className="text-4xl font-bold text-primary">{format(value)}</div>
+        <div data-testid="slider-readout" className="text-4xl font-bold text-primary">{format(value)}</div>
         <input
           type="range"
           min={min}
