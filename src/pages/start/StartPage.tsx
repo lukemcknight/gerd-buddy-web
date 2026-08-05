@@ -10,26 +10,7 @@ import StatStep from "./components/StatStep";
 import PlanStep from "./components/PlanStep";
 import AccountStep from "./components/AccountStep";
 import PaywallStep from "./components/PaywallStep";
-
-/**
- * Minimal placeholder for step types owned by later tasks (success).
- * Task 10 replaces this switch arm with a real component.
- */
-function FallbackStep() {
-  const { step, displayName, stats } = useFunnel();
-  const title = renderTitle(step.title, { name: displayName, ...stats });
-
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 py-10 text-center">
-      <h1 className="font-display text-3xl font-bold leading-tight text-foreground">
-        {title}
-      </h1>
-      <p className="text-sm text-muted-foreground">
-        This step continues in the app.
-      </p>
-    </div>
-  );
-}
+import SuccessStep from "./components/SuccessStep";
 
 function StepRenderer() {
   const { step } = useFunnel();
@@ -56,8 +37,9 @@ function StepRenderer() {
     case "paywall":
       return <PaywallStep key={step.id} />;
     case "success":
+      return <SuccessStep key={step.id} />;
     default:
-      return <FallbackStep key={step.id} />;
+      return null;
   }
 }
 
