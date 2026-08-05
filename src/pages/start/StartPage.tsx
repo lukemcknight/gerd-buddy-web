@@ -8,10 +8,11 @@ import SliderStep from "./components/SliderStep";
 import TextStep from "./components/TextStep";
 import StatStep from "./components/StatStep";
 import PlanStep from "./components/PlanStep";
+import AccountStep from "./components/AccountStep";
 
 /**
- * Minimal placeholder for step types owned by later tasks (account, paywall,
- * success). Tasks 8-10 replace these switch arms with real components.
+ * Minimal placeholder for step types owned by later tasks (paywall, success).
+ * Tasks 9-10 replace these switch arms with real components.
  */
 function FallbackStep() {
   const { step, displayName, stats } = useFunnel();
@@ -50,6 +51,7 @@ function StepRenderer() {
     case "plan":
       return <PlanStep key={step.id} />;
     case "account":
+      return <AccountStep key={step.id} />;
     case "paywall":
     case "success":
     default:
