@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { marked } from "marked";
+import { buildMetaPixelSnippet, buildGtagSnippet } from "./lib/ad-snippets.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DIST = resolve(__dirname, "../dist");
@@ -56,46 +57,21 @@ const inlineScripts = [...shell.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)
   .map((m) => m[0])
   .join("\n");
 
-// Meta Pixel + Google Ads gtag loader, mirrored from index.html's guarded snippets (see
-// the comment there for the full rationale). index.html's copies are guarded at runtime
-// against Vite's unsubstituted "%VITE_X%" placeholder because Vite does that templating;
-// prerender.js has no such step -- it runs as plain node, so the ids come straight from
-// process.env (set for real by Vercel/the shell at build time; unset locally is the
-// default today) and each script tag is included only when its id is actually present.
-// That keeps the *behavior* identical to index.html's output (no fbq/gtag network request
-// when an id is unset) even though the mechanism is build-time omission here rather than
-// a runtime guard.
+// Meta Pixel + Google Ads gtag loader, built from scripts/lib/ad-snippets.js (the same
+// module the adSnippets.test.ts coverage imports and evals) so there is exactly one
+// implementation of the fbq/gtag base code driving both prerender.js and its tests.
+// index.html carries its own copy of the same logic -- see the comment there for the full
+// rationale. index.html's copy is guarded at runtime against Vite's unsubstituted
+// "%VITE_X%" placeholder because Vite does that templating; prerender.js has no such step
+// -- it runs as plain node, so the ids come straight from process.env (set for real by
+// Vercel/the shell at build time; unset locally is the default today) and each script tag
+// is included only when its id is actually present. That keeps the *behavior* identical to
+// index.html's output (no fbq/gtag network request when an id is unset) even though the
+// mechanism is build-time omission here rather than a runtime guard.
 const metaPixelId = process.env.VITE_META_PIXEL_ID || "";
 const googleAdsId = process.env.VITE_GOOGLE_ADS_ID || "";
 
-const adSnippets = [
-  metaPixelId &&
-    `<script data-ad-snippet="meta-pixel">
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', ${JSON.stringify(metaPixelId)});
-    fbq('track', 'PageView');
-  </script>`,
-  googleAdsId &&
-    `<script data-ad-snippet="gtag">
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () { window.dataLayer.push(arguments); };
-    (function () {
-      var s = document.createElement("script");
-      s.async = true;
-      s.src = ${JSON.stringify("https://www.googletagmanager.com/gtag/js?id=" + googleAdsId)};
-      document.head.appendChild(s);
-    })();
-    gtag('js', new Date());
-    gtag('config', ${JSON.stringify(googleAdsId)});
-  </script>`,
-]
+const adSnippets = [buildMetaPixelSnippet(metaPixelId), buildGtagSnippet(googleAdsId)]
   .filter(Boolean)
   .join("\n");
 

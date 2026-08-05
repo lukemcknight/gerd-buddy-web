@@ -70,11 +70,22 @@
 
     CAVEAT this guard exists for: when a var is UNSET, Vite does not substitute anything --
     it leaves the literal string "%VITE_X%" in the HTML. So each snippet below reads the
-    (maybe-substituted) value into a local var and bails before touching the network if it
-    still starts with "%" (never substituted) or is empty (defined-but-blank, e.g. the
-    blank line in .env.example). No fbq/gtag request fires when the id is unset. Both ids
-    are unset today -- Luke creates the Meta pixel + Google Ads conversion action later; see
-    ops/ for status once they exist.
+    (maybe-substituted) value and bails before touching the network if it still starts with
+    "%" (never substituted) or is empty (defined-but-blank, e.g. the blank line in
+    .env.example). No fbq/gtag request fires when the id is unset. Both ids are unset today
+    -- Luke creates the Meta pixel + Google Ads conversion action later; see ops/ for status
+    once they exist.
+
+    The id is read from a data-* attribute on the script tag itself (via
+    document.currentScript), not interpolated into a JS string literal. Vite's %VITE_X%
+    replacement is a raw, unescaped text substitution -- embedding it directly inside
+    `"..."` in a script body would let a stray double-quote in the env value break out of
+    the string. A HTML attribute value doesn't have that failure mode. (Pixel/conversion
+    ids are plain alphanumeric strings in practice, so this is defense in depth, not a
+    response to an observed bad value.) scripts/lib/ad-snippets.js, which
+    scripts/prerender.js imports for its own copy of these snippets, uses JSON.stringify
+    instead for the equivalent guarantee, since there the id is a real JS value at
+    template-build time rather than raw substituted text.
 
     Neither snippet uses a static `<script src="...">` tag: a src built from an unset
     id would still fire a (broken) network request the instant the browser parses it, which
@@ -82,18 +93,24 @@
     inside the guarded IIFE instead, same technique Meta's own base code already uses for
     fbevents.js.
 
-    scripts/prerender.js carries a matching pair of guarded snippets built from the same
-    env vars (read via process.env there, since prerender runs as plain node, not through
-    Vite) in its own head template -- marked with the same data-ad-snippet attribute so the
-    generic inline-script lift in prerender.js skips these two and prerendered pages don't
-    get them twice.
+    scripts/prerender.js carries a matching pair of guarded snippets (scripts/lib/ad-snippets.js,
+    built from process.env there, since prerender runs as plain node, not through Vite) in
+    its own head template -- marked with the same data-ad-snippet attribute so the generic
+    inline-script lift in prerender.js skips these two and prerendered pages don't get them
+    twice.
+
+    Covered by src/pages/start/funnel/__tests__/adSnippets.test.ts, which evals this exact
+    script body (read straight from this file) in a sandboxed vm context and asserts
+    window.fbq / window.gtag actually become callable functions and don't throw -- a plain
+    grep for "fbq" or "gtag" in the built HTML would not have caught a broken base-code stub
+    that leaves window.fbq undefined.
   -->
-  <script data-ad-snippet="meta-pixel">
+  <script data-ad-snippet="meta-pixel" data-pixel-id="%VITE_META_PIXEL_ID%">
     (function () {
-      var id = "%VITE_META_PIXEL_ID%";
+      var id = document.currentScript.getAttribute("data-pixel-id");
       if (!id || id.charAt(0) === "%") return;
       !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=function(){n.callMethod?
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
       n.callMethod.apply(n,arguments):n.queue.push(arguments)};
       if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
       n.queue=[];t=b.createElement(e);t.async=!0;
@@ -104,15 +121,15 @@
       fbq('track', 'PageView');
     })();
   </script>
-  <script data-ad-snippet="gtag">
+  <script data-ad-snippet="gtag" data-gtag-id="%VITE_GOOGLE_ADS_ID%">
     (function () {
-      var id = "%VITE_GOOGLE_ADS_ID%";
+      var id = document.currentScript.getAttribute("data-gtag-id");
       if (!id || id.charAt(0) === "%") return;
       window.dataLayer = window.dataLayer || [];
       window.gtag = function () { window.dataLayer.push(arguments); };
       var s = document.createElement("script");
       s.async = true;
-      s.src = "https://www.googletagmanager.com/gtag/js?id=" + id;
+      s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(id);
       document.head.appendChild(s);
       gtag('js', new Date());
       gtag('config', id);
