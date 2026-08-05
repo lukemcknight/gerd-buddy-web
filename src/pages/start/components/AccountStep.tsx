@@ -8,8 +8,16 @@ const SIGN_IN_MESSAGE = "Welcome back. Enter your password to keep going.";
 type Mode = "signup" | "signin";
 
 export default function AccountStep() {
-  const { step, answer, next, displayName, stats } = useFunnel();
+  const { step, answer, next, displayName, answers, stats } = useFunnel();
   const { signUp, signIn } = useAuth();
+
+  // The "friend" fallback in `displayName` is a UI-only default for page
+  // copy (title/subtitle). It must never be written to the account record,
+  // so this resolves to the user's real trimmed name, or undefined.
+  const realName =
+    typeof answers.name === "string" && answers.name.trim()
+      ? answers.name.trim()
+      : undefined;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +41,7 @@ export default function AccountStep() {
       if (mode === "signin") {
         await signIn(email, password);
       } else {
-        await signUp(email, password, displayName);
+        await signUp(email, password, realName);
       }
 
       answer("email", email);

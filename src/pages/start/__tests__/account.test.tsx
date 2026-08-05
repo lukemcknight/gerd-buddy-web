@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import StartPage from "../StartPage";
@@ -12,10 +12,10 @@ vi.mock("../../../contexts/AuthContext", () => ({
   useAuth: () => ({ signUp: mockSignUp, signIn: mockSignIn, user: null }),
 }));
 
-function seedAtAccountStep() {
+function seedAtAccountStep(answers: Record<string, unknown> = { name: "Sam" }) {
   localStorage.setItem(
     "gb_funnel_v1",
-    JSON.stringify({ v: 1, stepIndex: ACCOUNT_STEP_INDEX, answers: { name: "Sam" } })
+    JSON.stringify({ v: 1, stepIndex: ACCOUNT_STEP_INDEX, answers })
   );
 }
 
@@ -154,5 +154,69 @@ describe("AccountStep", () => {
     expect(
       screen.queryByText("Try GERDBuddy Pro for $0.00")
     ).not.toBeInTheDocument();
+  });
+
+  it("does not persist the UI 'friend' fallback as a display name when no name was collected", async () => {
+    mockSignUp.mockResolvedValueOnce(undefined);
+    seedAtAccountStep({}); // no `name` answer -> displayName UI fallback is "friend"
+    const user = userEvent.setup();
+    render(<StartPage />);
+
+    await user.type(screen.getByLabelText("Email"), "nameless@example.com");
+    await user.type(screen.getByLabelText("Password"), "correct-horse-1");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(
+      await screen.findByText("Try GERDBuddy Pro for $0.00")
+    ).toBeInTheDocument();
+
+    expect(mockSignUp).toHaveBeenCalledWith(
+      "nameless@example.com",
+      "correct-horse-1",
+      undefined
+    );
+  });
+
+  it("guards against a double submit: a second submit while pending calls signUp only once", async () => {
+    let resolveSignUp: () => void = () => {};
+    mockSignUp.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSignUp = resolve;
+        })
+    );
+    seedAtAccountStep();
+    const user = userEvent.setup();
+    render(<StartPage />);
+
+    const emailInput = screen.getByLabelText("Email");
+    const passwordInput = screen.getByLabelText("Password");
+    await user.type(emailInput, "sam@example.com");
+    await user.type(passwordInput, "correct-horse-1");
+
+    const form = passwordInput.closest("form");
+    expect(form).not.toBeNull();
+
+    // First submit via the Enter key inside the password field (native
+    // implicit form submission), not a button click.
+    await user.type(passwordInput, "{Enter}");
+    await waitFor(() => expect(mockSignUp).toHaveBeenCalledTimes(1));
+
+    // Second submit attempt while the first is still pending, dispatched
+    // directly on the form so it exercises AccountStep's own
+    // `if (pending) return` guard rather than relying on the submit
+    // button's `disabled` attribute to block it.
+    fireEvent.submit(form as HTMLFormElement);
+    await Promise.resolve();
+
+    expect(mockSignUp).toHaveBeenCalledTimes(1);
+
+    resolveSignUp();
+    await waitFor(() =>
+      expect(
+        screen.getByText("Try GERDBuddy Pro for $0.00")
+      ).toBeInTheDocument()
+    );
+    expect(mockSignUp).toHaveBeenCalledTimes(1);
   });
 });
