@@ -31,10 +31,41 @@
       "title": "Problems of the Digestive System",
       "publisher": "American College of Obstetricians and Gynecologists",
       "url": "https://www.acog.org/womens-health/faqs/problems-of-the-digestive-system"
+    },
+    "niddk-diet": {
+      "title": "Eating, Diet, & Nutrition for GER & GERD",
+      "publisher": "National Institute of Diabetes and Digestive and Kidney Diseases (NIH)",
+      "url": "https://www.niddk.nih.gov/health-information/digestive-diseases/acid-reflux-ger-gerd-adults/eating-diet-nutrition"
+    },
+    "ness-jensen-2016": {
+      "title": "Lifestyle Intervention in Gastroesophageal Reflux Disease",
+      "publisher": "Clinical Gastroenterology and Hepatology, via PubMed (PMID 25956834)",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25956834/"
     }
   },
 
   "posts": {
+    "do-gerd-food-tracking-apps-work": {
+      "sources": ["acg-guideline", "ness-jensen-2016", "niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Do GERD food tracking apps actually work?",
+          "a": "Tracking works as a tool for finding your personal triggers, and personalized trigger avoidance is what current clinical guidance recommends over blanket elimination diets. No trial shows that logging alone reduces symptoms: the benefit comes from the changes tracking leads you to, such as selective elimination, earlier meals, and weight loss."
+        },
+        {
+          "q": "Is there scientific evidence that lifestyle changes help acid reflux?",
+          "a": "Yes. A systematic review in Clinical Gastroenterology and Hepatology found that weight loss reduced esophageal acid exposure in two randomized trials, that eating late in the evening increased nighttime acid exposure, and that raising the head of the bed reduced supine acid exposure from about 21% to 15%."
+        },
+        {
+          "q": "Should I cut out all common trigger foods at once?",
+          "a": "No. The American College of Gastroenterology suggests selective elimination: identify the specific foods that provoke your symptoms and avoid those, rather than cutting every commonly listed trigger. Blanket elimination is hard to sustain and often removes foods you tolerate fine."
+        },
+        {
+          "q": "Can a food tracking app replace GERD medication or a doctor?",
+          "a": "No. Tracking complements medical care. Many people need acid suppression alongside lifestyle changes, and symptoms like trouble swallowing, unintended weight loss, vomiting, or signs of bleeding need a doctor promptly. Bring your tracked data to the appointment; it makes the conversation more useful."
+        }
+      ]
+    },
     "acid-reflux-pregnancy": {
       "sources": ["acog", "niddk-adults", "nhs"],
       "faq": [
