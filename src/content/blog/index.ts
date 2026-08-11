@@ -29,8 +29,12 @@ import travelingWithGerd from "./traveling-with-gerd";
 import gerdFlareUp from "./gerd-flare-up";
 import gerdInChildren from "./gerd-in-children";
 import doGerdFoodTrackingAppsWork from "./do-gerd-food-tracking-apps-work";
+import bestGerdTrackingApps from "./best-gerd-tracking-apps";
+import gerdbuddyVsMysymptoms from "./gerdbuddy-vs-mysymptoms";
 
 const posts: BlogPost[] = [
+  gerdbuddyVsMysymptoms,
+  bestGerdTrackingApps,
   doGerdFoodTrackingAppsWork,
   gerdTriggerFoods,
   nighttimeGerdTips,
