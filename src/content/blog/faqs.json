@@ -60,6 +60,27 @@
   },
 
   "posts": {
+    "gerdbuddy-vs-mysymptoms": {
+      "sources": ["appstore-mysymptoms"],
+      "faq": [
+        {
+          "q": "What is the difference between GERDBuddy and mySymptoms?",
+          "a": "mySymptoms is a broad food and symptom diary with statistical correlation analysis, covering conditions from IBS to migraines, on iPhone, iPad, Mac, and Android. GERDBuddy is reflux-only and works in the moment: it scans meals and restaurant menus for reflux risk before you eat, ranks your personal triggers, and offers a guided routine during a flare. As of August 2026, mySymptoms rates 4.6 stars from about 4,000 ratings; GERDBuddy rates 4.4 from 22."
+        },
+        {
+          "q": "Is mySymptoms good for acid reflux?",
+          "a": "Yes. mySymptoms lists acid reflux among the conditions it supports, and its food and symptom correlation analysis works well for finding reflux trigger patterns, especially if you also track other conditions. It does not offer reflux-specific features like menu scanning or in-flare guidance."
+        },
+        {
+          "q": "Which is cheaper, GERDBuddy or mySymptoms?",
+          "a": "At the yearly tier GERDBuddy Pro is $39.99 per year versus $59.99 per year for mySymptoms Premium, as of August 2026. Monthly, GERDBuddy is $6.99 and mySymptoms is $9.99. mySymptoms has the more complete free tier for pure manual logging."
+        },
+        {
+          "q": "Can I use GERDBuddy and mySymptoms together?",
+          "a": "Yes. Some people use mySymptoms as the broad clinical diary across multiple conditions and GERDBuddy for restaurant menus and flare moments. The two roles do not overlap much."
+        }
+      ]
+    },
     "best-gerd-tracking-apps": {
       "sources": ["appstore-mysymptoms", "appstore-noburn", "appstore-caracare"],
       "faq": [
