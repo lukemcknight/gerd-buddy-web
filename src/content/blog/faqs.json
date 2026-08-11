@@ -41,10 +41,46 @@
       "title": "Lifestyle Intervention in Gastroesophageal Reflux Disease",
       "publisher": "Clinical Gastroenterology and Hepatology, via PubMed (PMID 25956834)",
       "url": "https://pubmed.ncbi.nlm.nih.gov/25956834/"
+    },
+    "appstore-mysymptoms": {
+      "title": "mySymptoms Food Diary",
+      "publisher": "US App Store listing, SkyGazer Labs Ltd",
+      "url": "https://apps.apple.com/us/app/mysymptoms-food-diary/id405231632"
+    },
+    "appstore-noburn": {
+      "title": "NoBurn - Reflux & GERD Tracker",
+      "publisher": "US App Store listing, Ascendant Life, LLC",
+      "url": "https://apps.apple.com/us/app/noburn-reflux-gerd-tracker/id6745908361"
+    },
+    "appstore-caracare": {
+      "title": "Cara Care: IBS, FODMAP Tracker",
+      "publisher": "US App Store listing, HiDoc Technologies GmbH",
+      "url": "https://apps.apple.com/us/app/id1133687886"
     }
   },
 
   "posts": {
+    "best-gerd-tracking-apps": {
+      "sources": ["appstore-mysymptoms", "appstore-noburn", "appstore-caracare"],
+      "faq": [
+        {
+          "q": "What is the best app for tracking acid reflux triggers?",
+          "a": "It depends on your situation. mySymptoms is the strongest general food and symptom diary and the only major option on Android. NoBurn is a well-rated GERD-specific tracker with a community. GERDBuddy focuses on reflux relief in the moment, with a meal and restaurant menu scanner and a personal trigger ranking. All ratings and prices in this comparison are from the US App Store as of August 2026."
+        },
+        {
+          "q": "Are there free GERD tracking apps?",
+          "a": "All the major options are free to download with paid upgrades: mySymptoms Premium is $9.99 per month or $59.99 per year, NoBurn sells Unlimited tiers from $3.99 to $49.99, and GERDBuddy Pro is $6.99 per month or $39.99 per year after a 3-day trial. Basic manual logging is free in mySymptoms and NoBurn."
+        },
+        {
+          "q": "Is Cara Care still good for acid reflux?",
+          "a": "Cara Care has a 4.8-star rating from about 4,600 reviews, but per App Store data its last app version shipped in October 2020, and it is built around IBS and the low-FODMAP diet rather than reflux. For GERD specifically, an actively maintained reflux-focused app is a better fit today."
+        },
+        {
+          "q": "Should I use a GERD-specific app or a general food diary?",
+          "a": "A general diary like mySymptoms is better when your symptoms span multiple conditions or you need clinician-shareable reports across many factors. A GERD-specific app is better when reflux is the main issue, because features like acidity scanning, trigger ranking, and flare relief are built around it. Either works for the core job of finding personal trigger patterns."
+        }
+      ]
+    },
     "do-gerd-food-tracking-apps-work": {
       "sources": ["acg-guideline", "ness-jensen-2016", "niddk-diet", "niddk-adults"],
       "faq": [
