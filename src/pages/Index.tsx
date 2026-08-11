@@ -140,6 +140,7 @@ const softwareAppSchema = {
   installUrl: APP.url,
   description: APP.shortDescription,
   featureList: APP.featureList,
+  screenshot: APP.screenshots.urls,
   contentRating: APP.contentRating,
   publisher: { "@type": "Organization", name: "GERDBuddy" },
   // Real numbers only. Both come from config/app-facts.json, which records where
