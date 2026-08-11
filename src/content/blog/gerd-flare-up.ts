@@ -17,7 +17,7 @@ const post: BlogPost = {
     "emergency tips",
   ],
   content: `
-You've been managing your GERD well for weeks. You've been eating right, sleeping elevated, tracking your triggers. And then — seemingly out of nowhere — everything flares up. The burning comes back, the regurgitation returns, and you feel like you're back to square one.
+You've been managing your GERD well for weeks. You've been eating right, sleeping elevated, [tracking your triggers](/blog/do-gerd-food-tracking-apps-work). And then — seemingly out of nowhere — everything flares up. The burning comes back, the regurgitation returns, and you feel like you're back to square one.
 
 GERD flare-ups are frustrating, but they're also completely normal. They don't mean you've failed or that your management strategy isn't working. They mean your condition is chronic, and chronic conditions have ups and downs. Here's how to handle them.
 
@@ -166,7 +166,7 @@ A few things worth remembering:
 
 ## The Bottom Line
 
-GERD flare-ups are annoying but manageable. Respond quickly with antacids and lifestyle adjustments, eat bland and safe for a few days, stay upright, manage stress, and let your body calm down. Track what happened leading up to the flare so you can learn from it. And if things don't improve within a week or symptoms are unusually severe, see your doctor.
+GERD flare-ups are annoying but manageable. Respond quickly with antacids and lifestyle adjustments, eat bland and safe for a few days, stay upright, manage stress, and let your body calm down. Track what happened leading up to the flare so you can learn from it. (Not sure what to track with? We compared [the main GERD tracking apps](/blog/best-gerd-tracking-apps), including ones that aren't ours.) And if things don't improve within a week or symptoms are unusually severe, see your doctor.
 
 Every flare teaches you something. Use [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) to capture that data, and over time you'll get better at seeing flares coming before they hit full force — and sometimes stopping them before they start.
   `.trim(),

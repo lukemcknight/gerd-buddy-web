@@ -80,7 +80,7 @@ These are your first line of defense and they make a real difference:
 - **Don't eat 2-3 hours before bed** — lying down with a full stomach is a recipe for reflux, especially with a hernia.
 - **Maintain a healthy weight** — extra abdominal weight increases pressure on the hernia. Even modest [weight loss](/blog/gerd-and-weight-loss) can make a significant difference.
 - **Avoid tight clothing** — anything that puts pressure on your abdomen can push the hernia upward and worsen symptoms.
-- **Track your triggers** — personal trigger identification becomes even more important when you have a hernia. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) can help you log meals and symptoms to identify patterns specific to your situation.
+- **Track your triggers** — [personal trigger identification](/blog/do-gerd-food-tracking-apps-work) becomes even more important when you have a hernia. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) can help you log meals and symptoms to identify patterns specific to your situation.
 
 ### Dietary Adjustments
 

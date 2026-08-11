@@ -71,7 +71,7 @@ No alcoholic drink is truly GERD-friendly. Some are just less bad. If alcohol is
 
 ## Track Your Alcohol Triggers
 
-Here's the thing that helped me the most: actually tracking which drinks cause problems and which don't. I discovered that I can handle a single light beer or a vodka soda without much issue, but even one glass of red wine guarantees a bad night. I never would have figured that out without data.
+Here's the thing that helped me the most: [actually tracking](/blog/do-gerd-food-tracking-apps-work) which drinks cause problems and which don't. I discovered that I can handle a single light beer or a vodka soda without much issue, but even one glass of red wine guarantees a bad night. I never would have figured that out without data.
 
 Keep a log of what you drink, how much, what you ate with it, and how your symptoms were afterward. [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes this kind of tracking simple — log your drinks alongside meals and symptoms, and the patterns become clear within a few weeks.
 
@@ -81,7 +81,7 @@ If you're dealing with frequent reflux and you drink regularly, it's worth doing
 
 For many people, reducing from regular drinking to occasional, planned drinking — with the right precautions — is enough to make a real difference. You don't necessarily have to quit entirely, but being intentional about it matters.
 
-For a bigger picture of how to manage your diet with GERD, see our [comprehensive diet guide](/blog/gerd-diet-guide) and learn how to [identify your personal trigger foods](/blog/gerd-trigger-foods).
+For a bigger picture of how to manage your diet with GERD, see our [comprehensive diet guide](/blog/gerd-diet-guide) and learn how to [identify your personal trigger foods](/blog/gerd-trigger-foods). If you'd rather use an app for the logging, here's [how the main GERD tracking apps compare](/blog/best-gerd-tracking-apps).
 
 ## The Bottom Line
 
