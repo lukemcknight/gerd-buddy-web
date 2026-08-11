@@ -28,8 +28,10 @@ import eatingHabitsForGerd from "./eating-habits-for-gerd";
 import travelingWithGerd from "./traveling-with-gerd";
 import gerdFlareUp from "./gerd-flare-up";
 import gerdInChildren from "./gerd-in-children";
+import doGerdFoodTrackingAppsWork from "./do-gerd-food-tracking-apps-work";
 
 const posts: BlogPost[] = [
+  doGerdFoodTrackingAppsWork,
   gerdTriggerFoods,
   nighttimeGerdTips,
   stressAndGerd,
