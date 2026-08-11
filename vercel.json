@@ -3,6 +3,14 @@
     {
       "source": "/(.*)",
       "has": [
+        { "type": "host", "value": "gerd-buddy-web.vercel.app" }
+      ],
+      "destination": "https://www.gerdbuddy.app/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
         { "type": "host", "value": "gerdbuddy.com" }
       ],
       "destination": "https://www.gerdbuddy.app/$1",
