@@ -235,6 +235,7 @@ writePage("/", buildPage({
       installUrl: APP.url,
       description: APP.shortDescription,
       featureList: APP.featureList,
+      screenshot: APP.screenshots.urls,
       contentRating: APP.contentRating,
       publisher: { "@type": "Organization", name: "GERDBuddy" },
       aggregateRating: { "@type": "AggregateRating", ratingValue: APP.rating.value, ratingCount: APP.rating.count, bestRating: 5, worstRating: 1 },

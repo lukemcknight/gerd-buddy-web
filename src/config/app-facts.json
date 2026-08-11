@@ -20,6 +20,20 @@
 
   "shortDescription": "Scan any meal to see its reflux risk in seconds, calm an active flare with a guided routine, and learn your personal acid reflux triggers from what you actually eat.",
 
+  "screenshots": {
+    "urls": [
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/c4/2c/ef/c42cef56-33f7-847b-e3a4-cfb74d8f5c60/01-scanner.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/bb/fc/3c/bbfc3c93-c5f2-3c2b-aa3a-ff39b8d8eaba/02-menu.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/14/2e/12/142e125c-38cb-4fa9-fe22-6055e822bfff/04-insights.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/f5/7d/2c/f57d2cf0-3d8c-f487-32a4-bd98590f4af1/05-breathing.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/42/85/2e/42852e1f-b47d-f805-1015-e46271c70330/03-logsymptom.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/8b/fe/b8/8bfeb869-460a-c8c4-4f56-c0d45a944a8b/06-recipes.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/1b/b8/cf/1bb8cfe8-2879-68af-081a-16eb9e1e7eab/07-medications.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a5/98/c1/a598c124-7afb-aebd-762e-6f12478467ff/08-report.png/320x480bb.jpg"
+    ],
+    "source": "iTunes Lookup API screenshotUrls, checked 2026-08-11; refresh whenever App Store screenshots change"
+  },
+
   "rating": {
     "value": 4.55,
     "count": 20,
