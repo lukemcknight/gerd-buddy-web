@@ -60,6 +60,23 @@
   },
 
   "posts": {
+    "bananas-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Are bananas good for acid reflux?",
+          "a": "For most people, yes. Bananas are low in acid, fat-free, soft, and filling, which makes them one of the safest common fruits for GERD and a staple during flares. A minority of people react to bananas anyway, so confirm your own tolerance by eating one on its own and logging the result a few times."
+        },
+        {
+          "q": "Can bananas cause heartburn?",
+          "a": "Occasionally. Some people consistently react to bananas, and ripeness can matter, since unripe bananas are starchier. More often the culprit is what the banana came with, like a citrus smoothie or full-fat yogurt, rather than the fruit itself."
+        },
+        {
+          "q": "What fruits are safe for acid reflux?",
+          "a": "Low-acid fruits are the safer end: bananas and melons like watermelon and cantaloupe lead the list. Citrus fruits, pineapple, and tomatoes sit at the acidic end that the NIDDK flags among common triggers. Individual tolerance varies, so test one fruit at a time."
+        }
+      ]
+    },
     "gerdbuddy-vs-noburn": {
       "sources": ["appstore-noburn"],
       "faq": [
