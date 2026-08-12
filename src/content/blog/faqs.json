@@ -60,6 +60,23 @@
   },
 
   "posts": {
+    "eggs-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Are eggs bad for acid reflux?",
+          "a": "Eggs themselves are not on the NIDDK's list of foods commonly linked to GERD symptoms. The risk comes from preparation: high-fat foods are on that list, and fried eggs, butter, and fatty sides like bacon turn an egg breakfast into a high-fat meal that slows stomach emptying and relaxes the lower esophageal sphincter."
+        },
+        {
+          "q": "Are boiled eggs OK for GERD?",
+          "a": "For most people, yes. Boiled and poached eggs add no cooking fat and are among the gentler protein options for reflux. A minority of people react to eggs regardless of preparation, so test gently cooked eggs against your own symptom log to know which group you are in."
+        },
+        {
+          "q": "Why do fried eggs cause heartburn when boiled eggs don't?",
+          "a": "The difference is fat. Frying adds cooking fat on top of the yolk's roughly 5 grams, and fatty meals both slow gastric emptying and lower the pressure of the valve that keeps stomach contents down. The egg white itself is nearly fat-free."
+        }
+      ]
+    },
     "gerdbuddy-vs-mysymptoms": {
       "sources": ["appstore-mysymptoms"],
       "faq": [
