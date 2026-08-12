@@ -2,7 +2,7 @@
   "_comment": "Single source of truth for machine-readable product facts. Consumed by src/pages/Index.tsx, scripts/prerender.js, and scripts/generate-llms.js so the SoftwareApplication schema, the page copy, and llms.txt can never disagree. AI assistants read these fields verbatim when asked what GERDBuddy is, what it costs, and how it is rated, so EVERY value here must be verifiable against a primary source. Never hand-edit a rating or price to something you have not just checked.",
 
   "_verification": {
-    "verifiedOn": "2026-07-25",
+    "verifiedOn": "2026-08-12",
     "howToReverify": [
       "name / rating / version / minimum OS: curl -s 'https://itunes.apple.com/lookup?id=6756620910&country=us'",
       "price / trial: ops/runbooks/trial-toggle.md (App Store Connect product table), cross-checked against RevenueCat (annual + monthly carry a P3D trial)",
