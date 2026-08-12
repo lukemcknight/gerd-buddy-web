@@ -60,6 +60,27 @@
   },
 
   "posts": {
+    "dairy-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Is cheese bad for acid reflux?",
+          "a": "It depends on the fat and the portion. High-fat foods are on the NIDDK's list of common GERD triggers, and cheese spans that spectrum: soft high-fat cheeses like brie and cream cheese are common trouble, hard aged cheeses in small amounts are milder, and fresh lower-fat cheeses like cottage cheese or part-skim mozzarella sit in the middle."
+        },
+        {
+          "q": "Does milk help heartburn?",
+          "a": "Not really. Cold milk soothes briefly on the way down, then stimulates acid production, and the fat in whole milk relaxes the valve that keeps stomach contents down. If you want the ritual, a small glass of skim milk with food is a much milder bet than whole milk."
+        },
+        {
+          "q": "Is yogurt good for GERD?",
+          "a": "Nonfat and low-fat yogurt are usually the best-tolerated dairy for reflux, and some people find them settling. Flavored varieties with heavy sugar or fruit acids can undo the advantage, so plain is the safer test."
+        },
+        {
+          "q": "Why does ice cream cause heartburn at night?",
+          "a": "Ice cream combines high fat, high sugar, and evening timing. Fat slows stomach emptying and relaxes the lower esophageal sphincter, and eating close to lying down gives acid the easiest possible path. Timing alone makes evening ice cream riskier than the same dessert at midday."
+        }
+      ]
+    },
     "what-is-an-acid-reflux-app": {
       "sources": ["acg-guideline", "niddk-adults"],
       "faq": [
