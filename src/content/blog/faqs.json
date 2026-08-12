@@ -60,6 +60,23 @@
   },
 
   "posts": {
+    "gerdbuddy-vs-noburn": {
+      "sources": ["appstore-noburn"],
+      "faq": [
+        {
+          "q": "What is the difference between GERDBuddy and NoBurn?",
+          "a": "Both are built specifically for acid reflux and both scan food. NoBurn (4.7 stars, about 220 ratings) adds a community, recipes, sleep tracking, and Unlimited tiers from $3.99; GERDBuddy (4.4 stars, 22 ratings) scans full restaurant menus and ranks dishes for you, offers a guided routine for active flares, and prices simply at $6.99/month or $39.99/year after a 3-day trial. Numbers are from the US App Store as of August 2026."
+        },
+        {
+          "q": "Is NoBurn a good app for acid reflux?",
+          "a": "Yes. NoBurn is a well-rated, actively maintained reflux-specific tracker with food scanning, symptom and sleep tracking, recipes, and a community. Its Unlimited pricing tiers range from $3.99 to $49.99, and the listing does not spell out what each unlocks, so check before buying."
+        },
+        {
+          "q": "Which is better for eating out, GERDBuddy or NoBurn?",
+          "a": "GERDBuddy. NoBurn's listing describes scanning food items and barcodes, while GERDBuddy scans a full restaurant menu and ranks the dishes safest-first based on your personal trigger history. For home cooking and packaged food, the two scanners cover similar ground."
+        }
+      ]
+    },
     "dairy-and-acid-reflux": {
       "sources": ["niddk-diet", "niddk-adults"],
       "faq": [

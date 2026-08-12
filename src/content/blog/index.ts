@@ -35,9 +35,11 @@ import teaAndAcidReflux from "./tea-and-acid-reflux";
 import bestAcidRefluxApps from "./best-acid-reflux-apps";
 import whatIsAnAcidRefluxApp from "./what-is-an-acid-reflux-app";
 import dairyAndAcidReflux from "./dairy-and-acid-reflux";
+import gerdbuddyVsNoburn from "./gerdbuddy-vs-noburn";
 import gerdbuddyVsMysymptoms from "./gerdbuddy-vs-mysymptoms";
 
 const posts: BlogPost[] = [
+  gerdbuddyVsNoburn,
   dairyAndAcidReflux,
   whatIsAnAcidRefluxApp,
   bestAcidRefluxApps,
