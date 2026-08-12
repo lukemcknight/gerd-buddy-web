@@ -60,6 +60,27 @@
   },
 
   "posts": {
+    "tea-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Is tea bad for acid reflux?",
+          "a": "Not automatically. Two ingredients drive the risk: caffeine, which the NIDDK lists among common GERD triggers, and mint, which is on the same list and relaxes the lower esophageal sphincter. Black and green tea are a mild caffeine question, peppermint tea is a specific suspect, and caffeine-free herbal teas like ginger, chamomile, and rooibos avoid both."
+        },
+        {
+          "q": "Is peppermint tea bad for acid reflux?",
+          "a": "Often, yes. Mint relaxes the valve between the stomach and esophagus, which is why it appears on the NIDDK's list of foods commonly linked to GERD symptoms. Peppermint tea can soothe general stomach upset while still making reflux worse."
+        },
+        {
+          "q": "Which teas are safest for GERD?",
+          "a": "Caffeine-free, non-mint options: ginger tea, chamomile, and rooibos. Decaf black or green tea is the next tier. Brew lighter, let it cool slightly, avoid citrus add-ins, and finish evening cups an hour or more before lying down."
+        },
+        {
+          "q": "Is tea better than coffee for acid reflux?",
+          "a": "Usually. Black tea has roughly half the caffeine of coffee and green tea less still, so many people who react to coffee tolerate tea fine. Individual responses vary, so test each drink separately against your own symptom log."
+        }
+      ]
+    },
     "eggs-and-acid-reflux": {
       "sources": ["niddk-diet", "niddk-adults"],
       "faq": [
