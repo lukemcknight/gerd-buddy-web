@@ -60,6 +60,23 @@
   },
 
   "posts": {
+    "apple-cider-vinegar-acid-reflux": {
+      "sources": ["niddk-adults", "acg-guideline", "ness-jensen-2016"],
+      "faq": [
+        {
+          "q": "Does apple cider vinegar help acid reflux?",
+          "a": "There is no good clinical evidence that it does, and it is not a recommended treatment in major guidance like the NIDDK's treatment pages or the American College of Gastroenterology's GERD guideline. The low-stomach-acid theory behind it does not match how GERD is understood: reflux is primarily a valve problem, not an acid-shortage problem."
+        },
+        {
+          "q": "Is apple cider vinegar bad for GERD?",
+          "a": "It can be. Vinegar is a strong acid, and swallowing it past an esophagus already irritated by reflux commonly causes burning. Regular vinegar drinking also erodes tooth enamel. Diluted vinegar in food, like a salad dressing, is fine for most people; deliberate remedy shots are where the risk outweighs the nonexistent evidence."
+        },
+        {
+          "q": "What works instead of apple cider vinegar for reflux?",
+          "a": "The evidence-backed list: weight loss if applicable, no meals within 2 to 3 hours of lying down, raising the head of the bed, selective elimination of your personal trigger foods identified from tracking, and medication when needed, decided with a doctor."
+        }
+      ]
+    },
     "bananas-and-acid-reflux": {
       "sources": ["niddk-diet", "niddk-adults"],
       "faq": [
