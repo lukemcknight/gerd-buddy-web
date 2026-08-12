@@ -32,9 +32,11 @@ import doGerdFoodTrackingAppsWork from "./do-gerd-food-tracking-apps-work";
 import bestGerdTrackingApps from "./best-gerd-tracking-apps";
 import eggsAndAcidReflux from "./eggs-and-acid-reflux";
 import teaAndAcidReflux from "./tea-and-acid-reflux";
+import bestAcidRefluxApps from "./best-acid-reflux-apps";
 import gerdbuddyVsMysymptoms from "./gerdbuddy-vs-mysymptoms";
 
 const posts: BlogPost[] = [
+  bestAcidRefluxApps,
   teaAndAcidReflux,
   eggsAndAcidReflux,
   gerdbuddyVsMysymptoms,

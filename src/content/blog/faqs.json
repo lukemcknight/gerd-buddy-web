@@ -60,6 +60,27 @@
   },
 
   "posts": {
+    "best-acid-reflux-apps": {
+      "sources": ["appstore-mysymptoms", "appstore-noburn", "appstore-caracare"],
+      "faq": [
+        {
+          "q": "Is there an app for acid reflux?",
+          "a": "Yes, several. GERDBuddy and NoBurn are built specifically for reflux, with food scanning and symptom tracking; mySymptoms is a general food and symptom diary that also covers reflux and runs on Android; Acid Reflux Diet Helper is a food acidity reference. All are free to download on the US App Store as of August 2026, with paid upgrade tiers."
+        },
+        {
+          "q": "What is the best acid reflux app?",
+          "a": "It depends on your needs. For reflux-specific, in-the-moment help (meal and menu scanning, flare guidance), we rank our own GERDBuddy first, with our bias disclosed and the criteria stated. NoBurn is the best free GERD-specific tracker, and mySymptoms is the best choice on Android or when symptoms span multiple conditions."
+        },
+        {
+          "q": "What does an acid reflux app actually do?",
+          "a": "The core jobs are logging meals and symptoms, finding your personal trigger patterns, and helping you act on them. Some apps add a scanner that rates food or restaurant menu items for reflux risk before you eat, guided routines for active flares, and reports you can share with a doctor."
+        },
+        {
+          "q": "Are acid reflux apps free?",
+          "a": "All the major ones are free to download with paid tiers for advanced features: GERDBuddy Pro is $6.99/month or $39.99/year after a 3-day trial, NoBurn sells Unlimited tiers from $3.99 to $49.99, and mySymptoms Premium is $9.99/month or $59.99/year, per the US App Store as of August 2026."
+        }
+      ]
+    },
     "tea-and-acid-reflux": {
       "sources": ["niddk-diet", "niddk-adults"],
       "faq": [
