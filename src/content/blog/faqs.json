@@ -60,6 +60,23 @@
   },
 
   "posts": {
+    "what-is-an-acid-reflux-app": {
+      "sources": ["acg-guideline", "niddk-adults"],
+      "faq": [
+        {
+          "q": "What does an acid reflux app do?",
+          "a": "The three core jobs are finding your personal triggers through food and symptom logging, helping you decide what is safe to eat (newer apps scan meals or restaurant menus for reflux risk before you eat), and supporting you during active flares with guided routines. Some also produce summaries you can bring to a doctor."
+        },
+        {
+          "q": "Can an acid reflux app cure GERD?",
+          "a": "No. No app treats, diagnoses, or cures reflux. The evidence supports the changes an app helps you make, such as selective trigger elimination, earlier meals, and weight loss, and symptoms like trouble swallowing, unintended weight loss, vomiting, or signs of bleeding need a doctor promptly."
+        },
+        {
+          "q": "How do I choose an acid reflux app?",
+          "a": "Match the app to your main job. For reflux-specific, in-the-moment help with eating out and flares, GERDBuddy (ours). For a free GERD-specific diary with a community, NoBurn. For Android or multi-condition tracking with clinician reports, mySymptoms. Verified ratings and prices for all of them are in our comparison pages."
+        }
+      ]
+    },
     "best-acid-reflux-apps": {
       "sources": ["appstore-mysymptoms", "appstore-noburn", "appstore-caracare"],
       "faq": [
