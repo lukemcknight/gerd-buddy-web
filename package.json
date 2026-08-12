@@ -8,7 +8,8 @@
     "build": "vite build && node scripts/generate-sitemap.js && node scripts/generate-feed.js && node scripts/generate-llms.js && node scripts/prerender.js",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "submit:indexnow": "node scripts/submit-indexnow.js"
   },
   "dependencies": {
     "@capacitor/cli": "^8.0.0",
