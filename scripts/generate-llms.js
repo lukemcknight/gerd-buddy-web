@@ -50,11 +50,14 @@ const posts = blogFiles
     const raw = readFileSync(resolve(blogDir, file), "utf-8");
     const slug = field(raw, "slug");
     if (!slug) return null;
+    // Full markdown body, same extraction prerender.js uses. Feeds llms-full.txt.
+    const contentMatch = raw.match(/content:\s*`\n?([\s\S]*?)`\.trim\(\)/);
     return {
       slug,
       title: field(raw, "title") || slug,
       description: field(raw, "description") || "",
       date: field(raw, "date") || "",
+      content: contentMatch ? contentMatch[1].trim() : "",
     };
   })
   .filter(Boolean)
@@ -106,6 +109,7 @@ ${APP.notMedicalAdvice}
 - [Blog](${SITE_URL}/blog): ${posts.length} expert-written articles about GERD management, trigger foods, lifestyle tips, and related conditions
 - [Community Forum](${SITE_URL}/forum): Discussion categories for food triggers, medications, lifestyle tips, and general GERD topics
 - [App Store](${APP.url}): The GERDBuddy iPhone app
+- [Full article text](${SITE_URL}/llms-full.txt): every blog article in full, in one plain-text file
 
 ## Blog Articles
 
@@ -136,3 +140,29 @@ writeFileSync(outPath, out, "utf-8");
 console.log(
   `llms.txt generated at ${outPath} (${posts.length} posts, ${HOME_FAQS.product.length + HOME_FAQS.general.length} FAQs, product facts verified ${APP._verification.verifiedOn})`
 );
+
+// --- llms-full.txt: the same header plus every article's full text ----------
+// llms.txt is the index an assistant reads first; llms-full.txt is for crawlers
+// that ingest whole corpora in one fetch. Same generated-from-source guarantee.
+const fullOut = `${out}
+---
+
+# Full Articles
+
+Each article below is the complete text of the corresponding page under ${SITE_URL}/blog/.
+
+${posts
+  .map(
+    (p) => `## ${p.title}
+
+- URL: ${SITE_URL}/blog/${p.slug}
+- Published: ${p.date}
+
+${p.content}`
+  )
+  .join("\n\n---\n\n")}
+`;
+
+const fullPath = resolve(__dirname, "../dist/llms-full.txt");
+writeFileSync(fullPath, fullOut, "utf-8");
+console.log(`llms-full.txt generated at ${fullPath} (${Math.round(fullOut.length / 1024)} KB)`);
