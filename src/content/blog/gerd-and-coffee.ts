@@ -24,7 +24,7 @@ Coffee hits your digestive system in several ways at once:
 - **It's naturally acidic** — most coffee sits around pH 4.5-5, which can irritate an already-inflamed esophagus.
 - **It speeds up digestion** — for some people this is helpful, but for others it means more gastric activity and more opportunity for reflux.
 
-The tricky part is that not everyone reacts the same way. I know people who can drink black coffee all day without issues, and others who get heartburn from half a cup of the mildest brew. This is why [tracking your personal triggers](/blog/gerd-trigger-foods) matters more than following generic advice.
+The tricky part is that not everyone reacts the same way. I know people who can drink black coffee all day without issues, and others who get heartburn from half a cup of the mildest brew. This is why [tracking your personal triggers](/blog/gerd-trigger-foods) matters more than following generic advice, and it's [the approach the evidence actually supports](/blog/do-gerd-food-tracking-apps-work).
 
 ## Cold Brew vs. Hot Coffee
 

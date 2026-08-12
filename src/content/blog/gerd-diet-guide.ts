@@ -147,7 +147,7 @@ For specific recipes and ingredient swaps, check out our guide to [building GERD
 
 ## The Most Important Thing: Track and Personalize
 
-Here's what I really want you to take away from this: these lists are starting points, not gospel. Your body will have its own opinions.
+Here's what I really want you to take away from this: these lists are starting points, not gospel. Your body will have its own opinions, and [the clinical guidance agrees](/blog/do-gerd-food-tracking-apps-work): selective elimination based on your own data beats cutting everything on a generic list.
 
 I've seen people who can eat spicy food without a problem but can't touch dairy. Others are fine with coffee but get wrecked by chocolate. The only way to build a diet that truly works for *you* is to [track what you eat alongside how you feel](/blog/gerd-trigger-foods).
 
