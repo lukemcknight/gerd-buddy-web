@@ -223,7 +223,7 @@ const Index = () => {
     <div className="text-foreground">
       <SEO
         title="Calm Your Reflux & Find Your Triggers"
-        description="Scan any meal, get instant relief in a flare, and uncover your personal GERD triggers with AI grounded in your own data. GERDBuddy is the relief-first GERD app on iOS."
+        description="Scan any meal, get instant relief in a flare, and uncover your personal GERD triggers with AI grounded in your own data. GERDBuddy is the acid reflux app for iPhone."
         path="/"
         jsonLd={[faqSchema, organizationSchema, webSiteSchema, softwareAppSchema]}
       />

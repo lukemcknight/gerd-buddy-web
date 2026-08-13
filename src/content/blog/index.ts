@@ -30,9 +30,27 @@ import gerdFlareUp from "./gerd-flare-up";
 import gerdInChildren from "./gerd-in-children";
 import doGerdFoodTrackingAppsWork from "./do-gerd-food-tracking-apps-work";
 import bestGerdTrackingApps from "./best-gerd-tracking-apps";
+import eggsAndAcidReflux from "./eggs-and-acid-reflux";
+import teaAndAcidReflux from "./tea-and-acid-reflux";
+import bestAcidRefluxApps from "./best-acid-reflux-apps";
+import whatIsAnAcidRefluxApp from "./what-is-an-acid-reflux-app";
+import dairyAndAcidReflux from "./dairy-and-acid-reflux";
+import gerdbuddyVsNoburn from "./gerdbuddy-vs-noburn";
+import bananasAndAcidReflux from "./bananas-and-acid-reflux";
+import appleCiderVinegarAcidReflux from "./apple-cider-vinegar-acid-reflux";
+import oatmealAndAcidReflux from "./oatmeal-and-acid-reflux";
 import gerdbuddyVsMysymptoms from "./gerdbuddy-vs-mysymptoms";
 
 const posts: BlogPost[] = [
+  oatmealAndAcidReflux,
+  appleCiderVinegarAcidReflux,
+  bananasAndAcidReflux,
+  gerdbuddyVsNoburn,
+  dairyAndAcidReflux,
+  whatIsAnAcidRefluxApp,
+  bestAcidRefluxApps,
+  teaAndAcidReflux,
+  eggsAndAcidReflux,
   gerdbuddyVsMysymptoms,
   bestGerdTrackingApps,
   doGerdFoodTrackingAppsWork,

@@ -184,7 +184,7 @@ const recentBlogHtml = posts.slice(0, 3)
 // Home page
 writePage("/", buildPage({
   title: "Your All-in-One GERD Resource — Articles, Tracking & Community",
-  description: "Track triggers, explore expert articles, and connect with a community that gets it. GERDBuddy is your all-in-one resource for managing GERD and acid reflux.",
+  description: "Track triggers, explore expert articles, and connect with a community that gets it. GERDBuddy is the acid reflux app for iPhone: scan meals, calm flares, and learn your triggers.",
   path: "/",
   content: `<h1>Your All-in-One GERD Resource</h1>
 <p>Track triggers, explore expert articles, and connect with a community that gets it.</p>

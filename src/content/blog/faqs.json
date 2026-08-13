@@ -60,6 +60,175 @@
   },
 
   "posts": {
+    "oatmeal-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Is oatmeal good for acid reflux?",
+          "a": "Yes, for most people it is one of the most reliable breakfasts with GERD: low in fat, not acidic, filling, and gentle in texture. Trouble usually comes from the toppings (chocolate, citrus, heavy cream), oversized portions, or the coffee alongside, rather than the oats."
+        },
+        {
+          "q": "What are the best oatmeal toppings for GERD?",
+          "a": "Banana slices, melon, cooked apple or pear, a small drizzle of honey, a measured spoon of almond butter, cinnamon if you tolerate it, and a splash of oat or almond milk. Avoid chocolate, citrus fruit, mint, and heavy pours of cream or full-fat milk."
+        },
+        {
+          "q": "Can oatmeal cause heartburn?",
+          "a": "Rarely. When oatmeal shows up before symptoms in a food log, the portion, the toppings, or an accompanying coffee is usually responsible. If a plain, modest bowl still consistently bothers you, trust your own repeated data over the general rule."
+        },
+        {
+          "q": "Are instant oats OK for acid reflux?",
+          "a": "Plain instant oats are fine; it is the same grain cut thinner. Flavored packets deserve a label check for added sugar and trigger flavors like chocolate or citrus. Steel-cut and rolled oats are the cleanest default."
+        }
+      ]
+    },
+    "apple-cider-vinegar-acid-reflux": {
+      "sources": ["niddk-adults", "acg-guideline", "ness-jensen-2016"],
+      "faq": [
+        {
+          "q": "Does apple cider vinegar help acid reflux?",
+          "a": "There is no good clinical evidence that it does, and it is not a recommended treatment in major guidance like the NIDDK's treatment pages or the American College of Gastroenterology's GERD guideline. The low-stomach-acid theory behind it does not match how GERD is understood: reflux is primarily a valve problem, not an acid-shortage problem."
+        },
+        {
+          "q": "Is apple cider vinegar bad for GERD?",
+          "a": "It can be. Vinegar is a strong acid, and swallowing it past an esophagus already irritated by reflux commonly causes burning. Regular vinegar drinking also erodes tooth enamel. Diluted vinegar in food, like a salad dressing, is fine for most people; deliberate remedy shots are where the risk outweighs the nonexistent evidence."
+        },
+        {
+          "q": "What works instead of apple cider vinegar for reflux?",
+          "a": "The evidence-backed list: weight loss if applicable, no meals within 2 to 3 hours of lying down, raising the head of the bed, selective elimination of your personal trigger foods identified from tracking, and medication when needed, decided with a doctor."
+        }
+      ]
+    },
+    "bananas-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Are bananas good for acid reflux?",
+          "a": "For most people, yes. Bananas are low in acid, fat-free, soft, and filling, which makes them one of the safest common fruits for GERD and a staple during flares. A minority of people react to bananas anyway, so confirm your own tolerance by eating one on its own and logging the result a few times."
+        },
+        {
+          "q": "Can bananas cause heartburn?",
+          "a": "Occasionally. Some people consistently react to bananas, and ripeness can matter, since unripe bananas are starchier. More often the culprit is what the banana came with, like a citrus smoothie or full-fat yogurt, rather than the fruit itself."
+        },
+        {
+          "q": "What fruits are safe for acid reflux?",
+          "a": "Low-acid fruits are the safer end: bananas and melons like watermelon and cantaloupe lead the list. Citrus fruits, pineapple, and tomatoes sit at the acidic end that the NIDDK flags among common triggers. Individual tolerance varies, so test one fruit at a time."
+        }
+      ]
+    },
+    "gerdbuddy-vs-noburn": {
+      "sources": ["appstore-noburn"],
+      "faq": [
+        {
+          "q": "What is the difference between GERDBuddy and NoBurn?",
+          "a": "Both are built specifically for acid reflux and both scan food. NoBurn (4.7 stars, about 220 ratings) adds a community, recipes, sleep tracking, and Unlimited tiers from $3.99; GERDBuddy (4.4 stars, 22 ratings) scans full restaurant menus and ranks dishes for you, offers a guided routine for active flares, and prices simply at $6.99/month or $39.99/year after a 3-day trial. Numbers are from the US App Store as of August 2026."
+        },
+        {
+          "q": "Is NoBurn a good app for acid reflux?",
+          "a": "Yes. NoBurn is a well-rated, actively maintained reflux-specific tracker with food scanning, symptom and sleep tracking, recipes, and a community. Its Unlimited pricing tiers range from $3.99 to $49.99, and the listing does not spell out what each unlocks, so check before buying."
+        },
+        {
+          "q": "Which is better for eating out, GERDBuddy or NoBurn?",
+          "a": "GERDBuddy. NoBurn's listing describes scanning food items and barcodes, while GERDBuddy scans a full restaurant menu and ranks the dishes safest-first based on your personal trigger history. For home cooking and packaged food, the two scanners cover similar ground."
+        }
+      ]
+    },
+    "dairy-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Is cheese bad for acid reflux?",
+          "a": "It depends on the fat and the portion. High-fat foods are on the NIDDK's list of common GERD triggers, and cheese spans that spectrum: soft high-fat cheeses like brie and cream cheese are common trouble, hard aged cheeses in small amounts are milder, and fresh lower-fat cheeses like cottage cheese or part-skim mozzarella sit in the middle."
+        },
+        {
+          "q": "Does milk help heartburn?",
+          "a": "Not really. Cold milk soothes briefly on the way down, then stimulates acid production, and the fat in whole milk relaxes the valve that keeps stomach contents down. If you want the ritual, a small glass of skim milk with food is a much milder bet than whole milk."
+        },
+        {
+          "q": "Is yogurt good for GERD?",
+          "a": "Nonfat and low-fat yogurt are usually the best-tolerated dairy for reflux, and some people find them settling. Flavored varieties with heavy sugar or fruit acids can undo the advantage, so plain is the safer test."
+        },
+        {
+          "q": "Why does ice cream cause heartburn at night?",
+          "a": "Ice cream combines high fat, high sugar, and evening timing. Fat slows stomach emptying and relaxes the lower esophageal sphincter, and eating close to lying down gives acid the easiest possible path. Timing alone makes evening ice cream riskier than the same dessert at midday."
+        }
+      ]
+    },
+    "what-is-an-acid-reflux-app": {
+      "sources": ["acg-guideline", "niddk-adults"],
+      "faq": [
+        {
+          "q": "What does an acid reflux app do?",
+          "a": "The three core jobs are finding your personal triggers through food and symptom logging, helping you decide what is safe to eat (newer apps scan meals or restaurant menus for reflux risk before you eat), and supporting you during active flares with guided routines. Some also produce summaries you can bring to a doctor."
+        },
+        {
+          "q": "Can an acid reflux app cure GERD?",
+          "a": "No. No app treats, diagnoses, or cures reflux. The evidence supports the changes an app helps you make, such as selective trigger elimination, earlier meals, and weight loss, and symptoms like trouble swallowing, unintended weight loss, vomiting, or signs of bleeding need a doctor promptly."
+        },
+        {
+          "q": "How do I choose an acid reflux app?",
+          "a": "Match the app to your main job. For reflux-specific, in-the-moment help with eating out and flares, GERDBuddy (ours). For a free GERD-specific diary with a community, NoBurn. For Android or multi-condition tracking with clinician reports, mySymptoms. Verified ratings and prices for all of them are in our comparison pages."
+        }
+      ]
+    },
+    "best-acid-reflux-apps": {
+      "sources": ["appstore-mysymptoms", "appstore-noburn", "appstore-caracare"],
+      "faq": [
+        {
+          "q": "Is there an app for acid reflux?",
+          "a": "Yes, several. GERDBuddy and NoBurn are built specifically for reflux, with food scanning and symptom tracking; mySymptoms is a general food and symptom diary that also covers reflux and runs on Android; Acid Reflux Diet Helper is a food acidity reference. All are free to download on the US App Store as of August 2026, with paid upgrade tiers."
+        },
+        {
+          "q": "What is the best acid reflux app?",
+          "a": "It depends on your needs. For reflux-specific, in-the-moment help (meal and menu scanning, flare guidance), we rank our own GERDBuddy first, with our bias disclosed and the criteria stated. NoBurn is the best free GERD-specific tracker, and mySymptoms is the best choice on Android or when symptoms span multiple conditions."
+        },
+        {
+          "q": "What does an acid reflux app actually do?",
+          "a": "The core jobs are logging meals and symptoms, finding your personal trigger patterns, and helping you act on them. Some apps add a scanner that rates food or restaurant menu items for reflux risk before you eat, guided routines for active flares, and reports you can share with a doctor."
+        },
+        {
+          "q": "Are acid reflux apps free?",
+          "a": "All the major ones are free to download with paid tiers for advanced features: GERDBuddy Pro is $6.99/month or $39.99/year after a 3-day trial, NoBurn sells Unlimited tiers from $3.99 to $49.99, and mySymptoms Premium is $9.99/month or $59.99/year, per the US App Store as of August 2026."
+        }
+      ]
+    },
+    "tea-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Is tea bad for acid reflux?",
+          "a": "Not automatically. Two ingredients drive the risk: caffeine, which the NIDDK lists among common GERD triggers, and mint, which is on the same list and relaxes the lower esophageal sphincter. Black and green tea are a mild caffeine question, peppermint tea is a specific suspect, and caffeine-free herbal teas like ginger, chamomile, and rooibos avoid both."
+        },
+        {
+          "q": "Is peppermint tea bad for acid reflux?",
+          "a": "Often, yes. Mint relaxes the valve between the stomach and esophagus, which is why it appears on the NIDDK's list of foods commonly linked to GERD symptoms. Peppermint tea can soothe general stomach upset while still making reflux worse."
+        },
+        {
+          "q": "Which teas are safest for GERD?",
+          "a": "Caffeine-free, non-mint options: ginger tea, chamomile, and rooibos. Decaf black or green tea is the next tier. Brew lighter, let it cool slightly, avoid citrus add-ins, and finish evening cups an hour or more before lying down."
+        },
+        {
+          "q": "Is tea better than coffee for acid reflux?",
+          "a": "Usually. Black tea has roughly half the caffeine of coffee and green tea less still, so many people who react to coffee tolerate tea fine. Individual responses vary, so test each drink separately against your own symptom log."
+        }
+      ]
+    },
+    "eggs-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Are eggs bad for acid reflux?",
+          "a": "Eggs themselves are not on the NIDDK's list of foods commonly linked to GERD symptoms. The risk comes from preparation: high-fat foods are on that list, and fried eggs, butter, and fatty sides like bacon turn an egg breakfast into a high-fat meal that slows stomach emptying and relaxes the lower esophageal sphincter."
+        },
+        {
+          "q": "Are boiled eggs OK for GERD?",
+          "a": "For most people, yes. Boiled and poached eggs add no cooking fat and are among the gentler protein options for reflux. A minority of people react to eggs regardless of preparation, so test gently cooked eggs against your own symptom log to know which group you are in."
+        },
+        {
+          "q": "Why do fried eggs cause heartburn when boiled eggs don't?",
+          "a": "The difference is fat. Frying adds cooking fat on top of the yolk's roughly 5 grams, and fatty meals both slow gastric emptying and lower the pressure of the valve that keeps stomach contents down. The egg white itself is nearly fat-free."
+        }
+      ]
+    },
     "gerdbuddy-vs-mysymptoms": {
       "sources": ["appstore-mysymptoms"],
       "faq": [
