@@ -38,9 +38,11 @@ import dairyAndAcidReflux from "./dairy-and-acid-reflux";
 import gerdbuddyVsNoburn from "./gerdbuddy-vs-noburn";
 import bananasAndAcidReflux from "./bananas-and-acid-reflux";
 import appleCiderVinegarAcidReflux from "./apple-cider-vinegar-acid-reflux";
+import oatmealAndAcidReflux from "./oatmeal-and-acid-reflux";
 import gerdbuddyVsMysymptoms from "./gerdbuddy-vs-mysymptoms";
 
 const posts: BlogPost[] = [
+  oatmealAndAcidReflux,
   appleCiderVinegarAcidReflux,
   bananasAndAcidReflux,
   gerdbuddyVsNoburn,

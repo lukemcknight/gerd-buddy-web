@@ -60,6 +60,27 @@
   },
 
   "posts": {
+    "oatmeal-and-acid-reflux": {
+      "sources": ["niddk-diet", "niddk-adults"],
+      "faq": [
+        {
+          "q": "Is oatmeal good for acid reflux?",
+          "a": "Yes, for most people it is one of the most reliable breakfasts with GERD: low in fat, not acidic, filling, and gentle in texture. Trouble usually comes from the toppings (chocolate, citrus, heavy cream), oversized portions, or the coffee alongside, rather than the oats."
+        },
+        {
+          "q": "What are the best oatmeal toppings for GERD?",
+          "a": "Banana slices, melon, cooked apple or pear, a small drizzle of honey, a measured spoon of almond butter, cinnamon if you tolerate it, and a splash of oat or almond milk. Avoid chocolate, citrus fruit, mint, and heavy pours of cream or full-fat milk."
+        },
+        {
+          "q": "Can oatmeal cause heartburn?",
+          "a": "Rarely. When oatmeal shows up before symptoms in a food log, the portion, the toppings, or an accompanying coffee is usually responsible. If a plain, modest bowl still consistently bothers you, trust your own repeated data over the general rule."
+        },
+        {
+          "q": "Are instant oats OK for acid reflux?",
+          "a": "Plain instant oats are fine; it is the same grain cut thinner. Flavored packets deserve a label check for added sugar and trigger flavors like chocolate or citrus. Steel-cut and rolled oats are the cleanest default."
+        }
+      ]
+    },
     "apple-cider-vinegar-acid-reflux": {
       "sources": ["niddk-adults", "acg-guideline", "ness-jensen-2016"],
       "faq": [
