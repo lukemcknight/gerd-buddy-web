@@ -110,6 +110,9 @@ const organizationSchema = {
   name: "GERDBuddy",
   url: SITE_URL,
   logo: `${SITE_URL}/gerdbuddy-mark.png`,
+  // Entity reconciliation: the App Store listing is the one external profile
+  // we control and assistants already know. Add socials here if/when real.
+  sameAs: [APP.url],
   contactPoint: {
     "@type": "ContactPoint",
     email: "gerdbuddy2@gmail.com",

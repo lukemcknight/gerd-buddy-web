@@ -223,7 +223,7 @@ writePage("/", buildPage({
   jsonLd: [
     faqSchema,
     { "@context": "https://schema.org", "@type": "WebSite", name: "GERDBuddy", url: SITE_URL, description: "Track meals and symptoms to discover your personal GERD triggers with AI-powered insights." },
-    { "@context": "https://schema.org", "@type": "Organization", name: "GERDBuddy", url: SITE_URL, logo: `${SITE_URL}/gerdbuddy-mark.png`, contactPoint: { "@type": "ContactPoint", email: "gerdbuddy2@gmail.com", contactType: "customer support" } },
+    { "@context": "https://schema.org", "@type": "Organization", name: "GERDBuddy", url: SITE_URL, logo: `${SITE_URL}/gerdbuddy-mark.png`, sameAs: [APP.url], contactPoint: { "@type": "ContactPoint", email: "gerdbuddy2@gmail.com", contactType: "customer support" } },
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
