@@ -28,6 +28,7 @@ const ALLOWED_GENERATION_KEYS = new Set([
   "thinkingConfig",
   "mediaResolution",
 ]);
+const ALLOWED_CONTENT_KEYS = new Set(["role", "parts"]);
 const IMAGE_MIME_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -48,7 +49,11 @@ export class AIHttpError extends Error {
 }
 
 const decodedBase64Bytes = (value: string): number => {
-  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(value) || value.length % 4 === 1) {
+  const hasPadding = value.includes("=");
+  const isValid = hasPadding
+    ? /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)$/.test(value)
+    : /^[A-Za-z0-9+/]*$/.test(value) && value.length % 4 !== 1;
+  if (!isValid) {
     throw new AIHttpError(400, "invalid_image", "Invalid image encoding");
   }
   return Buffer.from(value, "base64").byteLength;
@@ -121,9 +126,17 @@ const validateParts = (parts: unknown, imageCount: { value: number }): void => {
   }
 };
 
-const validateContent = (value: unknown, imageCount: { value: number }): void => {
+const validateContent = (
+  value: unknown,
+  expectedRole: "system" | "user",
+  imageCount: { value: number }
+): void => {
   if (!isRecord(value)) {
     return invalidRequest("Content must be an object");
+  }
+  rejectUnknownKeys(value, ALLOWED_CONTENT_KEYS, "content");
+  if (value.role !== expectedRole) {
+    return invalidRequest("Content role does not match its location");
   }
   validateParts(value.parts, imageCount);
 };
@@ -180,9 +193,9 @@ export const validateAIRequest = (
 
   const imageCount = { value: 0 };
   if (request.system_instruction !== undefined) {
-    validateContent(request.system_instruction, imageCount);
+    validateContent(request.system_instruction, "system", imageCount);
   }
-  validateContent(request.contents[0], imageCount);
+  validateContent(request.contents[0], "user", imageCount);
 
   const policy = POLICIES[operation];
   if (imageCount.value !== policy.images) {
