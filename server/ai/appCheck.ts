@@ -3,9 +3,19 @@ import { getAppCheck } from "firebase-admin/app-check";
 
 let appPromise: Promise<ReturnType<typeof initializeApp>> | null = null;
 
+export class AppCheckConfigurationError extends Error {
+  override readonly cause: unknown;
+
+  constructor(cause: unknown) {
+    super("firebase_admin_not_configured");
+    this.name = "AppCheckConfigurationError";
+    this.cause = cause;
+  }
+}
+
 const getAdminApp = async () => {
   if (!appPromise) {
-    appPromise = Promise.resolve().then(() => {
+    const initialization = Promise.resolve().then(() => {
       const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
       if (!raw) {
         throw new Error("firebase_admin_not_configured");
@@ -16,6 +26,10 @@ const getAdminApp = async () => {
         credential: cert(serviceAccount),
         projectId: serviceAccount.project_id,
       });
+    });
+    appPromise = initialization.catch((error) => {
+      appPromise = null;
+      throw new AppCheckConfigurationError(error);
     });
   }
 

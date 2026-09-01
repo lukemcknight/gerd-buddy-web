@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { randomUUID } from "node:crypto";
-import { verifyAppCheckToken } from "./appCheck.ts";
+import {
+  AppCheckConfigurationError,
+  verifyAppCheckToken,
+} from "./appCheck.ts";
 import {
   AIHttpError,
   type AIOperation,
@@ -9,6 +12,7 @@ import {
 
 const ALLOWED_GEMINI_MODEL = "gemini-3.5-flash";
 const GEMINI_API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models";
+export const MAX_GEMINI_RESPONSE_BYTES = 1_000_000;
 
 const OPERATION_TIMEOUT_MS: Record<AIOperation, number> = {
   food: 35_000,
@@ -67,6 +71,92 @@ const isTimeoutError = (error: unknown): boolean =>
     error.name === "AbortError" || error.name === "TimeoutError"
   );
 
+const cancelResponseBody = async (
+  response: Response,
+  reason: Error
+): Promise<void> => {
+  try {
+    await response.body?.cancel(reason);
+  } catch {
+    // Cancellation is best-effort for a response that will not be consumed.
+  }
+};
+
+const readUpstreamJSON = async (
+  response: Response,
+  signal: AbortSignal
+): Promise<unknown> => {
+  if (!response.body) {
+    throw new Error("upstream_body_missing");
+  }
+
+  const contentLength = response.headers.get("content-length");
+  if (contentLength !== null) {
+    const normalizedLength = contentLength.trim();
+    const declaredBytes = Number(normalizedLength);
+    if (
+      !/^\d+$/.test(normalizedLength) ||
+      !Number.isSafeInteger(declaredBytes) ||
+      declaredBytes > MAX_GEMINI_RESPONSE_BYTES
+    ) {
+      await cancelResponseBody(response, new Error("upstream_body_too_large"));
+      throw new Error("upstream_body_too_large");
+    }
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+  let abortListener: (() => void) | undefined;
+  const abortPromise = new Promise<never>((_, reject) => {
+    abortListener = () => reject(
+      signal.reason instanceof Error
+        ? signal.reason
+        : new DOMException("Aborted", "AbortError")
+    );
+    if (signal.aborted) {
+      abortListener();
+    } else {
+      signal.addEventListener("abort", abortListener, { once: true });
+    }
+  });
+
+  try {
+    while (true) {
+      const { done, value } = await Promise.race([
+        reader.read(),
+        abortPromise,
+      ]);
+      if (done) break;
+      totalBytes += value.byteLength;
+      if (totalBytes > MAX_GEMINI_RESPONSE_BYTES) {
+        throw new Error("upstream_body_too_large");
+      }
+      chunks.push(value);
+    }
+  } catch (error) {
+    try {
+      await reader.cancel(error);
+    } catch {
+      // The stream may already be errored by the upstream connection.
+    }
+    throw error;
+  } finally {
+    if (abortListener) {
+      signal.removeEventListener("abort", abortListener);
+    }
+    reader.releaseLock();
+  }
+
+  const bytes = new Uint8Array(totalBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return JSON.parse(new TextDecoder().decode(bytes));
+};
+
 export const createAIHandler = (
   operation: AIOperation,
   overrides: HandlerOverrides = {}
@@ -120,7 +210,11 @@ export const createAIHandler = (
     let claims: AppCheckClaims;
     try {
       claims = await verifyToken(token);
-    } catch {
+    } catch (error) {
+      if (error instanceof AppCheckConfigurationError) {
+        reply(503, { error: "service_unavailable" });
+        return;
+      }
       reply(401, { error: "unauthorized" });
       return;
     }
@@ -144,7 +238,9 @@ export const createAIHandler = (
     }
 
     let upstreamResponse: Response;
+    let upstreamSignal: AbortSignal;
     try {
+      upstreamSignal = AbortSignal.timeout(OPERATION_TIMEOUT_MS[operation]);
       upstreamResponse = await fetchImpl(
         `${GEMINI_API_ROOT}/${model}:generateContent`,
         {
@@ -154,7 +250,7 @@ export const createAIHandler = (
             "x-goog-api-key": apiKey,
           },
           body: JSON.stringify(validated.request),
-          signal: AbortSignal.timeout(OPERATION_TIMEOUT_MS[operation]),
+          signal: upstreamSignal,
         }
       );
       upstreamStatus = upstreamResponse.status;
@@ -168,25 +264,32 @@ export const createAIHandler = (
     }
 
     if (upstreamResponse.status === 429) {
+      await cancelResponseBody(upstreamResponse, new Error("upstream_rate_limited"));
       reply(503, { error: "service_unavailable" });
       return;
     }
 
     if (!upstreamResponse.ok) {
+      await cancelResponseBody(upstreamResponse, new Error("upstream_failed"));
       reply(502, { error: "bad_gateway" });
       return;
     }
 
     const upstreamContentType = upstreamResponse.headers.get("content-type");
     if (!isJSONContentType(upstreamContentType ?? undefined)) {
+      await cancelResponseBody(upstreamResponse, new Error("upstream_not_json"));
       reply(502, { error: "bad_gateway" });
       return;
     }
 
     let responseBody: unknown;
     try {
-      responseBody = await upstreamResponse.json();
-    } catch {
+      responseBody = await readUpstreamJSON(upstreamResponse, upstreamSignal);
+    } catch (error) {
+      if (isTimeoutError(error)) {
+        reply(504, { error: "upstream_timeout" });
+        return;
+      }
       reply(502, { error: "bad_gateway" });
       return;
     }

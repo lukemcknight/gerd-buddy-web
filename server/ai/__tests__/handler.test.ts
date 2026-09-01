@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { AppCheckConfigurationError } from "../appCheck.ts";
 import { createAIHandler } from "../handler.ts";
 
 const promptMarker = "PROMPT_MARKER_DO_NOT_LOG";
 const tokenMarker = "TOKEN_MARKER_DO_NOT_LOG";
 const keyMarker = "KEY_MARKER_DO_NOT_LOG";
+const responseByteLimit = 1_000_000;
 
 const validEnv = {
   GEMINI_API_KEY: keyMarker,
@@ -83,6 +85,14 @@ const successFetch: typeof fetch = async () => new Response(
   JSON.stringify({ candidates: [] }),
   { status: 200, headers: { "content-type": "application/json" } }
 );
+
+const jsonObjectWithSerializedBytes = (totalBytes: number): string => {
+  const prefix = '{"value":"';
+  const suffix = '"}';
+  const json = `${prefix}${"x".repeat(totalBytes - prefix.length - suffix.length)}${suffix}`;
+  assert.equal(Buffer.byteLength(json), totalBytes);
+  return json;
+};
 
 describe("createAIHandler", () => {
   it("returns 405 with Allow: POST for unsupported methods", async () => {
@@ -166,6 +176,27 @@ describe("createAIHandler", () => {
     assert.equal(upstreamCalls, 0);
   });
 
+  it("maps Firebase Admin configuration failures to 503 without calling Gemini", async () => {
+    let upstreamCalls = 0;
+    const handler = createAIHandler("doctor", {
+      verifyToken: async () => {
+        throw new AppCheckConfigurationError(new SyntaxError("malformed config"));
+      },
+      fetchImpl: async () => {
+        upstreamCalls += 1;
+        throw new Error("unreachable");
+      },
+      env: validEnv,
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler);
+
+    assert.equal(response.statusCode, 503);
+    assert.deepEqual(response.body, { error: "service_unavailable" });
+    assert.equal(upstreamCalls, 0);
+  });
+
   it("reads App Check and content-type headers case-insensitively", async () => {
     let receivedToken = "";
     const handler = createAIHandler("doctor", {
@@ -188,6 +219,28 @@ describe("createAIHandler", () => {
 
     assert.equal(response.statusCode, 200);
     assert.equal(receivedToken, tokenMarker);
+  });
+
+  it("accepts a case-insensitive JSON media type with parameters", async () => {
+    const handler = createAIHandler("doctor", {
+      verifyToken: passingVerifyToken,
+      fetchImpl: async () => new Response(JSON.stringify({ candidates: [] }), {
+        status: 200,
+        headers: { "content-type": "Application/JSON; Charset=UTF-8" },
+      }),
+      env: validEnv,
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler, {
+      ...validRequest,
+      headers: {
+        "content-type": "APPLICATION/JSON ; charset=UTF-8",
+        "x-firebase-appcheck": tokenMarker,
+      },
+    });
+
+    assert.equal(response.statusCode, 200);
   });
 
   it("rejects a verified token for an unapproved Firebase app", async () => {
@@ -223,6 +276,31 @@ describe("createAIHandler", () => {
     const response = await invoke(handler, { ...validRequest, body: { request: {} } });
 
     assert.equal(response.statusCode, 400);
+    assert.equal(upstreamCalls, 0);
+  });
+
+  it("returns 400 when reading the request body throws", async () => {
+    let upstreamCalls = 0;
+    const malformedRequest = { ...validRequest };
+    Object.defineProperty(malformedRequest, "body", {
+      get() {
+        throw new Error("malformed body getter");
+      },
+    });
+    const handler = createAIHandler("doctor", {
+      verifyToken: passingVerifyToken,
+      fetchImpl: async () => {
+        upstreamCalls += 1;
+        throw new Error("unreachable");
+      },
+      env: validEnv,
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler, malformedRequest);
+
+    assert.equal(response.statusCode, 400);
+    assert.deepEqual(response.body, { error: "invalid_request" });
     assert.equal(upstreamCalls, 0);
   });
 
@@ -304,6 +382,59 @@ describe("createAIHandler", () => {
     assert.equal(response.statusCode, 504);
   });
 
+  it("maps an abort while reading the upstream body to 504 and cancels the stream", async () => {
+    const originalTimeout = AbortSignal.timeout;
+    const abortController = new AbortController();
+    let streamCancelled = false;
+    let stalledController: ReadableStreamDefaultController<Uint8Array> | undefined;
+    let safetyTimer: ReturnType<typeof setTimeout> | undefined;
+    AbortSignal.timeout = () => abortController.signal;
+
+    try {
+      const handler = createAIHandler("doctor", {
+        verifyToken: passingVerifyToken,
+        fetchImpl: async () => {
+          const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+              stalledController = controller;
+              controller.enqueue(new TextEncoder().encode('{"candidates":'));
+            },
+            pull() {
+              return new Promise(() => undefined);
+            },
+            cancel() {
+              streamCancelled = true;
+            },
+          });
+          queueMicrotask(() => abortController.abort(
+            new DOMException("Timed out", "TimeoutError")
+          ));
+          safetyTimer = setTimeout(() => {
+            try {
+              stalledController?.error(new Error("stream test safety timeout"));
+            } catch {
+              // The handler already cancelled the stream.
+            }
+          }, 100);
+          return new Response(stream, {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          });
+        },
+        env: validEnv,
+        logger: silentLogger,
+      });
+
+      const response = await invoke(handler);
+
+      assert.equal(response.statusCode, 504);
+      assert.equal(streamCancelled, true);
+    } finally {
+      if (safetyTimer) clearTimeout(safetyTimer);
+      AbortSignal.timeout = originalTimeout;
+    }
+  });
+
   it("normalizes an upstream 429 to 503", async () => {
     const handler = createAIHandler("doctor", {
       verifyToken: passingVerifyToken,
@@ -336,6 +467,122 @@ describe("createAIHandler", () => {
     assert.equal(response.statusCode, 502);
   });
 
+  it("maps a representative non-429 upstream failure to 502", async () => {
+    let streamCancelled = false;
+    const handler = createAIHandler("doctor", {
+      verifyToken: passingVerifyToken,
+      fetchImpl: async () => new Response(new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('{"error":"unavailable"}'));
+        },
+        cancel() {
+          streamCancelled = true;
+        },
+      }), {
+        status: 500,
+        headers: { "content-type": "application/json" },
+      }),
+      env: validEnv,
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler);
+
+    assert.equal(response.statusCode, 502);
+    assert.deepEqual(response.body, { error: "bad_gateway" });
+    assert.equal(streamCancelled, true);
+  });
+
+  it("accepts an upstream JSON object exactly at the response byte limit", async () => {
+    const body = jsonObjectWithSerializedBytes(responseByteLimit);
+    const handler = createAIHandler("doctor", {
+      verifyToken: passingVerifyToken,
+      fetchImpl: async () => new Response(body, {
+        status: 200,
+        headers: {
+          "content-type": "application/json",
+          "content-length": String(responseByteLimit),
+        },
+      }),
+      env: validEnv,
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler);
+
+    assert.equal(response.statusCode, 200);
+    assert.equal((response.body as { value: string }).value.length, responseByteLimit - 12);
+  });
+
+  it("rejects an oversized declared Content-Length and cancels the body", async () => {
+    let streamCancelled = false;
+    const handler = createAIHandler("doctor", {
+      verifyToken: passingVerifyToken,
+      fetchImpl: async () => new Response(new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode('{"candidates":[]}'));
+          controller.close();
+        },
+        cancel() {
+          streamCancelled = true;
+        },
+      }), {
+        status: 200,
+        headers: {
+          "content-type": "application/json",
+          "content-length": String(responseByteLimit + 1),
+        },
+      }),
+      env: validEnv,
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler);
+
+    assert.equal(response.statusCode, 502);
+    assert.deepEqual(response.body, { error: "bad_gateway" });
+    assert.equal(streamCancelled, true);
+  });
+
+  it("rejects an oversized chunked response and cancels its reader", async () => {
+    let streamCancelled = false;
+    let streamController: ReadableStreamDefaultController<Uint8Array> | undefined;
+    const body = new TextEncoder().encode(
+      jsonObjectWithSerializedBytes(responseByteLimit + 1)
+    );
+    const safetyTimer = setTimeout(() => {
+      try {
+        streamController?.error(new Error("stream test safety timeout"));
+      } catch {
+        // The handler already cancelled the stream.
+      }
+    }, 100);
+    const handler = createAIHandler("doctor", {
+      verifyToken: passingVerifyToken,
+      fetchImpl: async () => new Response(new ReadableStream<Uint8Array>({
+        start(controller) {
+          streamController = controller;
+          controller.enqueue(body.subarray(0, responseByteLimit));
+          controller.enqueue(body.subarray(responseByteLimit));
+        },
+        cancel() {
+          streamCancelled = true;
+        },
+      }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+      env: validEnv,
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler).finally(() => clearTimeout(safetyTimer));
+
+    assert.equal(response.statusCode, 502);
+    assert.deepEqual(response.body, { error: "bad_gateway" });
+    assert.equal(streamCancelled, true);
+  });
+
   it("returns 503 when required server configuration is missing", async () => {
     let upstreamCalls = 0;
     const handler = createAIHandler("doctor", {
@@ -352,6 +599,43 @@ describe("createAIHandler", () => {
 
     assert.equal(response.statusCode, 503);
     assert.equal(upstreamCalls, 0);
+  });
+
+  it("ignores empty App ID entries when an allow-listed ID remains", async () => {
+    const handler = createAIHandler("doctor", {
+      verifyToken: passingVerifyToken,
+      fetchImpl: successFetch,
+      env: {
+        ...validEnv,
+        FIREBASE_APP_CHECK_APP_IDS: " , , ios-app-id,  , ",
+      },
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler);
+
+    assert.equal(response.statusCode, 200);
+  });
+
+  it("returns 503 when the App ID allow-list contains only whitespace entries", async () => {
+    let verifierCalls = 0;
+    const handler = createAIHandler("doctor", {
+      verifyToken: async () => {
+        verifierCalls += 1;
+        return { app_id: "ios-app-id" };
+      },
+      fetchImpl: successFetch,
+      env: {
+        ...validEnv,
+        FIREBASE_APP_CHECK_APP_IDS: " ,  , ",
+      },
+      logger: silentLogger,
+    });
+
+    const response = await invoke(handler);
+
+    assert.equal(response.statusCode, 503);
+    assert.equal(verifierCalls, 0);
   });
 
   it("rejects a non-allow-listed Gemini model before forwarding", async () => {
