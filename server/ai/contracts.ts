@@ -10,7 +10,7 @@ export const MAX_AI_BODY_BYTES = 4_300_000;
 export const MAX_SCAN_IMAGE_BYTES = 3_000_000;
 
 const POLICIES = {
-  food: { images: 1, maxOutputTokens: 4608, timeoutMs: 35_000 },
+  food: { images: 1, maxOutputTokens: 8192, timeoutMs: 35_000 },
   menu: { images: 1, maxOutputTokens: 4096, timeoutMs: 35_000 },
   doctor: { images: 0, maxOutputTokens: 180, timeoutMs: 25_000 },
 } as const;

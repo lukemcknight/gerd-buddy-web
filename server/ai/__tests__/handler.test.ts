@@ -337,6 +337,39 @@ describe("createAIHandler", () => {
     assert.equal(JSON.stringify(response.body).includes(keyMarker), false);
   });
 
+  it("forwards the production food retry with more output headroom than the first attempt", async () => {
+    const forwardedTokenBudgets: number[] = [];
+    const handler = createAIHandler("food", {
+      verifyToken: passingVerifyToken,
+      fetchImpl: async (_url, init) => {
+        forwardedTokenBudgets.push(
+          JSON.parse(String(init?.body)).generationConfig.maxOutputTokens
+        );
+        return new Response(JSON.stringify({ candidates: [] }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      },
+      env: validEnv,
+      logger: silentLogger,
+    });
+    const firstRequest = structuredClone(validRequest);
+    firstRequest.body.request.contents[0].parts.push({
+      inline_data: { mime_type: "image/jpeg", data: "AQID" },
+    } as never);
+    firstRequest.body.request.generationConfig.maxOutputTokens = 4608;
+    const retryRequest = structuredClone(firstRequest);
+    retryRequest.body.request.generationConfig.maxOutputTokens = 8192;
+
+    const firstResponse = await invoke(handler, firstRequest);
+    const retryResponse = await invoke(handler, retryRequest);
+
+    assert.equal(firstResponse.statusCode, 200);
+    assert.equal(retryResponse.statusCode, 200);
+    assert.deepEqual(forwardedTokenBudgets, [4608, 8192]);
+    assert.ok(forwardedTokenBudgets[1] > forwardedTokenBudgets[0]);
+  });
+
   it("uses the operation timeout policy for doctor and scanner requests", async () => {
     const originalTimeout = AbortSignal.timeout;
     const timeoutCalls: number[] = [];

@@ -113,7 +113,7 @@ describe("validateAIRequest", () => {
   it("clamps food output tokens and requires exactly one image", () => {
     const overBudget = structuredClone(foodBody);
     overBudget.request.generationConfig.maxOutputTokens = 9999;
-    assert.equal(validateAIRequest("food", overBudget).request.generationConfig.maxOutputTokens, 4608);
+    assert.equal(validateAIRequest("food", overBudget).request.generationConfig.maxOutputTokens, 8192);
 
     const withoutImage = structuredClone(foodBody);
     withoutImage.request.contents[0].parts.pop();
