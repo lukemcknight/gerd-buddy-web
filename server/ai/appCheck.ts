@@ -4,7 +4,7 @@ import { getAppCheck } from "firebase-admin/app-check";
 let appPromise: Promise<ReturnType<typeof initializeApp>> | null = null;
 
 export class AppCheckConfigurationError extends Error {
-  override readonly cause: unknown;
+  readonly cause: unknown;
 
   constructor(cause: unknown) {
     super("firebase_admin_not_configured");

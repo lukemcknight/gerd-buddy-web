@@ -3,12 +3,12 @@ import { randomUUID } from "node:crypto";
 import {
   AppCheckConfigurationError,
   verifyAppCheckToken,
-} from "./appCheck.ts";
+} from "./appCheck.js";
 import {
   AIHttpError,
   type AIOperation,
   validateAIRequest,
-} from "./contracts.ts";
+} from "./contracts.js";
 
 const ALLOWED_GEMINI_MODEL = "gemini-3.5-flash";
 const GEMINI_API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models";
