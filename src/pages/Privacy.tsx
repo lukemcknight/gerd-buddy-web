@@ -15,7 +15,7 @@ const Privacy = () => {
           <h1 className="text-3xl font-display font-bold">Privacy Policy</h1>
           <p className="text-muted-foreground">
             This policy explains what GERDBuddy stores locally, what leaves your device when you use connected features,
-            and the choices available to you. Effective July 20, 2026.
+            and the choices available to you. Effective September 1, 2026.
           </p>
         </header>
 
@@ -33,8 +33,9 @@ const Privacy = () => {
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li>
               <strong className="text-foreground">AI features:</strong> when you choose food scanning, menu scanning,
-              visit preparation, or AI chat, the selected image, your prompt, and relevant context may be sent to
-              Google's Gemini API to produce the response.
+              or AI chat, the selected image, your prompt, and relevant context are sent through GERDBuddy's
+              Vercel-hosted service to Google's Gemini API to produce the response. Vercel processes the request
+              in transit; GERDBuddy does not store the image, prompt, health context, or response on that server.
             </li>
             <li>
               <strong className="text-foreground">Product analytics:</strong> PostHog receives app lifecycle and feature
