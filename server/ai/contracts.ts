@@ -1,8 +1,11 @@
 export type AIOperation = "food" | "menu" | "doctor";
 
 export type AIRequestEnvelope = { request: Record<string, unknown> };
+type ValidatedAIRequestPayload = Record<string, unknown> & {
+  generationConfig: Record<string, unknown>;
+};
 export type ValidatedAIRequest = {
-  request: Record<string, any>;
+  request: ValidatedAIRequestPayload;
   requestBytes: number;
 };
 
@@ -220,5 +223,8 @@ export const validateAIRequest = (
     generationConfig.mediaResolution = "MEDIA_RESOLUTION_HIGH";
   }
 
-  return { request, requestBytes };
+  return {
+    request: request as ValidatedAIRequestPayload,
+    requestBytes,
+  };
 };
