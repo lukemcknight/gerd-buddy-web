@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:api": "node --import tsx --test server/ai/__tests__/*.test.ts",
-    "test:api:types": "tsc --noEmit --module NodeNext --moduleResolution NodeNext --target ES2021 --esModuleInterop --skipLibCheck api/ai/doctor.ts api/ai/food.ts api/ai/menu.ts server/ai/appCheck.ts server/ai/contracts.ts server/ai/handler.ts"
+    "test:api:types": "tsc --noEmit --module NodeNext --moduleResolution NodeNext --target ES2021 --esModuleInterop --skipLibCheck api/ai/doctor.ts api/ai/food.ts api/ai/menu.ts server/ai/appCheck.ts server/ai/contracts.ts server/ai/handler.ts",
+    "test:api:runtime": "node --no-experimental-require-module -e \"require('firebase-admin/app-check')\""
   },
   "dependencies": {
     "@capacitor/cli": "^8.0.0",
@@ -51,7 +52,7 @@
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.10.0",
-    "firebase-admin": "14.3.0",
+    "firebase-admin": "13.6.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
