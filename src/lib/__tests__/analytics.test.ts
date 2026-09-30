@@ -62,6 +62,7 @@ test('filters SDK-enriched session, attribution, and person data before click tr
     event: WEB_EVENTS.APP_STORE_CLICKED,
     properties: {
       token: 'project-token', distinct_id: 'anonymous-id', $session_id: 'session-id',
+      $process_person_profile: false, $is_identified: false,
       page_path: '/forum', placement: 'header', app_store_id: '6756620910',
       $session_entry_url: 'https://www.gerdbuddy.app/forum/private-id?detail=private',
       $session_entry_pathname: '/forum/private-id', $session_entry_referrer: 'https://example.com/?private=1',
@@ -72,6 +73,8 @@ test('filters SDK-enriched session, attribution, and person data before click tr
   assert.equal(filtered.properties.token, 'project-token');
   assert.equal(filtered.properties.distinct_id, 'anonymous-id');
   assert.equal(filtered.properties.$session_id, 'session-id');
+  assert.equal(filtered.properties.$process_person_profile, false);
+  assert.equal(filtered.properties.$is_identified, false);
   assert.equal(filtered.properties.page_path, '/forum');
   assert.ok(!JSON.stringify(filtered).includes('private'));
   const pageview = { ...event, event: '$pageview' };

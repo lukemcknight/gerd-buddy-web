@@ -76,6 +76,7 @@ type CaptureEvent = { event: string; properties: Record<string, unknown>; [key: 
 // before_send, after that enrichment, so private navigation cannot leak here.
 const clickPropertyAllowlist = new Set([
   'token', 'distinct_id', '$device_id', '$session_id', '$window_id', '$lib', '$lib_version',
+  '$process_person_profile', '$is_identified',
   'page_path', 'placement', 'app_store_id', '$current_url', '$pathname', '$title', '$referrer',
 ]);
 export function sanitizeWebEvent(event: CaptureEvent): CaptureEvent {
