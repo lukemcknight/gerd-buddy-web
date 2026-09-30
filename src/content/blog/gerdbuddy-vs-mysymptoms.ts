@@ -6,11 +6,12 @@ const post: BlogPost = {
   description:
     "A direct comparison of GERDBuddy and mySymptoms for acid reflux: features, prices, platforms, and an honest verdict on which app fits which person. Written by the GERDBuddy team, bias disclosed.",
   date: "2026-08-11",
+  dateModified: "2026-09-30",
   author: "GERDBuddy Team",
   category: "Lifestyle & Management",
   tags: ["GERDBuddy", "mySymptoms", "comparison", "acid reflux apps", "food diary"],
   content: `
-We make GERDBuddy, so read this knowing exactly where we stand. We're writing it anyway because people ask, and because the honest answer isn't "ours, obviously." These are two genuinely different tools that happen to share a category. All ratings and prices below are from the US App Store as of August 2026.
+We make GERDBuddy, so read this knowing exactly where we stand. We're writing it anyway because people ask, and because the honest answer isn't "ours, obviously." These are two genuinely different tools that happen to share a category. Ratings and competitor prices below are from the US App Store as of August 2026. GERDBuddy pricing was updated on September 30, 2026.
 
 The one-paragraph verdict: **mySymptoms is a broad, mature food and symptom diary with statistical analysis, available on Android, iPhone, iPad, and Mac.** If you want to log everything and let correlation analysis hunt for patterns across any condition, it's excellent, and it has a decade of ratings to back it up. **GERDBuddy is reflux-only and built around the moment of decision:** scan a meal or a restaurant menu before you eat, get your personal trigger ranking, and use a guided routine when a flare hits. If reflux is your one problem and you want help *before* and *during*, not just analysis *after*, that's the job we built it for.
 
@@ -20,7 +21,7 @@ The one-paragraph verdict: **mySymptoms is a broad, mature food and symptom diar
 |---|---|---|
 | App Store rating | 4.6 stars (~4,000 ratings) | 4.4 stars (22 ratings) |
 | Free tier | Food and symptom logging | Symptom logging, limited scans |
-| Paid price | $9.99/month, $39.99/6 months, $59.99/year | $6.99/month, $39.99/year (3-day trial) |
+| Paid price | $9.99/month, $39.99/6 months, $59.99/year | $14.99/month, $59.99/year (3-day trial) |
 | Platforms | iPhone, iPad, Mac, Android | iPhone only |
 | Scope | Any diet-related condition (IBS, FODMAP, migraines, eczema, reflux) | GERD and acid reflux only |
 | Core method | Log everything, correlation analysis finds patterns | Scanner rates food before you eat, trigger ranking learns from your logs |
@@ -41,7 +42,6 @@ A note on those ratings: mySymptoms has roughly 180 times more ratings than we d
 - **You want an answer before you eat, not after.** mySymptoms tells you what happened; its analysis needs weeks of logs. GERDBuddy's scanner gives you a reflux-risk read on a meal photo or a restaurant menu in the moment, then refines its picture of you as you log.
 - **You eat out a lot.** Restaurant menu scanning is the feature GERDBuddy is built around, and nothing in mySymptoms addresses it.
 - **You want help during a flare.** The guided breathing routine exists because 2am reflux is when people actually open the app. A diary has nothing for you at 2am.
-- **Price, slightly.** $39.99/year vs $59.99/year for premium, though mySymptoms' free tier is more complete for pure manual logging.
 
 ## Can you use both?
 

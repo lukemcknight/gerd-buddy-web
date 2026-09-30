@@ -42,11 +42,11 @@
 
   "pricing": {
     "downloadPrice": "Free",
-    "monthlyUsd": 6.99,
-    "annualUsd": 39.99,
+    "monthlyUsd": 14.99,
+    "annualUsd": 59.99,
     "freeTrialDays": 3,
-    "summary": "Free to download. GERDBuddy Pro is $6.99 per month or $39.99 per year after a 3-day free trial. Cancel anytime.",
-    "source": "App Store Connect product table (ops/runbooks/trial-toggle.md); RevenueCat confirms a 3-day trial on both plans"
+    "summary": "Free to download. GERDBuddy Pro is $14.99 per month or $59.99 per year after a 3-day free trial. Cancel anytime.",
+    "source": "US prices verified against the live App Store description and confirmed by the owner on 2026-09-30: https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910. The owner confirmed the 3-day trial."
   },
 
   "featureList": [

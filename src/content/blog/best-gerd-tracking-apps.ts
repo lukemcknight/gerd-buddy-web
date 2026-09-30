@@ -6,11 +6,12 @@ const post: BlogPost = {
   description:
     "A straight comparison of the main acid reflux and GERD tracking apps: mySymptoms, NoBurn, Cara Care, and GERDBuddy, with verified ratings, prices, and who each one actually fits.",
   date: "2026-08-11",
+  dateModified: "2026-09-30",
   author: "GERDBuddy Team",
   category: "Lifestyle & Management",
   tags: ["GERD apps", "comparison", "food tracking", "symptom diary", "acid reflux apps"],
   content: `
-Full disclosure before anything else: we make GERDBuddy, one of the apps in this comparison. You should read everything below knowing that. We've kept every number verifiable (ratings and prices are from the US App Store as of August 2026), and we'll tell you plainly where the other apps are the better choice, because a comparison that always concludes "buy ours" isn't a comparison.
+Full disclosure before anything else: we make GERDBuddy, one of the apps in this comparison. You should read everything below knowing that. We've kept every number verifiable (ratings and competitor prices are from the US App Store as of August 2026; GERDBuddy pricing was updated on September 30, 2026), and we'll tell you plainly where the other apps are the better choice, because a comparison that always concludes "buy ours" isn't a comparison.
 
 The short version: **mySymptoms** is the best general food and symptom diary, especially if you want Android or your issues go beyond reflux. **NoBurn** is a well-rated GERD-specific tracker with a community. **Cara Care** has great historical ratings but hasn't shipped an app update since October 2020 and is built for IBS, not reflux. **GERDBuddy** (ours) is built specifically for reflux relief and eating out. Details and honest tradeoffs below.
 
@@ -44,7 +45,7 @@ Cara Care earned its rating as a guided IBS and FODMAP program, and Germany's di
 
 ## GERDBuddy: ours, built for reflux relief and eating out
 
-**4.4 stars, 22 ratings (yes, we're the newest and smallest here, we won't pretend otherwise). Free to download; Pro is $6.99/month or $39.99/year after a 3-day trial. iPhone only.**
+**4.4 stars, 22 ratings (yes, we're the newest and smallest here, we won't pretend otherwise). Free to download; Pro is $14.99/month or $59.99/year after a 3-day trial. iPhone only.**
 
 GERDBuddy's bet is different from a classic diary: instead of asking you to log everything and analyze later, it tries to help in the moment. You can scan a meal photo and see its reflux risk before you eat it, scan a restaurant menu and get the safest dishes ranked for you, and open a guided routine to calm an active flare. Underneath, it still does the diary job: two-tap symptom logging and a personal trigger ranking built from your own meals rather than a generic list, which is the approach [current guidance actually recommends](/blog/do-gerd-food-tracking-apps-work).
 
