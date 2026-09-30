@@ -64,7 +64,7 @@
         respect_dnt: true,
         // The app filters explicit click events after SDK context is attached.
         before_send: function (event) {
-          return window.gerdbuddyBeforeSend ? window.gerdbuddyBeforeSend(event) : event;
+          return event && window.gerdbuddyBeforeSend ? window.gerdbuddyBeforeSend(event) : event;
         }
       });
     }
