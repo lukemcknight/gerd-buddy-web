@@ -3,12 +3,14 @@
  * Reads blog post source files and generates static HTML with full content,
  * meta tags, and JSON-LD for each route — no browser required.
  *
- * Run as part of the build: `node scripts/prerender.js`
+ * Run as part of the build: `node --import tsx scripts/prerender.js`
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "fs";
+import { readFileSync, writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { posts } from "../src/content/blog/index.ts";
+import { HOME, bigFeatures, moreFeatures, faqItems, homepageSchema } from "../src/content/homepage.ts";
 import { marked } from "marked";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -20,23 +22,14 @@ const SITE_URL = "https://www.gerdbuddy.app";
 // cannot drift apart. See src/config/app-facts.json for how each value was verified.
 const readJson = (path) => JSON.parse(readFileSync(resolve(__dirname, path), "utf-8"));
 const APP = readJson("../src/config/app-facts.json");
-const HOME_FAQS = readJson("../src/content/home-faqs.json");
 const BLOG_FAQS = readJson("../src/content/blog/faqs.json");
 
 // Byline. Mirrors AUTHOR in src/config/site.ts.
 const AUTHOR = { name: "Luke McKnight", jobTitle: "Founder, GERDBuddy" };
 
-// Resolve {{dotted.path}} tokens in FAQ answers against app-facts.json. Unlike the
-// browser-side resolver this THROWS, so a bad token fails `npm run build` instead of
-// shipping a literal "{{pricing.summary}}" to an AI crawler.
-const resolveFacts = (text) =>
-  text.replace(/\{\{([\w.]+)\}\}/g, (_, path) => {
-    const value = path.split(".").reduce((acc, key) => (acc == null ? acc : acc[key]), APP);
-    if (value === undefined || value === null) {
-      throw new Error(`prerender: unknown app-facts token {{${path}}}`);
-    }
-    return String(value);
-  });
+if (faqItems.some((faq) => /\{\{.*?\}\}/.test(faq.a))) {
+  throw new Error("Unresolved product fact in homepage FAQ");
+}
 
 // Read the built index.html as our shell
 const shell = readFileSync(resolve(DIST, "index.html"), "utf-8");
@@ -53,59 +46,14 @@ const inlineScripts = [...shell.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)
   .map((m) => m[0])
   .join("\n");
 
-// Parse blog post files
-const blogDir = resolve(__dirname, "../src/content/blog");
-const blogFiles = readdirSync(blogDir).filter(
-  (f) => f.endsWith(".ts") && f !== "index.ts" && f !== "types.ts"
-);
-
-function extractField(content, field) {
-  // Handle multiline string fields (like description that may span lines)
-  const multiline = content.match(new RegExp(`${field}:\\s*\\n?\\s*["'\`]([^"'\`]+)["'\`]`));
-  if (multiline) return multiline[1];
-  const single = content.match(new RegExp(`${field}:\\s*["'\`]([^"'\`]+)["'\`]`));
-  return single ? single[1] : null;
-}
-
-function extractArray(content, field) {
-  const match = content.match(new RegExp(`${field}:\\s*\\[([^\\]]+)\\]`));
-  if (!match) return [];
-  return match[1].match(/["']([^"']+)["']/g)?.map((s) => s.replace(/["']/g, "")) || [];
-}
-
-const posts = [];
-for (const file of blogFiles) {
-  const raw = readFileSync(resolve(blogDir, file), "utf-8");
-  const slug = extractField(raw, "slug");
-  if (!slug) continue;
-
-  // Extract markdown content between backticks
-  const contentMatch = raw.match(/content:\s*`\n?([\s\S]*?)`\.trim\(\)/);
-  const markdownContent = contentMatch ? contentMatch[1].trim() : "";
-
-  posts.push({
-    slug,
-    title: extractField(raw, "title") || slug,
-    description: extractField(raw, "description") || "",
-    date: extractField(raw, "date") || "",
-    dateModified: extractField(raw, "dateModified") || "",
-    author: extractField(raw, "author") || "GERDBuddy Team",
-    category: extractField(raw, "category") || "GERD Management",
-    tags: extractArray(raw, "tags"),
-    content: markdownContent,
-  });
-}
-
-posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-function buildPage({ title, description, path, content, jsonLd, extra = "" }) {
+function buildPage({ title, description, path, content, jsonLd, type = "website", extra = "" }) {
   const fullTitle = `${title} | GERDBuddy`;
   const url = `${SITE_URL}${path}`;
   const jsonLdTags = (Array.isArray(jsonLd) ? jsonLd : [jsonLd])
     .filter(Boolean)
-    .map((j) => `<script type="application/ld+json">${JSON.stringify(j)}</script>`)
+    .map((j) => `<script type="application/ld+json" data-rh="true">${JSON.stringify(j)}</script>`)
     .join("\n");
 
   return `<!doctype html>
@@ -114,20 +62,20 @@ function buildPage({ title, description, path, content, jsonLd, extra = "" }) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>${esc(fullTitle)}</title>
-  <meta name="description" content="${esc(description)}" />
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <link rel="canonical" href="${url}" />
-  <meta property="og:title" content="${esc(title)}" />
-  <meta property="og:description" content="${esc(description)}" />
-  <meta property="og:url" content="${url}" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="${SITE_URL}/gerdbuddy-mark.png" />
-  <meta property="og:site_name" content="GERDBuddy" />
-  <meta property="og:locale" content="en_US" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${esc(title)}" />
-  <meta name="twitter:description" content="${esc(description)}" />
-  <meta name="twitter:image" content="${SITE_URL}/gerdbuddy-mark.png" />
+  <meta name="description" content="${esc(description)}" data-rh="true" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" data-rh="true" />
+  <link rel="canonical" href="${url}" data-rh="true" />
+  <meta property="og:title" content="${esc(title)}" data-rh="true" />
+  <meta property="og:description" content="${esc(description)}" data-rh="true" />
+  <meta property="og:url" content="${url}" data-rh="true" />
+  <meta property="og:type" content="${type}" data-rh="true" />
+  <meta property="og:image" content="${SITE_URL}/gerdbuddy-mark.png" data-rh="true" />
+  <meta property="og:site_name" content="GERDBuddy" data-rh="true" />
+  <meta property="og:locale" content="en_US" data-rh="true" />
+  <meta name="twitter:card" content="summary_large_image" data-rh="true" />
+  <meta name="twitter:title" content="${esc(title)}" data-rh="true" />
+  <meta name="twitter:description" content="${esc(description)}" data-rh="true" />
+  <meta name="twitter:image" content="${SITE_URL}/gerdbuddy-mark.png" data-rh="true" />
   <meta name="theme-color" content="#154212" />
   <meta name="apple-itunes-app" content="app-id=6756620910" />
   <link rel="alternate" type="application/rss+xml" title="GERDBuddy Blog" href="${SITE_URL}/feed.xml" />
@@ -157,101 +105,33 @@ function writePage(route, html) {
 
 console.log(`Prerendering ${2 + 1 + posts.length + 6} routes...`);
 
-// FAQ data for the homepage, from the same file the React page renders.
-const faqItems = [...HOME_FAQS.product, ...HOME_FAQS.general].map((f) => ({
-  q: f.q,
-  a: resolveFacts(f.a),
-}));
-
 const faqHtml = faqItems
   .map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`)
   .join("\n");
-
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqItems.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: { "@type": "Answer", text: f.a },
-  })),
-};
 
 const recentBlogHtml = posts.slice(0, 3)
   .map((p) => `<article><h3><a href="/blog/${p.slug}">${esc(p.title)}</a></h3><p>${esc(p.description)}</p><time datetime="${p.date}">${p.date}</time></article>`)
   .join("\n");
 
-// Home page
+// The crawler-visible homepage uses the same copy and schema as React.
 writePage("/", buildPage({
-  title: "Your All-in-One GERD Resource — Articles, Tracking & Community",
-  description: "Track triggers, explore expert articles, and connect with a community that gets it. GERDBuddy is your all-in-one resource for managing GERD and acid reflux.",
+  title: HOME.title,
+  description: HOME.description,
   path: "/",
-  content: `<h1>Your All-in-One GERD Resource</h1>
-<p>Track triggers, explore expert articles, and connect with a community that gets it.</p>
-
-<section>
-  <h2>Blog &amp; Articles</h2>
-  <p>Expert-written articles on managing GERD, trigger foods, and lifestyle tips.</p>
-  <a href="/blog">Browse articles</a>
-
-  <h2>Community Forum</h2>
-  <p>Ask questions, share what works, and connect with others who understand life with GERD.</p>
-  <a href="/forum">Visit the forum</a>
-
-  <h2>GERDBuddy App</h2>
-  <p>${esc(APP.shortDescription)}</p>
-  <p>${esc(APP.pricing.summary)} Rated ${APP.rating.value} out of 5 from ${APP.rating.count} ratings. Requires ${esc(APP.operatingSystem)}.</p>
-  <a href="${APP.url}">Get it on the App Store</a>
+  content: `<h1>${esc(HOME.heroLines.join(" "))}</h1>
+<p>${esc(HOME.intro)}</p>
+<p>${esc(APP.pricing.summary)}</p>
+<a href="${APP.url}">Download on iOS</a>
+<section id="features"><h2>${esc(HOME.featuresHeading)}</h2>
+${bigFeatures.map((f) => `<article><h3>${esc(f.title)}</h3><p>${esc(f.body)}</p><ul>${f.points.map((p) => `<li>${esc(p)}</li>`).join("")}</ul></article>`).join("\n")}
+${moreFeatures.map((f) => `<article><h3>${esc(f.title)}</h3><p>${esc(f.body)}</p></article>`).join("\n")}
 </section>
-
-<section>
-  <h2>Recent Blog Posts</h2>
-  ${recentBlogHtml}
-  <a href="/blog">View all articles</a>
-</section>
-
-<section>
-  <h2>Frequently Asked Questions</h2>
-  <p>Everything you need to know about GERD, triggers, and GERDBuddy.</p>
-  ${faqHtml}
-</section>
-
-<section>
-  <h2>Why GERDBuddy?</h2>
-  <p>I built GERDBuddy because I know how frustrating it is to manage GERD without clear answers. This started as a simple tracking app and has grown into a community resource for everyone dealing with acid reflux. Whether you're newly diagnosed or have been managing symptoms for years, you deserve better tools and a supportive community to help you figure out what works for your body.</p>
-</section>`,
-  jsonLd: [
-    faqSchema,
-    { "@context": "https://schema.org", "@type": "WebSite", name: "GERDBuddy", url: SITE_URL, description: "Track meals and symptoms to discover your personal GERD triggers with AI-powered insights." },
-    { "@context": "https://schema.org", "@type": "Organization", name: "GERDBuddy", url: SITE_URL, logo: `${SITE_URL}/gerdbuddy-mark.png`, contactPoint: { "@type": "ContactPoint", email: "gerdbuddy2@gmail.com", contactType: "customer support" } },
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: APP.name,
-      operatingSystem: APP.operatingSystem,
-      applicationCategory: APP.applicationCategory,
-      applicationSubCategory: APP.applicationSubCategory,
-      url: APP.url,
-      installUrl: APP.url,
-      description: APP.shortDescription,
-      featureList: APP.featureList,
-      screenshot: APP.screenshots.urls,
-      contentRating: APP.contentRating,
-      publisher: { "@type": "Organization", name: "GERDBuddy" },
-      aggregateRating: { "@type": "AggregateRating", ratingValue: APP.rating.value, ratingCount: APP.rating.count, bestRating: 5, worstRating: 1 },
-      offers: {
-        "@type": "AggregateOffer",
-        priceCurrency: "USD",
-        lowPrice: APP.pricing.monthlyUsd,
-        highPrice: APP.pricing.annualUsd,
-        offerCount: 2,
-        offers: [
-          { "@type": "Offer", name: "GERDBuddy Pro, monthly", price: APP.pricing.monthlyUsd, priceCurrency: "USD", url: APP.url, category: "subscription" },
-          { "@type": "Offer", name: "GERDBuddy Pro, annual", price: APP.pricing.annualUsd, priceCurrency: "USD", url: APP.url, category: "subscription" },
-        ],
-      },
-    },
-  ],
+<section><h2>GERD articles</h2>${recentBlogHtml}<a href="/blog">View all articles</a></section>
+<section><h2>Community forum</h2><p>Ask questions, share what works, and connect with people who actually understand life with reflux.</p><a href="/forum">Join the conversation</a></section>
+<section><h2>Frequently asked questions</h2>${faqHtml}</section>
+<section><h2>Why GERDBuddy?</h2><p>${esc(HOME.founder)}</p></section>
+<section><h2>${esc(HOME.ctaHeading)}</h2><p>${esc(APP.pricing.summary)}</p><a href="${APP.url}">Download on the App Store</a></section>`,
+  jsonLd: homepageSchema,
 }));
 console.log("  ✓ /");
 
@@ -360,10 +240,11 @@ for (const post of posts) {
     ],
   };
 
-  const articleMeta = post.tags.map((t) => `<meta property="article:tag" content="${esc(t)}" />`).join("\n  ");
+  const articleMeta = post.tags.map((t) => `<meta property="article:tag" content="${esc(t)}" data-rh="true" />`).join("\n  ");
 
   writePage(`/blog/${post.slug}`, buildPage({
     title: post.title,
+    type: "article",
     description: post.description,
     path: `/blog/${post.slug}`,
     content: `<nav><a href="/">Home</a> &gt; <a href="/blog">Blog</a> &gt; ${esc(post.title)}</nav>
@@ -376,9 +257,9 @@ for (const post of posts) {
 ${postFaqHtml}
 ${sourcesHtml}`,
     jsonLd: [articleSchema, medicalSchema, breadcrumbSchema, faqSchema].filter(Boolean),
-    extra: `<meta property="article:published_time" content="${post.date}" />
-  <meta property="article:modified_time" content="${post.dateModified || post.date}" />
-  <meta property="article:section" content="${esc(post.category)}" />
+    extra: `<meta property="article:published_time" content="${post.date}" data-rh="true" />
+  <meta property="article:modified_time" content="${post.dateModified || post.date}" data-rh="true" />
+  <meta property="article:section" content="${esc(post.category)}" data-rh="true" />
   ${articleMeta}`,
   }));
   console.log(`  ✓ /blog/${post.slug}`);

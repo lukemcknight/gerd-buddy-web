@@ -4,9 +4,8 @@ export const SITE_URL = "https://www.gerdbuddy.app";
 export const SITE_NAME = "GERDBuddy";
 export const DEFAULT_IMAGE = `${SITE_URL}/gerdbuddy-mark.png`;
 
-// Canonical App Store listing (GERDBuddy - GERD Food Scanner, app-id 6756620910).
-export const APP_STORE_URL =
-  "https://apps.apple.com/us/app/gerdbuddy-gerd-food-scanner/id6756620910";
+// Canonical App Store listing, shared with product facts.
+export const APP_STORE_URL = appFacts.url;
 
 /**
  * Verified product facts (price, rating, features, App Store URL).

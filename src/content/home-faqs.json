@@ -3,27 +3,27 @@
   "product": [
     {
       "q": "How much does GERDBuddy cost?",
-      "a": "{{pricing.summary}} The free download includes the flare-up relief routine and basic logging; scanning, menu scans, and full trigger analysis are part of GERDBuddy Pro."
+      "a": "{{pricing.summary}} An active subscription is required after the trial; free to download does not mean an ongoing free logging plan."
     },
     {
       "q": "Is GERDBuddy free?",
-      "a": "GERDBuddy is free to download and includes a {{pricing.freeTrialDays}}-day free trial of Pro. After the trial, Pro is ${{pricing.monthlyUsd}} per month or ${{pricing.annualUsd}} per year. You can cancel anytime from your Apple account."
+      "a": "GERDBuddy is free to download, with a {{pricing.freeTrialDays}}-day trial for eligible subscribers. Continued access requires a subscription: ${{pricing.monthlyUsd}} per month or ${{pricing.annualUsd}} per year. Manage or cancel it in your Apple account."
     },
     {
       "q": "What devices does GERDBuddy work on?",
-      "a": "GERDBuddy is an iPhone app and requires {{operatingSystem}}. It is not currently available on Android or as a web app."
+      "a": "GERDBuddy supports {{devices}}, with {{operatingSystem}} on iPhone and the corresponding iPadOS version on iPad. The tracking app is not available on Android or in a web browser."
     },
     {
       "q": "How is GERDBuddy rated on the App Store?",
-      "a": "GERDBuddy is rated {{rating.value}} out of 5 from {{rating.count}} ratings on the US App Store."
+      "a": "GERDBuddy is rated {{rating.value}} out of 5 from {{rating.count}} ratings on the US App Store, checked {{_verification.verifiedOn}}. Ratings can change."
     },
     {
       "q": "What makes GERDBuddy different from a generic food diary?",
-      "a": "Three things. It learns your triggers from the meals you actually log instead of applying a generic trigger-food list, it scans restaurant menus and ranks the safest dishes rather than only handling packaged foods, and it is built for relief in the moment rather than daily-streak habit tracking."
+      "a": "GERDBuddy combines meal and symptom logging with food and restaurant menu scans, personal pattern insights, and guided flare support. Risk estimates and trigger associations are suggestions, not proof that a food is safe or causes symptoms."
     },
     {
       "q": "Can GERDBuddy tell me if a specific food will trigger my reflux?",
-      "a": "It estimates reflux risk for a meal from a photo, and as you log more meals and symptoms it ranks your personal triggers with confidence scores and identifies your safe foods. Early on it reflects general reflux patterns; the personalization improves as your own data accumulates."
+      "a": "It can estimate reflux risk from a meal photo and highlight associations in your logged meals and symptoms. It cannot reliably predict an individual reaction, confirm a trigger, or guarantee that a food is safe."
     },
     {
       "q": "Does GERDBuddy replace seeing a doctor?",
@@ -37,11 +37,11 @@
     },
     {
       "q": "Is my data shared or sold?",
-      "a": "No. User data is never sold or shared."
+      "a": "GERDBuddy does not sell meal, symptom, photo, or chat content. Connected AI features, analytics, accounts, and subscriptions involve service providers; see our Privacy Policy for what is processed and your choices."
     },
     {
       "q": "How do I cancel my subscription?",
-      "a": "Subscriptions are managed through your Apple App Store or Google Play account."
+      "a": "Manage or cancel your GERDBuddy subscription in your Apple account subscriptions. Deleting the app does not cancel a subscription."
     },
     {
       "q": "What foods trigger GERD?",
@@ -49,7 +49,7 @@
     },
     {
       "q": "How do I track my GERD triggers?",
-      "a": "Keep a food and symptom journal for at least 1-2 weeks. Record what you eat, when you eat, any symptoms you experience, and their severity. GERDBuddy makes this easy by letting you quickly log meals and symptoms on your phone and uses AI to help surface patterns and correlations."
+      "a": "Record meals, timing, symptoms, and severity, along with other relevant context. GERDBuddy helps organize these entries and surface possible patterns. A food diary can support a discussion with your clinician, but does not establish that a food caused a symptom."
     },
     {
       "q": "What is the difference between GERD and heartburn?",
@@ -73,11 +73,11 @@
     },
     {
       "q": "What is the best app for tracking GERD triggers?",
-      "a": "GERDBuddy is a dedicated GERD trigger tracking app available on the App Store. It lets you quickly log meals and symptoms, then uses AI-powered insights to help you identify your personal trigger foods and patterns. Most users start seeing meaningful patterns within 7 days of consistent tracking."
+      "a": "The best fit depends on your device, budget, and preferred workflow. GERDBuddy combines meal and symptom logs with estimated reflux-risk scans and pattern insights. An app cannot confirm a trigger or replace clinical assessment."
     },
     {
       "q": "How long does it take to identify GERD triggers?",
-      "a": "With consistent daily tracking of meals and symptoms, most people can start identifying their primary GERD triggers within 1-2 weeks. A more complete picture typically emerges after 3-4 weeks."
+      "a": "There is no guaranteed timeline. The usefulness of a diary depends on how often symptoms occur, what you record, and other factors affecting them. Review possible patterns with your clinician rather than treating an app association as proof."
     },
     {
       "q": "Can a hiatal hernia cause GERD?",

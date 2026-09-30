@@ -18,74 +18,14 @@ import { format, formatDistanceToNow } from "date-fns";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { posts } from "@/content/blog";
-import homeFaqs from "@/content/home-faqs.json";
+import { HOME, bigFeatures as featureCopy, moreFeatures as moreFeatureCopy, faqItems, homepageSchema } from "@/content/homepage";
 import SEO from "@/components/SEO";
-import { SITE_URL, APP_STORE_URL, FORUM_CATEGORIES, APP } from "@/config/site";
-import { resolveFacts } from "@/lib/facts";
+import { APP_STORE_URL, FORUM_CATEGORIES, APP } from "@/config/site";
+
 
 const latestPosts = posts.slice(0, 3);
-
-// Product questions first: an assistant answering "how much does GERDBuddy cost"
-// or "what makes it different" reads the top of the list. Both groups are one
-// FAQPage, defined once in content/home-faqs.json.
-const faqItems = [...homeFaqs.product, ...homeFaqs.general].map((f) => ({
-  q: f.q,
-  a: resolveFacts(f.a),
-}));
-
-const bigFeatures = [
-  {
-    eyebrow: "AI Food Scanner",
-    title: "Scan any meal for triggers",
-    body: "Point your camera at a plate and GERDBuddy scores it against your own tracked patterns — so you know if it's safe before the first bite.",
-    points: ["Instant GERD safety score", "Flags likely triggers and safe foods", "Plain-language analysis"],
-    image: "/screens/scan.png",
-    icon: ScanLine,
-  },
-  {
-    eyebrow: "Pattern Insights",
-    title: "See what's actually setting you off",
-    body: "Severity trends and suspected triggers, ranked by signal strength. Coffee, milk, red wine — the data names names.",
-    points: ["7-day severity trends", "Triggers ranked by confidence", "Patterns in days, not months"],
-    image: "/screens/insights.png",
-    icon: TrendingUp,
-  },
-  {
-    eyebrow: "Ask GERDBuddy AI",
-    title: "Answers grounded in your own data",
-    body: "Wondering if you can have that glass of red wine? Ask, and get a straight answer based on your logs — not generic internet advice.",
-    points: ["Personalized to your history", "Cites the data behind every answer", "There whenever a craving hits"],
-    image: "/screens/ai.png",
-    icon: Sparkles,
-  },
-];
-
-const moreFeatures = [
-  {
-    title: "Instant flare relief",
-    body: "Guided breathing and soothing steps to take the edge off the burn — right when you need it.",
-    image: "/screens/sos.png",
-    icon: HeartPulse,
-  },
-  {
-    title: "GERD-safe recipes",
-    body: "Low-acid, low-fat meal ideas that are gentle on reflux, sorted by meal.",
-    image: "/screens/recipes.png",
-    icon: BookOpen,
-  },
-  {
-    title: "Doctor-ready reports",
-    body: "A clean PDF of your trigger evidence, safe foods, and symptom trends for your next appointment.",
-    image: "/screens/report.png",
-    icon: FileText,
-  },
-  {
-    title: "Meds and reminders",
-    body: "Track PPIs and antacids, set reminders, and log every dose in seconds.",
-    image: "/screens/medication.png",
-    icon: Pill,
-  },
-];
+const bigFeatures = featureCopy.map((feature, i) => ({ ...feature, icon: [ScanLine, TrendingUp, Sparkles][i] }));
+const moreFeatures = moreFeatureCopy.map((feature, i) => ({ ...feature, icon: [HeartPulse, BookOpen, FileText, Pill][i] }));
 
 const trustBadges = [
   { icon: Apple, label: "On the App Store" },
@@ -93,93 +33,6 @@ const trustBadges = [
   { icon: ShieldCheck, label: "Private by design" },
   { icon: HeartPulse, label: "Built for flares" },
 ];
-
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqItems.map((f) => ({
-    "@type": "Question",
-    name: f.q,
-    acceptedAnswer: { "@type": "Answer", text: f.a },
-  })),
-};
-
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "GERDBuddy",
-  url: SITE_URL,
-  logo: `${SITE_URL}/gerdbuddy-mark.png`,
-  contactPoint: {
-    "@type": "ContactPoint",
-    email: "gerdbuddy2@gmail.com",
-    contactType: "customer support",
-  },
-};
-
-const webSiteSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "GERDBuddy",
-  url: SITE_URL,
-  description: "Scan meals, calm flares, and discover your personal GERD triggers with AI grounded in your own data.",
-  publisher: {
-    "@type": "Organization",
-    name: "GERDBuddy",
-  },
-};
-
-const softwareAppSchema = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: APP.name,
-  operatingSystem: APP.operatingSystem,
-  applicationCategory: APP.applicationCategory,
-  applicationSubCategory: APP.applicationSubCategory,
-  url: APP.url,
-  installUrl: APP.url,
-  description: APP.shortDescription,
-  featureList: APP.featureList,
-  screenshot: APP.screenshots.urls,
-  contentRating: APP.contentRating,
-  publisher: { "@type": "Organization", name: "GERDBuddy" },
-  // Real numbers only. Both come from config/app-facts.json, which records where
-  // each value was verified and how to re-check it.
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: APP.rating.value,
-    ratingCount: APP.rating.count,
-    bestRating: 5,
-    worstRating: 1,
-  },
-  offers: {
-    "@type": "AggregateOffer",
-    priceCurrency: "USD",
-    lowPrice: APP.pricing.monthlyUsd,
-    highPrice: APP.pricing.annualUsd,
-    offerCount: 2,
-    offers: [
-      {
-        "@type": "Offer",
-        name: "GERDBuddy Pro, monthly",
-        price: APP.pricing.monthlyUsd,
-        priceCurrency: "USD",
-        url: APP.url,
-        category: "subscription",
-        eligibleDuration: { "@type": "QuantitativeValue", value: 1, unitCode: "MON" },
-      },
-      {
-        "@type": "Offer",
-        name: "GERDBuddy Pro, annual",
-        price: APP.pricing.annualUsd,
-        priceCurrency: "USD",
-        url: APP.url,
-        category: "subscription",
-        eligibleDuration: { "@type": "QuantitativeValue", value: 1, unitCode: "ANN" },
-      },
-    ],
-  },
-};
 
 interface ForumThread {
   id: string;
@@ -222,10 +75,10 @@ const Index = () => {
   return (
     <div className="text-foreground">
       <SEO
-        title="Calm Your Reflux & Find Your Triggers"
-        description="Scan any meal, get instant relief in a flare, and uncover your personal GERD triggers with AI grounded in your own data. GERDBuddy is the relief-first GERD app on iOS."
+        title={HOME.title}
+        description={HOME.description}
         path="/"
-        jsonLd={[faqSchema, organizationSchema, webSiteSchema, softwareAppSchema]}
+        jsonLd={homepageSchema}
       />
 
       {/* ===== Hero ===== */}
@@ -247,13 +100,13 @@ const Index = () => {
               </span>
 
               <h1 className="font-display font-semibold text-5xl md:text-6xl lg:text-[4.25rem] leading-[1.04] tracking-tight text-balance">
-                Calm your reflux.
+                {HOME.heroLines[0]}
                 <br />
-                <span className="text-primary">Find your triggers.</span>
+                <span className="text-primary">{HOME.heroLines[1]}</span>
               </h1>
 
               <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed">
-                GERDBuddy helps you take the edge off a flare in the moment, scan meals before you eat, and finally see which foods are really behind your symptoms.
+                {HOME.intro}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
@@ -274,6 +127,8 @@ const Index = () => {
                   <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
+
+              <p className="text-sm text-muted-foreground">{APP.pricing.summary}</p>
 
               <div className="flex flex-wrap gap-x-6 gap-y-2 pt-3">
                 {trustBadges.map((badge) => (
@@ -298,7 +153,7 @@ const Index = () => {
                 />
                 <img
                   src="/screens/sos.png"
-                  alt="GERDBuddy instant relief screen showing a guided breathing exercise"
+                  alt="GERDBuddy flare support screen showing a guided breathing exercise"
                   className="relative z-10 w-[56%] max-w-[280px] drop-shadow-2xl animate-float"
                   loading="eager"
                 />
@@ -315,7 +170,7 @@ const Index = () => {
           <div className="text-center max-w-2xl mx-auto space-y-3">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent">What's inside</p>
             <h2 className="text-3xl md:text-4xl font-display font-semibold tracking-tight text-balance">
-              Everything you need to tame GERD, in one app
+              {HOME.featuresHeading}
             </h2>
           </div>
 
@@ -413,7 +268,7 @@ const Index = () => {
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <BookOpen className="w-6 h-6" />
             </span>
-            <h3 className="text-2xl font-display font-semibold tracking-tight">Expert articles</h3>
+            <h3 className="text-2xl font-display font-semibold tracking-tight">GERD articles</h3>
             <p className="text-muted-foreground leading-relaxed">
               {latestPosts[0]
                 ? `Latest: ${latestPosts[0].title}`
@@ -547,7 +402,7 @@ const Index = () => {
         <section className="max-w-3xl mx-auto text-center space-y-4">
           <h2 className="text-2xl md:text-3xl font-display font-semibold tracking-tight">Why GERDBuddy?</h2>
           <p className="text-muted-foreground leading-relaxed text-lg">
-            I built GERDBuddy because I know how frustrating it is to manage GERD without clear answers. It started as a simple tracking app and has grown into a relief-first companion — and a community resource — for everyone dealing with acid reflux. Whether you're newly diagnosed or have been managing symptoms for years, you deserve better tools and a supportive community to help you figure out what works for your body.
+            {HOME.founder}
           </p>
         </section>
 
@@ -560,10 +415,10 @@ const Index = () => {
           <div className="relative space-y-6 max-w-2xl mx-auto">
             <img src="/gerdbuddy-mark-light.png" alt="" className="mx-auto w-14 h-14 object-contain" />
             <h2 className="text-3xl md:text-5xl font-display font-semibold tracking-tight text-balance text-primary-foreground">
-              Take back control of your reflux
+              {HOME.ctaHeading}
             </h2>
             <p className="text-lg text-primary-foreground/80 max-w-xl mx-auto">
-              Download GERDBuddy free on iOS and start scanning, soothing, and uncovering your triggers today.
+              {APP.pricing.summary}
             </p>
             <div className="flex justify-center pt-1">
               <a

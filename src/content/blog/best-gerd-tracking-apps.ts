@@ -11,60 +11,54 @@ const post: BlogPost = {
   category: "Lifestyle & Management",
   tags: ["GERD apps", "comparison", "food tracking", "symptom diary", "acid reflux apps"],
   content: `
-Full disclosure before anything else: we make GERDBuddy, one of the apps in this comparison. You should read everything below knowing that. We've kept every number verifiable (ratings and competitor prices are from the US App Store as of August 2026; GERDBuddy pricing was updated on September 30, 2026), and we'll tell you plainly where the other apps are the better choice, because a comparison that always concludes "buy ours" isn't a comparison.
+**Disclosure:** we make GERDBuddy. This is a comparison of public product listings, not a clinical evaluation or a hands-on test of every competitor. US App Store ratings, prices, and version dates were checked on **September 30, 2026**. Prices and availability can vary by platform, region, and offer.
 
-The short version: **mySymptoms** is the best general food and symptom diary, especially if you want Android or your issues go beyond reflux. **NoBurn** is a well-rated GERD-specific tracker with a community. **Cara Care** has great historical ratings but hasn't shipped an app update since October 2020 and is built for IBS, not reflux. **GERDBuddy** (ours) is built specifically for reflux relief and eating out. Details and honest tradeoffs below.
+**Which app fits?** Consider mySymptoms for a broad diary across digestive symptoms; NoBurn for a reflux-focused tracker with community features; Cara Care for its IBS and FODMAP focus; and GERDBuddy for food/menu scanning alongside reflux logs and guided flare support. None can prove that a food causes your symptoms or guarantee relief.
 
-## mySymptoms Food Diary: best general-purpose symptom diary
+## Compare the main options
 
-**4.6 stars, about 4,000 ratings. Free to download; Premium is $9.99/month, $39.99/6 months, or $59.99/year. iPhone, iPad, Mac, and Android.**
+| App | US App Store rating | Focus | Cost notes |
+|---|---|---|---|
+| mySymptoms | 4.6/5 from 4,045 ratings | Food and symptom diary, pattern analysis | $9.99/month, $39.99/6 months, or $59.99/year; iOS listing advertises a 7-day trial |
+| NoBurn | 4.7/5 from 259 ratings | Reflux tracking, scanning, community | Free download with paid Unlimited purchases; billing periods are unclear in the public listing |
+| Cara Care | 4.8/5 from 4,654 ratings | IBS and low-FODMAP tracking | Free download with in-app purchases; confirm current program availability |
+| GERDBuddy | 4.4/5 from 30 ratings | Reflux logs, meal/menu scans, flare support | $14.99/month or $59.99/year after a 3-day trial for eligible subscribers |
 
-mySymptoms has been around for over a decade and it shows, in a good way. You log food, drink, medication, stress, sleep, and exercise, and its correlation analysis looks for statistical links between what you logged and your symptoms. It's not reflux-specific: the same engine serves people chasing IBS, FODMAP sensitivities, migraines, and eczema triggers.
+Ratings measure user feedback, not medical effectiveness. GERDBuddy has substantially fewer ratings than the other apps here.
 
-**Choose it if:** you're on Android, you want clinician-shareable reports, or your symptoms span more than reflux.
+## mySymptoms: a broad food and symptom diary
 
-**Know going in:** it's a diary and an analysis engine, not a coach. Logging is manual, the interface is functional rather than pretty, and it won't help you decide what to order at a restaurant tonight.
+The [mySymptoms iOS listing](https://apps.apple.com/us/app/mysymptoms-food-diary/id405231632) describes food, symptom, and lifestyle logging with correlation analysis and shareable reports. It supports iPhone, iPad, and compatible Apple Silicon Macs. There is also an [Android version](https://play.google.com/store/apps/details?id=com.sglabs.mysymptoms).
 
-## NoBurn: best-rated GERD-specific tracker
+**Consider it if** you want one diary for several types of symptoms or need Android support. Its [Android user guide](https://www.mysymptoms.net/android-user-guide/) explains the diary and reporting workflow.
 
-**4.7 stars, about 220 ratings. Free to download with "Unlimited" upgrade tiers ranging from $3.99 to $49.99.**
+**Check before subscribing:** the platform listings differ. Google Play advertises free food and symptom logging with paid analysis, while the iOS listing describes subscription access and a trial. Do not assume the same free tier exists on both platforms.
 
-NoBurn is built for reflux the way mySymptoms is built for everything. It scans food for acidity and triggers, tracks symptoms and sleep, offers AI meal suggestions and reflux-friendly recipes, and has a small supportive community. Its ratings are strong for a newer app.
+## NoBurn: reflux tracking and community
 
-**Choose it if:** you want a GERD-specific tracker with a community feel and recipe browsing.
+The [NoBurn listing](https://apps.apple.com/us/app/noburn-reflux-gerd-tracker/id6745908361) describes food-photo scanning, symptom and lifestyle logs, recipes, and community features. It is designed for iPhone.
 
-**Know going in:** the "Unlimited" pricing tiers are a bit opaque from the App Store listing alone, so check what each unlocks before subscribing.
+**Consider it if** you want a reflux-focused app with community participation. Its listed Unlimited purchases range from $3.99 to $39.99, but the public labels do not identify the billing interval. Check the plan, renewal price, and included features inside the app; a free download alone does not establish free ongoing access.
 
-## Cara Care: strong ratings, but effectively dormant
+## Cara Care: IBS and FODMAP focus
 
-**4.8 stars, about 4,600 ratings, and that's the catch: per the App Store's own data, its last app version shipped in October 2020.**
+[Cara Care's US listing](https://apps.apple.com/us/app/cara-care-ibs-fodmap-tracker/id1133687886) emphasizes IBS, food and bowel-symptom tracking, and low-FODMAP programs. It also mentions reflux among the symptoms it can help record.
 
-Cara Care earned its rating as a guided IBS and FODMAP program, and Germany's digital-health system once prescribed it. But it targets IBS rather than reflux, and six years without an app update is a long time in both iOS terms and medical-content terms.
+**Consider it if** IBS tracking is your main priority. The US listing still shows version 5.4.5 from October 27, 2020. That is a reason to verify compatibility and program availability, not proof that all Cara Care services or regional apps are inactive.
 
-**Choose it if:** honestly, for reflux specifically, we'd look elsewhere today. For IBS, its content may still be useful if you accept the stale app.
+## GERDBuddy: reflux logs, scans, and guided support
 
-## GERDBuddy: ours, built for reflux relief and eating out
+[GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) supports iPhone and iPad. It combines meal and symptom logs with food-photo and restaurant-menu scans, suspected-trigger insights, and guided breathing and comfort steps during a flare.
 
-**4.4 stars, 22 ratings (yes, we're the newest and smallest here, we won't pretend otherwise). Free to download; Pro is $14.99/month or $59.99/year after a 3-day trial. iPhone only.**
+**Consider it if** reflux is your main concern and you want to review meals or menus alongside your own history. Scan results are estimates, and associations in your logs are not a diagnosis. Continued access requires a subscription after the trial; there is no ongoing free logging plan for new subscribers.
 
-GERDBuddy's bet is different from a classic diary: instead of asking you to log everything and analyze later, it tries to help in the moment. You can scan a meal photo and see its reflux risk before you eat it, scan a restaurant menu and get the safest dishes ranked for you, and open a guided routine to calm an active flare. Underneath, it still does the diary job: two-tap symptom logging and a personal trigger ranking built from your own meals rather than a generic list, which is the approach [current guidance actually recommends](/blog/do-gerd-food-tracking-apps-work).
+For a closer comparison, see [GERDBuddy vs mySymptoms](/blog/gerdbuddy-vs-mysymptoms).
 
-**Choose it if:** reflux is your main issue, you eat out a lot, and you want help during a flare, not just charts after it.
+## Choose around the job you need done
 
-**Know going in:** iPhone only, and the scanner features sit behind the subscription after the trial. If you just want a free manual diary, NoBurn or mySymptoms' free tier will serve you fine.
+Start with your device, budget, and preferred logging workflow. Use the trial to check how quickly you can record a real meal, correct an entry, and find a useful report. Read the subscription screen before confirming payment. If you only need a basic diary, a notebook can also help you organize observations without a subscription.
 
-## An honorable mention
-
-**Acid Reflux Diet Helper** (4.7 stars, about 190 ratings) takes a database approach: look up foods and their typical acidity instead of tracking your own patterns. Useful as a quick reference, but a generic acidity list can't tell you what *you* tolerate, which is [the whole problem with generic trigger lists](/blog/gerd-trigger-foods).
-
-## How to actually choose
-
-1. **Android?** mySymptoms. It's the only one here that runs there.
-2. **Symptoms beyond reflux?** mySymptoms for the breadth, or Cara Care's content if IBS is the core issue and the old app doesn't bother you.
-3. **Want a free, GERD-focused diary with a community?** NoBurn.
-4. **Reflux-first, eat out often, want in-the-moment help?** That's the user we built [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910?utm_source=blog&utm_medium=organic&utm_campaign=spearhead) for.
-
-Whichever you pick, the app matters less than the habit: track honestly for a couple of weeks, act on the patterns, and bring the data to your doctor. The evidence behind that loop is the same [no matter whose logo is on the icon](/blog/do-gerd-food-tracking-apps-work).
+Keep expectations realistic: a tracker organizes information for you and your clinician. Read more about [what food-tracking apps can and cannot tell you](/blog/do-gerd-food-tracking-apps-work).
   `.trim(),
 };
 

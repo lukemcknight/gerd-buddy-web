@@ -1,15 +1,13 @@
 {
   "_comment": "Single source of truth for machine-readable product facts. Consumed by src/pages/Index.tsx, scripts/prerender.js, and scripts/generate-llms.js so the SoftwareApplication schema, the page copy, and llms.txt can never disagree. AI assistants read these fields verbatim when asked what GERDBuddy is, what it costs, and how it is rated, so EVERY value here must be verifiable against a primary source. Never hand-edit a rating or price to something you have not just checked.",
-
   "_verification": {
-    "verifiedOn": "2026-07-25",
+    "verifiedOn": "2026-09-30",
     "howToReverify": [
       "name / rating / version / minimum OS: curl -s 'https://itunes.apple.com/lookup?id=6756620910&country=us'",
       "price / trial: ops/runbooks/trial-toggle.md (App Store Connect product table), cross-checked against RevenueCat (annual + monthly carry a P3D trial)",
       "featureList: must match the shipped App Store description in ops/store-listing/"
     ]
   },
-
   "appStoreId": "6756620910",
   "name": "GERDBuddy: Acid Reflux Relief",
   "url": "https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910",
@@ -17,29 +15,25 @@
   "applicationCategory": "HealthApplication",
   "applicationSubCategory": "Health & Fitness",
   "contentRating": "17+",
-
-  "shortDescription": "Scan any meal to see its reflux risk in seconds, calm an active flare with a guided routine, and learn your personal acid reflux triggers from what you actually eat.",
-
+  "shortDescription": "Track meals and symptoms, scan food and restaurant menus for estimated reflux risk, and explore personal patterns with guided flare support.",
   "screenshots": {
     "urls": [
-      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/c4/2c/ef/c42cef56-33f7-847b-e3a4-cfb74d8f5c60/01-scanner.png/320x480bb.jpg",
-      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/bb/fc/3c/bbfc3c93-c5f2-3c2b-aa3a-ff39b8d8eaba/02-menu.png/320x480bb.jpg",
-      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/14/2e/12/142e125c-38cb-4fa9-fe22-6055e822bfff/04-insights.png/320x480bb.jpg",
-      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/f5/7d/2c/f57d2cf0-3d8c-f487-32a4-bd98590f4af1/05-breathing.png/320x480bb.jpg",
-      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/42/85/2e/42852e1f-b47d-f805-1015-e46271c70330/03-logsymptom.png/320x480bb.jpg",
-      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/8b/fe/b8/8bfeb869-460a-c8c4-4f56-c0d45a944a8b/06-recipes.png/320x480bb.jpg",
-      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/1b/b8/cf/1bb8cfe8-2879-68af-081a-16eb9e1e7eab/07-medications.png/320x480bb.jpg",
-      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/a5/98/c1/a598c124-7afb-aebd-762e-6f12478467ff/08-report.png/320x480bb.jpg"
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/51/90/cd/5190cdd0-870a-b9cf-85c9-7479bbd2647e/01-scanner.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/00/32/c6/0032c622-9d68-ffb4-e2b9-6a3dba07137e/02-menu-picks.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/d6/bb/58/d6bb589d-b29f-8f9b-83c2-a8609e8f7d01/03-breathing.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/3b/54/9a/3b549a9d-ad40-e352-e0a4-a1607ebf3a8d/04-insights.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/3d/f5/0e/3df50eb8-3a60-ca0e-5b5e-62bdeb0e32df/05-ask-ai.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/b7/d2/67/b7d26700-49c5-0ae4-b914-c4e10835938b/06-recipes.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/e1/f0/63/e1f06352-52ad-9c1a-5164-8ff19c05ad67/07-reports.png/320x480bb.jpg",
+      "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/4b/ae/19/4bae1960-7879-6bca-7def-70dc7ec1462f/08-medications.png/320x480bb.jpg"
     ],
-    "source": "iTunes Lookup API screenshotUrls, checked 2026-08-11; refresh whenever App Store screenshots change"
+    "source": "US iTunes Lookup API screenshotUrls, checked 2026-09-30"
   },
-
   "rating": {
-    "value": 4.41,
-    "count": 22,
-    "source": "iTunes Lookup API, checked 2026-08-11"
+    "value": 4.43,
+    "count": 30,
+    "source": "US iTunes Lookup API, checked 2026-09-30"
   },
-
   "pricing": {
     "downloadPrice": "Free",
     "monthlyUsd": 14.99,
@@ -48,20 +42,18 @@
     "summary": "Free to download. GERDBuddy Pro is $14.99 per month or $59.99 per year after a 3-day free trial. Cancel anytime.",
     "source": "US prices verified against the live App Store description and confirmed by the owner on 2026-09-30: https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910. The owner confirmed the 3-day trial."
   },
-
   "featureList": [
-    "Scan a meal photo and see its reflux risk in seconds",
-    "Scan a restaurant menu and see the safest dishes ranked for you",
-    "Personal trigger ranking with confidence scores, plus your safe foods",
-    "Guided breathing routine to calm an active flare-up",
-    "Two-tap symptom logging with severity tracking"
+    "Meal photos with estimated reflux risk and possible trigger ingredients",
+    "Restaurant menu scanning with lower-risk suggestions",
+    "Personal trigger associations and confidence scores from logged meals and symptoms",
+    "Guided breathing and comfort steps during a flare",
+    "Symptom logging with severity tracking"
   ],
-
   "differentiators": [
-    "Learns your triggers from your own logged meals instead of applying a generic trigger-food list",
-    "Built for relief in the moment, not daily-streak habit tracking",
-    "Works on restaurant menus, not just packaged foods"
+    "Combines general reflux information with patterns from your own logs",
+    "Designed for support when you need it, without daily-streak mechanics",
+    "Scans restaurant menus as well as individual meals"
   ],
-
-  "notMedicalAdvice": "GERDBuddy is a tracking and information tool. It does not diagnose or treat disease and does not replace medical advice."
+  "notMedicalAdvice": "GERDBuddy is a tracking and information tool. It does not diagnose or treat disease and does not replace medical advice.",
+  "devices": "iPhone and iPad"
 }

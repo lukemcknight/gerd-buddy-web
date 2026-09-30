@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import { articleRemarkPlugins } from "@/lib/markdown";
 import { ArrowLeft, Calendar, User, Clock, ChevronRight } from "lucide-react";
 import { posts } from "@/content/blog";
 import faqData from "@/content/blog/faqs.json";
@@ -243,7 +244,9 @@ const BlogPost = () => {
 
           <div className="prose prose-slate max-w-none prose-headings:font-display prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:leading-relaxed prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline opacity-0 animate-slide-up stagger-2">
             <ReactMarkdown
+              remarkPlugins={articleRemarkPlugins}
               components={{
+                table: ({ children }) => <div className="overflow-x-auto"><table>{children}</table></div>,
                 h2: ({ children, ...props }) => <h2 {...props}>{children}</h2>,
                 h3: ({ children, ...props }) => <h3 {...props}>{children}</h3>,
               }}

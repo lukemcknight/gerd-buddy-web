@@ -1,14 +1,15 @@
 /**
  * Generates sitemap.xml from blog post data.
- * Run as part of the build: `node scripts/generate-sitemap.js`
+ * Run as part of the build: `node --import tsx scripts/generate-sitemap.js`
  *
  * This script reads the blog post files to extract slugs and dates,
  * then writes a sitemap.xml to the dist/ directory.
  */
 
-import { readFileSync, writeFileSync, readdirSync } from "fs";
+import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { posts } from "../src/content/blog/index.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SITE_URL = "https://www.gerdbuddy.app";
@@ -27,29 +28,13 @@ const staticPages = [
   { path: "/terms", priority: "0.3", changefreq: "yearly" },
 ];
 
-// Read blog post files to extract slugs and dates
-const blogDir = resolve(__dirname, "../src/content/blog");
-const blogFiles = readdirSync(blogDir).filter(
-  (f) => f.endsWith(".ts") && f !== "index.ts" && f !== "types.ts"
-);
-
-const blogEntries = [];
-for (const file of blogFiles) {
-  const content = readFileSync(resolve(blogDir, file), "utf-8");
-  const slugMatch = content.match(/slug:\s*["']([^"']+)["']/);
-  const dateMatch = content.match(/date:\s*["']([^"']+)["']/);
-  // Prefer dateModified: lastmod should reflect the last real edit, which is what
-  // tells a crawler the page is worth refetching.
-  const modifiedMatch = content.match(/dateModified:\s*["']([^"']+)["']/);
-  if (slugMatch) {
-    blogEntries.push({
-      path: `/blog/${slugMatch[1]}`,
-      lastmod: modifiedMatch?.[1] || dateMatch?.[1] || new Date().toISOString().split("T")[0],
-      priority: "0.7",
-      changefreq: "monthly",
-    });
-  }
-}
+// Use the same article records as the browser and every other publishing output.
+const blogEntries = posts.map((post) => ({
+  path: `/blog/${post.slug}`,
+  lastmod: post.dateModified || post.date,
+  priority: "0.7",
+  changefreq: "monthly",
+}));
 
 const today = new Date().toISOString().split("T")[0];
 

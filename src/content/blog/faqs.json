@@ -1,5 +1,5 @@
 {
-  "_comment": "AEO/GEO data for blog posts. Keyed by post slug. Consumed by src/pages/BlogPost.tsx (React) and scripts/prerender.js (static build) so both emit identical FAQPage JSON-LD and visible Q&A. Kept as JSON, not TS, so the plain-node prerender script can read it without a TypeScript loader. Every URL in `sources` was fetched and title-verified before being added: do not add a source you have not opened.",
+  "_comment": "AEO/GEO data for blog posts. Keyed by post slug. Consumed by src/pages/BlogPost.tsx (React) and scripts/prerender.js (static build) so both emit identical FAQPage JSON-LD and visible Q&A. Every URL in `sources` was fetched and title-verified before being added: do not add a source you have not opened.",
 
   "sources": {
     "niddk-adults": {
@@ -56,49 +56,69 @@
       "title": "Cara Care: IBS, FODMAP Tracker",
       "publisher": "US App Store listing, HiDoc Technologies GmbH",
       "url": "https://apps.apple.com/us/app/id1133687886"
+    },
+    "appstore-gerdbuddy": {
+      "url": "https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910",
+      "title": "GERDBuddy — US App Store",
+      "publisher": "US App Store listing, Luke McKnight"
+    },
+    "googleplay-mysymptoms": {
+      "url": "https://play.google.com/store/apps/details?id=com.sglabs.mysymptoms",
+      "title": "mySymptoms — Google Play",
+      "publisher": "Google Play listing, SkyGazer Labs Ltd"
     }
   },
 
   "posts": {
     "gerdbuddy-vs-mysymptoms": {
-      "sources": ["appstore-mysymptoms"],
+      "sources": [
+        "appstore-mysymptoms",
+        "appstore-gerdbuddy",
+        "googleplay-mysymptoms"
+      ],
       "faq": [
         {
           "q": "What is the difference between GERDBuddy and mySymptoms?",
-          "a": "mySymptoms is a broad food and symptom diary with statistical correlation analysis, covering conditions from IBS to migraines, on iPhone, iPad, Mac, and Android. GERDBuddy is reflux-only and works in the moment: it scans meals and restaurant menus for reflux risk before you eat, ranks your personal triggers, and offers a guided routine during a flare. As of August 2026, mySymptoms rates 4.6 stars from about 4,000 ratings; GERDBuddy rates 4.4 from 22."
+          "a": "mySymptoms focuses on a broad food and symptom diary with pattern analysis. GERDBuddy focuses on reflux logs, meal and restaurant-menu scans, and guided flare support. Neither diagnoses a condition or guarantees that a food is safe."
         },
         {
           "q": "Is mySymptoms good for acid reflux?",
-          "a": "Yes. mySymptoms lists acid reflux among the conditions it supports, and its food and symptom correlation analysis works well for finding reflux trigger patterns, especially if you also track other conditions. It does not offer reflux-specific features like menu scanning or in-flare guidance."
+          "a": "Its listing includes acid reflux among the symptoms users can track. Whether it fits depends on your logging and reporting needs; this comparison does not establish clinical effectiveness."
         },
         {
           "q": "Which is cheaper, GERDBuddy or mySymptoms?",
-          "a": "GERDBuddy Pro is $14.99 per month or $59.99 per year after a 3-day trial, updated September 30, 2026. In the August 2026 comparison, mySymptoms Premium was $9.99 per month or $59.99 per year: the same annual price and a lower monthly price. mySymptoms has the more complete free tier for pure manual logging."
+          "a": "As checked September 30, 2026, both list $59.99 per year on the US App Store. mySymptoms lists $9.99 per month, compared with GERDBuddy at $14.99 per month. Trials, eligibility, and prices may vary by platform and region."
         },
         {
           "q": "Can I use GERDBuddy and mySymptoms together?",
-          "a": "Yes. Some people use mySymptoms as the broad clinical diary across multiple conditions and GERDBuddy for restaurant menus and flare moments. The two roles do not overlap much."
+          "a": "You can use both, but automatic transfer of records between them has not been verified. Consider the extra effort of keeping two diaries before paying for both."
         }
       ]
     },
     "best-gerd-tracking-apps": {
-      "sources": ["appstore-mysymptoms", "appstore-noburn", "appstore-caracare"],
+      "sources": [
+        "appstore-mysymptoms",
+        "appstore-noburn",
+        "appstore-caracare",
+        "appstore-gerdbuddy",
+        "googleplay-mysymptoms"
+      ],
       "faq": [
         {
           "q": "What is the best app for tracking acid reflux triggers?",
-          "a": "It depends on your situation. mySymptoms is the strongest general food and symptom diary and the only major option on Android. NoBurn is a well-rated GERD-specific tracker with a community. GERDBuddy focuses on reflux relief in the moment, with a meal and restaurant menu scanner and a personal trigger ranking. Ratings and competitor prices in this comparison are from the US App Store as of August 2026. GERDBuddy pricing was updated on September 30, 2026."
+          "a": "There is no established winner for everyone. Consider device support, logging effort, reports, and cost. mySymptoms covers a broad diary workflow; NoBurn and GERDBuddy focus on reflux; Cara Care emphasizes IBS and FODMAP tracking. Our comparison is based on product listings, not clinical outcome testing."
         },
         {
           "q": "Are there free GERD tracking apps?",
-          "a": "All the major options are free to download with paid upgrades: mySymptoms Premium is $9.99 per month or $59.99 per year, NoBurn sells Unlimited tiers from $3.99 to $49.99, and GERDBuddy Pro is $14.99 per month or $59.99 per year after a 3-day trial. Basic manual logging is free in mySymptoms and NoBurn."
+          "a": "Free download does not always mean ongoing free access. The mySymptoms Android listing advertises free logging, while its iOS listing describes a subscription and trial. GERDBuddy requires a subscription after its trial. Check the current plan screen for NoBurn and Cara Care."
         },
         {
           "q": "Is Cara Care still good for acid reflux?",
-          "a": "Cara Care has a 4.8-star rating from about 4,600 reviews, but per App Store data its last app version shipped in October 2020, and it is built around IBS and the low-FODMAP diet rather than reflux. For GERD specifically, an actively maintained reflux-focused app is a better fit today."
+          "a": "Cara Care lists reflux tracking but emphasizes IBS and FODMAP programs. Its US listing still shows version 5.4.5 from October 27, 2020, so check compatibility and program availability. That does not establish whether other Cara Care services are active."
         },
         {
           "q": "Should I use a GERD-specific app or a general food diary?",
-          "a": "A general diary like mySymptoms is better when your symptoms span multiple conditions or you need clinician-shareable reports across many factors. A GERD-specific app is better when reflux is the main issue, because features like acidity scanning, trigger ranking, and flare relief are built around it. Either works for the core job of finding personal trigger patterns."
+          "a": "Choose based on the information you want to organize and the workflow you will use. A general diary may suit several types of symptoms; a reflux-focused app may add meal scans or flare support. Neither replaces clinical assessment."
         }
       ]
     },

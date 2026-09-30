@@ -1,4 +1,4 @@
-import appFacts from "@/config/app-facts.json";
+import appFacts from "../config/app-facts.json";
 
 /**
  * Replace `{{dotted.path}}` tokens with verified values from config/app-facts.json.

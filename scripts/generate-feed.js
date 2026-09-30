@@ -1,36 +1,15 @@
 /**
  * Generates RSS feed (feed.xml) from blog post data.
- * Run as part of the build: `node scripts/generate-feed.js`
+ * Run as part of the build: `node --import tsx scripts/generate-feed.js`
  */
 
-import { readFileSync, writeFileSync, readdirSync } from "fs";
+import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { posts } from "../src/content/blog/index.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SITE_URL = "https://www.gerdbuddy.app";
-
-const blogDir = resolve(__dirname, "../src/content/blog");
-const blogFiles = readdirSync(blogDir).filter(
-  (f) => f.endsWith(".ts") && f !== "index.ts" && f !== "types.ts"
-);
-
-const posts = [];
-for (const file of blogFiles) {
-  const content = readFileSync(resolve(blogDir, file), "utf-8");
-  const slug = content.match(/slug:\s*["']([^"']+)["']/)?.[1];
-  const title = content.match(/title:\s*["']([^"']+)["']/)?.[1];
-  const description = content.match(/description:\s*\n?\s*["']([^"']+)["']/)?.[1]
-    || content.match(/description:\s*["']([^"']+)["']/)?.[1];
-  const date = content.match(/date:\s*["']([^"']+)["']/)?.[1];
-  const author = content.match(/author:\s*["']([^"']+)["']/)?.[1];
-  if (slug && title && date) {
-    posts.push({ slug, title, description: description || "", date, author: author || "GERDBuddy Team" });
-  }
-}
-
-// Sort newest first
-posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 const escapeXml = (s) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");

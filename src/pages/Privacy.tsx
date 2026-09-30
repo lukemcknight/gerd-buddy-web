@@ -15,7 +15,7 @@ const Privacy = () => {
           <h1 className="text-3xl font-display font-bold">Privacy Policy</h1>
           <p className="text-muted-foreground">
             This policy explains what GERDBuddy stores locally, what leaves your device when you use connected features,
-            and the choices available to you. Effective September 1, 2026.
+            and the choices available to you. Effective September 30, 2026.
           </p>
         </header>
 
@@ -45,8 +45,10 @@ const Privacy = () => {
             <li>
               <strong className="text-foreground">Website analytics:</strong> this website sends PostHog a pageview
               event containing the page address, the referring site, and coarse browser and country information, so we
-              can see which articles are useful and where readers arrive from. Autocapture and session replay are
-              disabled, so form fields and on-page interactions are never recorded, and we do not build a profile of
+              can see which articles are useful and where readers arrive from. We also count clicks on GERDBuddy
+              App Store links, recording the public page and broad link location, such as the header or footer.
+              These clicks measure visits to the store, not installs or purchases. Autocapture and session replay
+              are disabled; click measurement does not collect form contents or clicked text. We do not build a profile of
               you unless you sign in. If your browser sends a Do Not Track signal, no analytics are collected at all.
             </li>
             <li>

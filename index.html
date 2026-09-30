@@ -61,7 +61,11 @@
         capture_pageview: 'history_change',
         autocapture: false,
         disable_session_recording: true,
-        respect_dnt: true
+        respect_dnt: true,
+        // The app filters explicit click events after SDK context is attached.
+        before_send: function (event) {
+          return window.gerdbuddyBeforeSend ? window.gerdbuddyBeforeSend(event) : event;
+        }
       });
     }
   </script>
