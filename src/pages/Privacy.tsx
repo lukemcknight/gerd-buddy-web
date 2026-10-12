@@ -15,7 +15,7 @@ const Privacy = () => {
           <h1 className="text-3xl font-display font-bold">Privacy Policy</h1>
           <p className="text-muted-foreground">
             This policy explains what GERDBuddy stores locally, what leaves your device when you use connected features,
-            and the choices available to you. Effective September 30, 2026.
+            and the choices available to you. Effective October 11, 2026.
           </p>
         </header>
 
@@ -23,7 +23,7 @@ const Privacy = () => {
           <h2 className="text-xl font-display font-semibold">Data stored on your device</h2>
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li>Meal, symptom, medication, check-in, profile, and plan entries are stored in the app's local storage.</li>
-            <li>These entries are not synced to a GERDBuddy health-record account.</li>
+            <li>These entries stay in local storage unless you choose a connected feature, including optional Cloud Backup. Signing in does not automatically back up or restore your logs.</li>
             <li>The app may request access to your camera or photo library when you choose a scanner feature, and notification permission when you enable reminders.</li>
           </ul>
         </section>
@@ -56,6 +56,15 @@ const Privacy = () => {
               processes your email address and sign-in credentials.
             </li>
             <li>
+              <strong className="text-foreground">Optional Cloud Backup:</strong> when you confirm a backup,
+              Google Firebase Firestore stores a copy of your meals, symptoms, medications and dose history,
+              health preferences, custom foods, saved reports, relief check-ins, breathing sessions, and plan
+              under your account. Only your signed-in account can access that backup through the app.
+              Backups are manual snapshots: saving another replaces the previous copy. You can restore the
+              copy on another phone signed into the same account. Authentication credentials, subscription
+              access, and device notification permissions are not part of the backup.
+            </li>
+            <li>
               <strong className="text-foreground">Subscriptions:</strong> Apple and RevenueCat process purchase,
               entitlement, and subscription identifiers. If advertising attribution is enabled and you grant Apple's
               tracking permission, Meta and RevenueCat may also process device or attribution identifiers.
@@ -72,6 +81,8 @@ const Privacy = () => {
           <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
             <li>You can avoid connected AI features and continue using the local meal and symptom log.</li>
             <li>You can disable notifications in the app or in your device settings.</li>
+            <li>You can use local logging without Cloud Backup. You choose when to upload, restore, replace, or delete a cloud copy in Settings → Cloud Backup.</li>
+            <li>A cloud copy remains until you replace or delete it, or delete the account through the app. Clearing this phone or uninstalling the app does not delete your cloud backup.</li>
             <li>Clear All Data or Start Over removes GERDBuddy's app-owned local data. Deleting the app also removes its local storage.</li>
             <li>Local deletion does not cancel an Apple subscription or automatically delete records already processed by a service provider.</li>
             <li>You can email us to request help with access or deletion questions for account or service data.</li>
