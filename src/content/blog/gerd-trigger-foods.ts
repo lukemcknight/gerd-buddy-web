@@ -25,7 +25,7 @@ I've talked to people who can eat spicy Thai food without blinking but get destr
 
 ## Start Keeping a Food and Symptom Journal
 
-This is the single most useful thing you can do. For at least a week or two, write down:
+This is the single most useful thing you can do ([here's the evidence behind why tracking works](/blog/do-gerd-food-tracking-apps-work), if you're skeptical). For at least a week or two, write down:
 
 - **What you ate** — ingredients, rough portions, how it was cooked
 - **When you ate** — time of day matters more than you'd think
@@ -35,7 +35,7 @@ This is the single most useful thing you can do. For at least a week or two, wri
 
 I know it sounds tedious. It kind of is at first. But after about a week, you start seeing patterns that you'd never notice otherwise.
 
-An app like [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes this way easier than a notebook — you can quickly log meals and symptoms on your phone, and it'll help surface patterns and correlations you might miss on your own.
+An app like [GERDBuddy](https://apps.apple.com/us/app/gerdbuddy-acid-reflux-relief/id6756620910) makes this way easier than a notebook — you can quickly log meals and symptoms on your phone, and it'll help surface patterns and correlations you might miss on your own. (Ours isn't the only option: we've [compared the main GERD tracking apps](/blog/best-gerd-tracking-apps) honestly, including where the others win.)
 
 ## Look for the Patterns
 
